@@ -8,7 +8,11 @@ class Domain
   
   def initialize(name, last_scheduled)
     @name = name
-    @last_scheduled = DateTime.parse(last_scheduled)
+    if last_scheduled.nil?
+      @last_scheduled = DateTime.now
+    else
+      @last_scheduled = DateTime.parse(last_scheduled)
+    end
   end
   
   def mark_time!
@@ -48,7 +52,7 @@ class Domain
     if result.ntuples == 1
       return Domain.new(result.getvalue(0,0), result.getvalue(0,1))
     elsif result.ntuples == 0
-      $db.exec_params("INSERT INTO domains (domain) VALUES ($1)", [domain_name])
+      $db.exec_params("INSERT INTO domains (domain, last_scheduled) VALUES ($1, CURRENT_TIMESTAMP)", [domain_name])
       return Domain.new(domain_name, nil)
     else
       raise "ERROR: Domain #{domain_name} registered #{result.ntuples} times!"
