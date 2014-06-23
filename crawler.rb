@@ -66,6 +66,7 @@ class Download
   end
   
   def run
+    time_start = Time.now
     uri  = URI.parse(@task.url)
     http = Net::HTTP.new(uri.host, uri.port)
     path = uri.path.empty? ? "/" : uri.path
@@ -84,6 +85,12 @@ class Download
     end
     
     @task.mark_done
+    time_end = Time.now
+    @time = time_end - time_start
+  end
+  
+  def time
+    @time
   end
 end
 
@@ -96,10 +103,10 @@ if __FILE__ == $0
         download = Download.new(task)
         begin
           download.run
-          print "+"
+          puts "[+] #{task.url[0...32]}  (#{download.time.round 2}s)"
         rescue Exception => e
+          puts "[-] #{task.url[0...32]}"
           puts e.message
-          print "-"
         end
       end
     end
