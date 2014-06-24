@@ -51,7 +51,7 @@ class HTMLParser
   
   private
   def _clean_url(url)
-    url = URLParser.new(@task.url, url).full_path
+    url = URLParser.new(@task.encoded_url, url).full_path
     if $robots.allowed? url
       return url
     else
@@ -67,7 +67,7 @@ class Download
   
   def run
     time_start = Time.now
-    uri  = URI.parse(@task.url)
+    uri  = URI.parse(@task.encoded_url)
     http = Net::HTTP.new(uri.host, uri.port)
     path = uri.path.empty? ? "/" : uri.path
     
@@ -77,9 +77,10 @@ class Download
           html = response.read_body
           parser = HTMLParser.new(@task, html)
           links  = parser.links
-          links.each {|link| Task.insert link}
+          links.each {|link| Task.insert(URI.decode link)}
         else
-          Task.insert response["location"]
+          url = URLParser.new(@task.encoded_url, response["location"]).full_path
+          Task.insert(URI.decode(url))
         end
       end
     end
@@ -103,12 +104,14 @@ if __FILE__ == $0
         download = Download.new(task)
         begin
           download.run
-          puts "[+] #{task.url[0...32]}  (#{download.time.round 2}s)"
+          puts "[+] #{task.decoded_url[0...64]}  (#{download.time.round 2}s)"
         rescue Exception => e
-          puts "[-] #{task.url[0...32]}"
+          raise e
+          puts "[-] #{task.decoded_url[0...64]}"
           puts e.message
         end
       end
     end
+    puts "[*] Finished sample."
   end
 end

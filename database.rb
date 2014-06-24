@@ -1,5 +1,6 @@
 require 'pg'
 require 'date'
+require 'uri'
 
 $db = PG.connect(dbname: "suchmaschine", host: "10.0.1.12", user: "leo", password: "1234")
 
@@ -61,28 +62,36 @@ class Domain
 end
 
 class Task
-  attr_reader :url, :state, :done_at
+  attr_reader :state, :done_at
   
-  def initialize(url, state, done_at)
-    @url = url
+  def initialize(encoded_url, state, done_at)
+    @encoded_url = encoded_url
     @state = state
     @done_at = done_at
   end
   
+  def encoded_url
+    @encoded_url
+  end
+  
+  def decoded_url
+    URI.decode(@encoded_url)
+  end
+  
   def allowed?
-    domain = Domain.for(@url)
+    domain = Domain.for(encoded_url)
     domain.allowed?
   end
   
   def mark_done
-    domain = Domain.for(@url)
+    domain = Domain.for(encoded_url)
     domain.mark_time!
-    $db.exec_params("UPDATE tasklist SET state = 1, done_at = $2 WHERE url = $1", [@url, DateTime.now])
+    $db.exec_params("UPDATE tasklist SET state = 1, done_at = $2 WHERE url = $1", [decoded_url, DateTime.now])
   end
   
   def store_result(html)
     require 'digest/md5'
-    filename = "html/#{Digest::MD5.hexdigest(@url)}"
+    filename = "html/#{Digest::MD5.hexdigest(decoded_url)}"
     f = open(filename, "w")
     f.write(html)
     f.close
@@ -90,8 +99,8 @@ class Task
     mark_done
   end
   
-  def self.registered?(url)
-    return $db.exec_params("SELECT url FROM tasklist WHERE url = $1", [url]).ntuples > 0
+  def self.registered?(decoded_url)
+    return $db.exec_params("SELECT url FROM tasklist WHERE url = $1", [decoded_url]).ntuples > 0
   end
   
   def self.sample(n=100)
@@ -103,7 +112,7 @@ class Task
     
     results = $db.exec_params("SELECT (url) FROM tasklist WHERE state = 0 LIMIT $1", [n])
     results.map do |result|
-      Task.new(result["url"], nil, nil)
+      Task.new(URI.encode(result["url"]), nil, nil)
     end
   end
   
@@ -117,14 +126,14 @@ class Task
 #    Task.new(result.getvalue(0,0), result.getvalue(0,1), result.getvalue(0,2))
 #  end
   
-  def self.insert(url)
+  def self.insert(decoded_url)
     # check if already stored
-    if self.registered? url
+    if self.registered? decoded_url
       return nil
     end
     
     # if not, insert into table
-    $db.exec_params("INSERT INTO tasklist (url, state) VALUES ($1, $2)", [url, 0])
+    $db.exec_params("INSERT INTO tasklist (url, state) VALUES ($1, $2)", [decoded_url, 0])
   end
 end
 
