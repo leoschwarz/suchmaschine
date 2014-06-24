@@ -73,7 +73,7 @@ class Download
     
     http.request_get(path) do |response|
       if response["content-type"].include? "text/html"
-        if response["ocation"].nil?
+        if response["location"].nil?
           html = response.read_body
           parser = HTMLParser.new(@task, html)
           links  = parser.links
