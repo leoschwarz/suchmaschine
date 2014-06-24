@@ -128,7 +128,7 @@ class Task
   
   def self.insert(decoded_url)
     # check if already stored
-    if self.registered? decoded_url
+    if decoded_url.length > 512 or self.registered? decoded_url
       return nil
     end
     
