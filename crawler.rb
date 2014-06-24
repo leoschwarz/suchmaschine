@@ -78,6 +78,7 @@ class Download
           parser = HTMLParser.new(@task, html)
           links  = parser.links
           links.each {|link| Task.insert(URI.decode link)}
+          @task.store_result(html)
         else
           url = URLParser.new(@task.encoded_url, response["location"]).full_path
           Task.insert(URI.decode(url))

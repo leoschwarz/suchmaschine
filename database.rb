@@ -2,7 +2,8 @@ require 'pg'
 require 'date'
 require 'uri'
 
-$db = PG.connect(dbname: "suchmaschine", host: "10.0.1.12", user: "leo", password: "1234")
+#$db = PG.connect(dbname: "suchmaschine", host: "10.0.1.12", user: "leo", password: "1234")
+$db = PG.connect(dbname: "suchmaschine", host: "localhost", user: "leo", password: "1234")
 
 class Domain
   attr_reader :name, :last_scheduled
