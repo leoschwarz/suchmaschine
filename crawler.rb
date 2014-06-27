@@ -1,10 +1,10 @@
 require 'nokogiri'
-require 'robots'
-require './database.rb'
 require 'net/http'
+require './database.rb'
+require './robots.rb'
 
-ROBOT_NAME = "SuperSpider"
-$robots = Robots.new(ROBOT_NAME)
+ROBOT_NAME = "lightblaze"
+$robots = RobotsParser.new(ROBOT_NAME)
 
 class URLParser
   def initialize(base, link)
