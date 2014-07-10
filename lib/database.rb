@@ -2,8 +2,8 @@ require 'pg'
 require 'date'
 require 'uri'
 
-#$db = PG.connect(dbname: "suchmaschine", host: "10.0.1.12", user: "leo", password: "1234")
-$db = PG.connect(dbname: "suchmaschine", host: "localhost", user: "leo", password: "1234")
+$db = PG.connect(dbname: "suchmaschine", host: "10.0.1.3", user: "leo", password: "1234")
+#$db = PG.connect(dbname: "suchmaschine", host: "localhost", user: "leo", password: "1234")
 
 class Domain
   attr_reader :name, :last_scheduled
@@ -92,7 +92,7 @@ class Task
   
   def store_result(html)
     require 'digest/md5'
-    filename = "html/#{Digest::MD5.hexdigest(decoded_url)}"
+    filename = "./cache/html/#{Digest::MD5.hexdigest(decoded_url)}"
     f = open(filename, "w")
     f.write(html)
     f.close
