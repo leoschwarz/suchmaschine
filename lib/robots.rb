@@ -83,7 +83,7 @@ class RobotsTxtParser
     if type == :insert
       sql = "INSERT INTO robotstxt (domain,data,time) VALUES ($1, $2, $3)"
     elsif type == :update
-      sql = "UPDATE robotsxt SET data = $2, time = $3 WHERE domain = $1"
+      sql = "UPDATE robotstxt SET data = $2, time = $3 WHERE domain = $1"
     else
       raise "Unsupported type: #{type}"
     end
