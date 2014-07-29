@@ -20,7 +20,7 @@ module Crawler
     private
     def _clean_url(url)
       url = URLParser.new(@task.encoded_url, url).full_path
-      if $robots.allowed? url
+      if RobotsParser.instance(Crawler.config.user_agent).allowed? url
         return url
       else
         return nil

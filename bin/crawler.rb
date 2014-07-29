@@ -9,10 +9,9 @@ require './lib/html_parser.rb'
 require './lib/download.rb'
 
 
-module Crawler
+module Crawler  
   def self.launch
-    $robots = RobotsParser.new(config.user_agent)
-    puts config.user_agent.inspect
+    puts "#{config.user_agent} wurde gestartet."
     
     loop do
       tasks = Task.sample(100)

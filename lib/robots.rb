@@ -20,7 +20,7 @@ module Crawler
         type = :insert
         if res.ntuples == 1
           time = DateTime.parse res.getvalue(0,1)
-          if time + Rational(config.robots_txt.cache_duration, 86400) < DateTime.now
+          if time + Rational(Crawler.config.robots_txt.cache_duration, 86400) < DateTime.now
             # Leider ist der Eintrag zu alt, er wird deshalb also aktualisiert werden müssen
             type = :update
           else
@@ -142,6 +142,11 @@ module Crawler
     def initialize(robot_name)
       @robot_name = robot_name
       @domains    = {}
+    end
+    
+    def self.instance(robot_name)
+      @@instances ||= {}
+      @@instances[robot_name] ||= RobotsParser.new(robot_name)
     end
   
     def allowed?(url)
