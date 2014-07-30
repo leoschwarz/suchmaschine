@@ -119,6 +119,10 @@ module Crawler
         Task.new(URI.encode(result["url"]), nil, nil)
       end
     end
+    
+    def self.fetch
+      self.sample(1).first
+    end
   
   #  def self.fetch
   #    result = $db.exec("SELECT url, state, scheduled FROM tasklist WHERE scheduled <= CURRENT_TIMESTAMP AND state = 0 LIMIT 1")

@@ -1,35 +1,48 @@
+require 'eventmachine'
+require 'em-http-request'
 require 'nokogiri'
-require 'net/http'
 
 require './config/config.rb'
 require './lib/database.rb'
 require './lib/robots.rb'
 require './lib/url_parser.rb'
 require './lib/html_parser.rb'
-require './lib/download.rb'
+#require './lib/download.rb'
 
 
-module Crawler  
+module Crawler
+  def self.run_task
+    task = Task.fetch
+    
+    http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10)
+    http_request.callback {
+      header = http_request.response_header
+      
+      if header["content-type"].include? "text/html"
+        if header["location"].nil?
+          html = http_request.response
+          parser = HTMLParser.new(task, html)
+          links  = parser.links
+          links.each {|link| Task.insert(URI.decode link)}
+          task.store_result(html)
+        else
+          url = URLParser.new(task.encoded_url, header["location"]).full_path
+          Task.insert(URI.decode(url))
+        end
+      end
+      
+    }
+  end
+  
   def self.launch
     puts "#{config.user_agent} wurde gestartet."
     
-    loop do
-      tasks = Task.sample(100)
-      tasks.each do |task|
-        if task.allowed?
-          download = Download.new(task)
-          begin
-            download.run
-            puts "[+] #{task.decoded_url[0...64]}  (#{download.time.round 2}s)"
-          rescue Exception => e
-            raise e
-            puts "[-] #{task.decoded_url[0...64]}"
-            puts e.message
-          end
-        end
-      end
-      puts "[*] Finished sample."
-    end
+    EventMachine.run {
+      10.times {
+        Crawler::run_task()
+      } 
+    }
+    
   end
 end
 
