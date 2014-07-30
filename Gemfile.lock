@@ -10,6 +10,9 @@ GEM
       em-socksify (>= 0.3)
       eventmachine (>= 1.0.3)
       http_parser.rb (>= 0.6.0)
+    em-pg-client (0.3.4)
+      eventmachine (~> 1.0.0)
+      pg (>= 0.17.0)
     em-socksify (0.3.0)
       eventmachine (>= 1.0.0.beta.4)
     eventmachine (1.0.3)
@@ -26,7 +29,7 @@ PLATFORMS
 DEPENDENCIES
   configatron (~> 4.2.0)
   em-http-request (~> 1.1.2)
+  em-pg-client (~> 0.3.4)
   eventmachine (~> 1.0.3)
   json (~> 1.8.1)
   nokogiri (~> 1.6.2.1)
-  pg (~> 0.17.1)
