@@ -10,7 +10,6 @@ require './lib/task.rb'
 require './lib/robots.rb'
 require './lib/url_parser.rb'
 require './lib/html_parser.rb'
-#require './lib/download.rb'
 
 
 module Crawler
@@ -24,9 +23,10 @@ module Crawler
           if header["location"].nil?
             html = http_request.response
             parser = HTMLParser.new(task, html)
-            links  = parser.links
-            links.each {|link| Task.insert(URI.decode link)}
-            task.store_result(html)
+            parser.get_links.callback { |links|
+              links.each {|link| Task.insert(URI.decode link)}
+              task.store_result(html)
+            }
           else
             url = URLParser.new(task.encoded_url, header["location"]).full_path
             Task.insert(URI.decode(url))
@@ -49,7 +49,6 @@ module Crawler
         Crawler::run_task()
       } 
     }
-    
   end
 end
 
