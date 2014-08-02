@@ -18,7 +18,7 @@ module Crawler
     
     # Überprüft ob der Cache-Eintrag noch immer gültig ist
     def valid?
-      @time + Rational(Crawler.config.robots_txt.cache_duration, 86400) > DateTime.now
+      @time + Rational(ROBOTS_TXT_CACHE_DURATION, 86400) > DateTime.now
     end
     
     # Sucht nach einem robots.txt Cache-Eintrag für eine bestimmte Domain.
@@ -77,7 +77,7 @@ module Crawler
           }.errback{ |cache_item|
             # Download der robots.txt Datei
             url  = "http://#{parser.domain}/robots.txt"
-            http = EventMachine::HttpRequest.new(url).get(timeout: Crawler.config.robots_txt.timeout)
+            http = EventMachine::HttpRequest.new(url).get(timeout: ROBOTS_TXT_TIMEOUT)
             http.callback {
               save_type = (cache_item == :outdated) ? :update : :insert
               c = http.response_header.http_status.to_s[0]
@@ -239,7 +239,7 @@ module Crawler
     end
     
     def self.allowed?(url)
-      RobotsParser.instance(Crawler.config.user_agent).allowed?(url)
+      RobotsParser.instance(USER_AGENT).allowed?(url)
     end
   end
 end

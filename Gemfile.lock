@@ -2,7 +2,6 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.3.6)
-    configatron (4.2.0)
     cookiejar (0.3.2)
     em-http-request (1.1.2)
       addressable (>= 2.3.4)
@@ -27,7 +26,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  configatron (~> 4.2.0)
   em-http-request (~> 1.1.2)
   em-pg-client (~> 0.3.4)
   eventmachine (~> 1.0.3)
