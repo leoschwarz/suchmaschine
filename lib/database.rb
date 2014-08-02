@@ -6,20 +6,20 @@
 module Crawler
   class Database
     def initialize
-      @db = PG::EM::Client.new(dbname: "suchmaschine", host: "10.0.1.3", user: "leo", password: "1234")
-      #@db = PG::EM::Client.new(dbname: "suchmaschine", host: "localhost", user: "leo", password: "1234")
+      @db = PG::EM::ConnectionPool.new(size: 20, dbname: "suchmaschine", host: "10.0.1.3", user: "leo", password: "1234")
+      #@db = PG::EM::ConnectionPool.new(size: 20, dbname: "suchmaschine", host: "localhost", user: "leo", password: "1234")
     end
     
     def self.instance
       @@instance ||= Database.new
     end
     
-    def update(table, identifier, values)
+    def update(table, identifiers, values)
       sql = "UPDATE #{table} SET "
-      sql += (0...values.length).to_a.map{|i| "#{values.keys[i]} = $#{i+1}"}
+      sql += (0...values.length).to_a.map{|i| "#{values.keys[i]} = $#{i+1}"}.join(",")
       sql += " WHERE "
       sql += (0...identifiers.length).to_a.map{|i| "#{identifiers.keys[i]} = $#{values.length+i+1}"}.join(" AND ")
-      @db.exec_params_defer(sql, values.values + identifier.values)
+      @db.exec_params_defer(sql, values.values + identifiers.values)
     end
     
     def insert(table, values)
