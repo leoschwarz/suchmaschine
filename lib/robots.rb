@@ -80,15 +80,16 @@ module Crawler
               c = http.response_header.http_status
               
               if c == "2"
-                parser.parse(http.response.force_encoding('UTF-8'))
-                succeed parser.save(save_type)
+                parser.parse(http.response.force_encoding('UTF-8'))                
               elsif c == "3" or c == "5" # TODO: Follow up to 5 redirects.
                 parser.rules = [[:disallow, "/"]] # alles verbieten
-                succeed parser.save(save_type)
               elsif c == "4"
                 parser.rules = [] # alles erlauben
-                succeed parser.save(save_type)
               end
+              
+              parser.save(save_type).callback {
+                succeed
+              }
             }
           }
         end
@@ -133,9 +134,9 @@ module Crawler
     def save(type=:insert)
       data = self.serialize
       if type == :insert
-        Database.insert(:robotstxt, {domain: @domain, data: data, time: DateTime.now})
+        return Database.insert(:robotstxt, {domain: @domain, data: data, time: DateTime.now})
       elsif type == :update
-        Database.update(:robotstxt, {domain: @domain}, {data: data, time: DateTime.now})
+        return Database.update(:robotstxt, {domain: @domain}, {data: data, time: DateTime.now})
       else
         raise "Unsupported type: #{type}"
       end
