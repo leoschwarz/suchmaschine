@@ -41,6 +41,8 @@ module Crawler
       }
       http_request.errback {
         puts "[-] #{task.decoded_url}"
+        
+        Crawler::run_task
       }
     }    
   end
