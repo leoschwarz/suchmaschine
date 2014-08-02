@@ -93,7 +93,14 @@ module Crawler
               parser.save(save_type).callback {
                 succeed
               }.errback {|e|
-                throw e
+                if e.class == PG::UniqueViolation
+                  # Dieser Fehler tritt auf, falls zweimal nacheinander in den Cache zu schreiben versucht wird.
+                  # Das heisst man kann dieses Problem ignorieren, denn der Wert wurde bereits gespeichert.
+                  # TODO: Es ist allerdings unnötiger overhead Dateien doppelt herunterzuladen, deshalb sollte man dies überflüssig machen.
+                  succeed
+                else
+                  throw e
+                end
               }
             }
           }
