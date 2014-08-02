@@ -74,6 +74,8 @@ module Crawler
         def initialize(n)
           Database.select(:tasklist, {state: 0}, ["url"], n).callback { |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
+          }.errback{|e|
+            throw e
           }
         end
       }.new(n)
@@ -83,8 +85,8 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize
-          Task.sample(1).callback{|tasks|
-            succeed(tasks.first)
+          Task.sample(100).callback{|tasks|
+            succeed(tasks.sample)
           }.errback{
             fail
           }

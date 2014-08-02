@@ -8,33 +8,39 @@ module Crawler
     end
     
     def get_links
-      @unvalidated_links = 0
-      
       Class.new {
         include EM::Deferrable
         
         def initialize(html_parser)
+          # alle URLs aus dem HTML extrahieren
           doc = Nokogiri::HTML(html_parser.html)
-          _urls = []
+          @_urls = []
           doc.xpath('//a[@href]').each do |link|
             if link['rel'] != "nofollow"
-              html_parser.unvalidated_links += 1
-              _urls << URLParser.new(html_parser.task.encoded_url, link['href']).full_path
+              @_urls << URLParser.new(html_parser.task.encoded_url, link['href']).full_path
             end
           end
           
-          allowed_urls = []
-          _urls.each do |url|
-            RobotsParser.allowed?(url).callback{ |allowed|
-              if allowed
-                allowed_urls << url
-              end
-              html_parser.unvalidated_links -= 1
-              if html_parser.unvalidated_links == 0
-                succeed(allowed_urls)
-              end
-            }
+          # die erlaubten bestimmen
+          @urls = []
+          check_link
+        end
+        
+        def check_link
+          if @_urls.length == 0
+            succeed(@urls)
+            return
           end
+          
+          url = @_urls.pop
+          RobotsParser.allowed?(url).callback{ |allowed|
+            if allowed
+              @urls << url
+            end
+            
+            # nächster Link
+            check_link
+          }
         end
       }.new(self)
     end

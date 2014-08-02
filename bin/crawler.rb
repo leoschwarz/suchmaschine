@@ -1,6 +1,6 @@
 require 'eventmachine'
 require 'em-http-request'
-require 'pg/em'
+require 'pg/em/connection_pool'
 require 'nokogiri'
 
 require './config/config.rb'
@@ -18,7 +18,7 @@ module Crawler
       http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10)
       http_request.callback {
         header = http_request.response_header
-      
+        
         if header["content-type"].include? "text/html"
           if header["location"].nil?
             html = http_request.response
@@ -26,10 +26,14 @@ module Crawler
             parser.get_links.callback { |links|
               links.each {|link| Task.insert(URI.decode link)}
               task.store_result(html)
+              
+              Crawler::run_task
             }
           else
             url = URLParser.new(task.encoded_url, header["location"]).full_path
             Task.insert(URI.decode(url))
+
+            Crawler::run_task
           end
         end
       

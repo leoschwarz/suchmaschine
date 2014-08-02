@@ -9,6 +9,8 @@ require 'date'
 
 module Crawler
   class RobotsTxtCacheItem
+    attr_accessor :data, :time
+    
     def initialize(data, time)
       @data = data
       @time = time
@@ -70,14 +72,15 @@ module Crawler
           # Cache überprüfen
           RobotsTxtCacheItem.for_domain(parser.domain).callback{ |cache_item|
             # Cachehit
-            succeed parser.load_cache(cache_item.data)
+            parser.load_cache(cache_item.data)
+            succeed
           }.errback{ |cache_item|
             # Download der robots.txt Datei
             url  = "http://#{parser.domain}/robots.txt"
             http = EventMachine::HttpRequest.new(url).get(timeout: 10)
             http.callback {
               save_type = (cache_item == :outdated) ? :update : :insert
-              c = http.response_header.http_status
+              c = http.response_header.http_status.to_s[0]
               
               if c == "2"
                 parser.parse(http.response.force_encoding('UTF-8'))                
@@ -89,6 +92,8 @@ module Crawler
               
               parser.save(save_type).callback {
                 succeed
+              }.errback {|e|
+                throw e
               }
             }
           }
@@ -104,7 +109,7 @@ module Crawler
         def initialize(parser, path)
           parser.load_if_needed.callback{
             allowed = true
-            @rules.each do |rule|
+            parser.rules.each do |rule|
               if rule[0] == :disallow
                 if not /^#{rule[1]}/.match(path).nil?
                   allowed = false
@@ -133,6 +138,7 @@ module Crawler
   
     def save(type=:insert)
       data = self.serialize
+      
       if type == :insert
         return Database.insert(:robotstxt, {domain: @domain, data: data, time: DateTime.now})
       elsif type == :update

@@ -24,11 +24,11 @@ module Crawler
     
     def insert(table, values)
       sql = "INSERT INTO #{table} ("
-      sql += (1..values.length).to_a.map{|i| "$#{i}"}.join(",")
+      sql += (0...values.length).to_a.map{|i| values.keys[i].to_s}.join(",")
       sql += ") VALUES ("
-      sql += (1..values.length).to_a.map{|i| "$#{values.length+i}"}.join(",")
+      sql += (1..values.length).to_a.map{|i| "$#{i}"}.join(",")
       sql += ")"
-      @db.exec_params_defer(sql, values.to_a.flatten)
+      @db.exec_params_defer(sql, values.values)
     end
     
     def select(table, identifiers, fields=["*"], limit=nil)
