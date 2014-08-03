@@ -52,7 +52,7 @@ module Crawler
     def do_next_task
       task = @tasks.pop
       
-      http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10)
+      http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: USER_AGENT})
       http_request.callback {
         header = http_request.response_header
         
