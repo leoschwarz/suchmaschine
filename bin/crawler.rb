@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'eventmachine'
 require 'em-http-request'
 require 'pg/em/connection_pool'
@@ -74,8 +76,9 @@ module Crawler
       
         puts "[+] #{task.decoded_url}"
       }
-      http_request.errback {
+      http_request.errback {|e|
         puts "[-] #{task.decoded_url}"
+        puts e.error
         
         do_next_task
       }
