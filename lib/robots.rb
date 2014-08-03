@@ -116,6 +116,7 @@ module Crawler
         def initialize(parser, path)
           parser.load_if_needed.callback{
             allowed = true
+            explicitely_allowed = false
             parser.rules.each do |rule|
               if rule[0] == :disallow
                 if not /^#{rule[1]}/.match(path).nil?
@@ -123,13 +124,16 @@ module Crawler
                 end
               elsif rule[0] == :allow
                 if not /^#{rule[1]}/.match(path).nil?
-                  succeed(true)
-                  return
+                  explicitely_allowed = true
                 end
               end
             end
             
-            succeed(allowed)
+            if explicitely_allowed
+              succeed(true)
+            else
+              succeed(allowed)
+            end
           }
         end
       }.new(self, path)

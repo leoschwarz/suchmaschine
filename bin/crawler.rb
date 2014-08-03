@@ -17,7 +17,7 @@ require './lib/html_parser.rb'
 module Crawler
   class Crawler
     def initialize
-      @tasks = Queue.new
+      @tasks = Array.new
       @loading_new_tasks = false
       @domain_request_count = {}
     end
@@ -62,7 +62,7 @@ module Crawler
     end
     
     def do_next_task
-      task = @tasks.pop
+      task = @tasks.shift
       
       if @domain_request_count.has_key? task.domain_name
         @domain_request_count[task.domain_name] += 1
