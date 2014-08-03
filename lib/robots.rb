@@ -50,12 +50,13 @@ module Crawler
   
   
   class RobotsTxtParser
-    attr_accessor :domain, :rules
+    attr_accessor :domain, :rules, :use_cache
     
-    def initialize(domain, robot_name)
+    def initialize(domain, robot_name, use_cache)
       @domain     = domain
       @rules      = nil
       @robot_name = robot_name
+      @use_cache  = use_cache
     end
   
     # Nach dem Callback ist sichergestellt, dass die robots.txt Datei geladen ist.
@@ -63,33 +64,23 @@ module Crawler
       Class.new {
         include EM::Deferrable
         
-        def initialize(parser)
-          # Falls die Regeln bereits geladen sind, ist hier schon Schluss.
-          if not parser.rules.nil?
-            return succeed()
-          end
-          
-          # Cache überprüfen
-          RobotsTxtCacheItem.for_domain(parser.domain).callback{ |cache_item|
-            # Cachehit
-            parser.load_cache(cache_item.data)
-            succeed
-          }.errback{ |cache_item|
-            # Download der robots.txt Datei
-            url  = "http://#{parser.domain}/robots.txt"
-            http = EventMachine::HttpRequest.new(url).get(timeout: ROBOTS_TXT_TIMEOUT, head: {user_agent: USER_AGENT})
-            http.callback {
-              save_type = (cache_item == :outdated) ? :update : :insert
-              c = http.response_header.http_status.to_s[0]
-              
-              if c == "2"
-                parser.parse(http.response.force_encoding('UTF-8'))                
-              elsif c == "3" or c == "5" # TODO: Follow up to 5 redirects.
-                parser.rules = [[:disallow, "/"]] # alles verbieten
-              elsif c == "4"
-                parser.rules = [] # alles erlauben
-              end
-              
+        def load(cache_response, parser)
+          # Download der robots.txt Datei
+          url  = "http://#{parser.domain}/robots.txt"
+          http = EventMachine::HttpRequest.new(url).get(timeout: ROBOTS_TXT_TIMEOUT, head: {user_agent: USER_AGENT})
+          http.callback {
+            c = http.response_header.http_status.to_s[0]
+            
+            if c == "2"
+              parser.parse(http.response.force_encoding('UTF-8'))                
+            elsif c == "3" or c == "5" # TODO: Follow up to 5 redirects.
+              parser.rules = [[:disallow, "/"]] # alles verbieten
+            elsif c == "4"
+              parser.rules = [] # alles erlauben
+            end
+            
+            if cache_response != :no_cache
+              save_type = (cache_response == :outdated) ? :update : :insert
               parser.save(save_type).callback {
                 succeed
               }.errback {|e|
@@ -102,8 +93,30 @@ module Crawler
                   throw e
                 end
               }
-            }
+            else
+              succeed
+            end
           }
+        end
+        
+        def initialize(parser)
+          # Falls die Regeln bereits geladen sind, ist hier schon Schluss.
+          if not parser.rules.nil?
+            return succeed()
+          end
+          
+          if parser.use_cache
+            # Cache überprüfen
+            RobotsTxtCacheItem.for_domain(parser.domain).callback{ |cache_item|
+              # Cachehit
+              parser.load_cache(cache_item.data)
+              succeed
+            }.errback{ |cache_response|
+              load(cache_response, parser)
+            }
+          else
+            load(:no_cache, parser)
+          end
         end
       }.new(self)
     end
@@ -208,11 +221,12 @@ module Crawler
   end
 
   class RobotsParser
-    attr_accessor :robot_name, :domains
+    attr_accessor :robot_name, :domains, :use_cache
     
-    def initialize(robot_name)
+    def initialize(robot_name, use_cache=true)
       @robot_name = robot_name
       @domains    = {}
+      @use_cache  = use_cache
     end
     
     def self.instance(robot_name)
@@ -232,7 +246,7 @@ module Crawler
           if path.empty? then path = "/" end
           
           if parser.domains[domain].nil?
-            parser.domains[domain] = RobotsTxtParser.new(domain, parser.robot_name)
+            parser.domains[domain] = RobotsTxtParser.new(domain, parser.robot_name, parser.use_cache)
           end
           
           parser.domains[domain].allowed?(path).callback{|value|
