@@ -77,7 +77,7 @@ module Crawler
           }.errback{ |cache_item|
             # Download der robots.txt Datei
             url  = "http://#{parser.domain}/robots.txt"
-            http = EventMachine::HttpRequest.new(url).get(timeout: ROBOTS_TXT_TIMEOUT)
+            http = EventMachine::HttpRequest.new(url).get(timeout: ROBOTS_TXT_TIMEOUT, head: {user_agent: USER_AGENT})
             http.callback {
               save_type = (cache_item == :outdated) ? :update : :insert
               c = http.response_header.http_status.to_s[0]
