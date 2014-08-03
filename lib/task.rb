@@ -18,23 +18,14 @@ module Crawler
       URI.decode(@encoded_url)
     end
     
-    # Gibt Auskunft ob es erlaubt ist die URL zu crawlen
-    # Gibt ein Deferrable zurück, dass mit einem Bool Wert aufgerufen wird
-    def allowed?
-      Class.new {
-        include EM::Deferrable
-        def initialize
-          Domain.for(encoded_url).callback { |domain|
-            self.succeed(domain.allowed?)
-          }
-        end
-      }.new
+    # Getter für den Domain namen der url
+    def domain_name
+      Domain.domain_name_of(encoded_url)
     end
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      Domain.for(encoded_url).callback do |domain|
-        domain.mark_time!
+      Domain.for_url(encoded_url).callback do |domain|
         Database.update(:tasklist, {url: decoded_url}, {state: 1, done_at: DateTime.now})
       end
     end
@@ -61,37 +52,26 @@ module Crawler
         end
       }.new(decoded_url)
     end
-  
+    
+    # Lädt ein Sample URLs die noch nicht abgerufen wurden und deren Domains wieder aufgerufen werden dürfen.
+    # Gibt ein Deferrable zurück welches mit einem Array von Task Instanzen aufgerufen wird.
     def self.sample(n=100)
       # FIXME: Zufallsauswahl
       # Idee:  Man könnte eine Spalte random einführen. Dort wird jeweils beim Schreiben in die Tabelle ein Zufallswert hineingesetzt.
       #        Diesen Zufallswert kombiniert man nun noch mit einer Stundenzahl oder so. Jetzt werden alle Einträge für die kleinste
       #        Stunde abgearbeitet, währned zu einem höheren Wert neue Einträge hinzugefügt werden. Hierdurch kann man vermeiden, dass 
       #        neue Einträge mit einem kleineren Zufallswert (beispielsweise) immer gecrawlt werden, während andere endlos darauf warten.
-    
+      
       Class.new {
         include EM::Deferrable
         def initialize(n)
-          Database.select(:tasklist, {state: 0}, ["url"], n).callback { |results|
+          Database.query("SELECT url FROM tasklist INNER JOIN domains ON tasklist.domain = domains.domain WHERE state = 0 AND ignore_until < CURRENT_TIMESTAMP LIMIT #{n}").callback{ |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
           }.errback{|e|
             throw e
           }
         end
       }.new(n)
-    end
-    
-    def self.fetch
-      Class.new {
-        include EM::Deferrable
-        def initialize
-          Task.sample(100).callback{|tasks|
-            succeed(tasks.sample)
-          }.errback{
-            fail
-          }
-        end
-      }.new
     end
   
     # Fügt eine neue URL der Datenbank hinzu.
@@ -101,12 +81,20 @@ module Crawler
         return nil
       end
       
-      # TODO Überprüfen ob URL gültig ist. (Das würde dann in allen Fällen verhindern, dass Domain.for(..) -> nil sein könnte)
-      
-      # Überprüfen ob url bereits in der Datenbank eingetragen ist
+      # Überprüfen ob URL bereits in der Datenbank eingetragen ist
       self.registered?(decoded_url).callback{ |registered|
         unless registered
-          Database.insert(:tasklist, {url: decoded_url, state: 0})
+          # Überprüfen ob Domain bereits in der Datenbank eingetragen ist
+          domain_name = Domain.domain_name_of(decoded_url)
+          Domain.registered?(domain_name).callback{ |domain_registered|
+            if domain_registered
+              Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: 0})
+            else
+              Database.insert(:domains, {domain: domain_name}).callback{
+                Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: 0})
+              }
+            end
+          }
         end
       }
     end

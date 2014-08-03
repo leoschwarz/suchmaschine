@@ -19,6 +19,7 @@ module Crawler
     def initialize
       @tasks = Queue.new
       @loading_new_tasks = false
+      @domain_request_count = {}
     end
     
     def launch
@@ -31,16 +32,7 @@ module Crawler
           
           # Timer, der dafür zu sorgen hat, dass die Warteschlange immer genug Aufgaben enthält.
           EventMachine.add_periodic_timer(1) {
-            unless @loading_new_tasks
-              # Sobald weniger als 50% der maximal Anzahl an Aufgaben vorhanden ist, werden neue geladen.
-              if @tasks.length < TASK_QUEUE_SIZE / 2
-                @loading_new_tasks = true
-                Task.sample(TASK_QUEUE_SIZE).callback { |tasks|
-                  tasks.each {|task| @tasks << task}
-                  @loading_new_tasks = false
-                }
-              end
-            end
+            update_queue
           }
           
           # Start des Crawlens
@@ -49,8 +41,34 @@ module Crawler
       }
     end
     
+    def update_queue
+      unless @loading_new_tasks
+        # Sobald weniger als 50% der maximal Anzahl an Aufgaben vorhanden ist, werden neue geladen.
+        if @tasks.length < TASK_QUEUE_SIZE / 2
+          # Domains markieren
+          @domain_request_count.each { |domain, count|
+            Domain.new(domain, nil).ignore_for count
+          }
+          @domain_request_count = {}
+          
+          # Aufgaben laden
+          @loading_new_tasks = true
+          Task.sample(TASK_QUEUE_SIZE).callback { |tasks|
+            tasks.each {|task| @tasks << task}
+            @loading_new_tasks = false
+          }
+        end
+      end
+    end
+    
     def do_next_task
       task = @tasks.pop
+      
+      if @domain_request_count.has_key? task.domain_name
+        @domain_request_count[task.domain_name] += 1
+      else
+        @domain_request_count[task.domain_name]  = 1
+      end
       
       http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: USER_AGENT})
       http_request.callback {
@@ -69,6 +87,7 @@ module Crawler
           else
             url = URLParser.new(task.encoded_url, header["location"]).full_path
             Task.insert(URI.decode(url))
+            task.mark_done
 
             do_next_task
           end
@@ -76,9 +95,8 @@ module Crawler
       
         puts "[+] #{task.decoded_url}"
       }
-      http_request.errback {|e|
+      http_request.errback {
         puts "[-] #{task.decoded_url}"
-        puts e.error
         
         do_next_task
       }

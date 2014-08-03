@@ -39,6 +39,13 @@ module Crawler
       unless limit.nil? then sql += " LIMIT #{limit.to_i}" end
       @db.exec_params_defer(sql, identifiers.values)
     end
+     
+    def query(sql, params=[])
+      @db.exec_params_defer(sql, params)
+    end
+    
+    
+    
     
     def self.update(table, identifier, values)
       Database.instance.update(table, identifier, values)
@@ -50,6 +57,10 @@ module Crawler
     
     def self.select(table, identifiers, fields=["*"], limit=nil)
       Database.instance.select(table, identifiers, fields, limit)
+    end
+    
+    def self.query(sql, params=[])
+      Database.instance.query(sql, params)
     end
   end
 end

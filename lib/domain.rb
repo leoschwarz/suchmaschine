@@ -1,27 +1,51 @@
 require 'date'
 
 module Crawler
-  class Domain
-    attr_reader :name, :last_scheduled
   
-    def initialize(name, last_scheduled)
+  # Information:
+  # In der Datenbank wird neuerdings ein Feld ignore_until für die Domain gespeichert.
+  # Dieses Feld wird aktualisiert sobald die Warteschleife wieder mit neuen Elementen aufgefüllt wird.
+  # Für jeden Seitenaufruf auf einer bestimmten Domain wird eine Sekunde Wartezeit eingerechnet, bis die Domain
+  # erneut aufgerufen wird.
+  
+  class Domain
+    attr_reader :name, :ignore_until
+  
+    def initialize(name, ignore_until)
       @name = name
-      if last_scheduled.nil?
-        @last_scheduled = DateTime.now
+      if ignore_until.nil?
+        @ignore_until = DateTime.new # t = 0, es wird also auf jeden Fall nicht ignoriert
       else
-        @last_scheduled = DateTime.parse(last_scheduled)
+        @ignore_until = DateTime.parse(ignore_until)
       end
     end
-  
-    def mark_time!
-      @last_scheduled = DateTime.now
-      Database.update(:domains, {domain: @name}, {last_scheduled: @last_scheduled})
+    
+    # Ändert den Eintrag für die Domain, sodass sie innerhalb der nächsten n Sekunden nicht mehr aufgerufen wird.
+    def ignore_for(seconds)
+      @ignore_until = DateTime.now + Rational(seconds,86400)
+      Database.update(:domains, {domain: @name}, {ignore_until: @ignore_until})
     end
     
-    def allowed?
-      @last_scheduled < DateTime.now - Rational(1, 60*60*24)
+    # Überprüft ob eine Domain bereits in der Datenbank registriert ist
+    # Gibt eine Deferrable Instanz zurück welche beim Callback mit einem Bool Wert aufgerufen wird.
+    def self.registered?(domain_name)
+      Class.new {
+        include EM::Deferrable
+        
+        def initialize(domain_name)
+          Database.select(:domains, {"domain" => domain_name}, ["ignore_until"]).callback { |result|
+            if result.ntuples == 1
+              succeed true
+            else
+              succeed false
+            end
+          }.errback{ |e|
+            raise e
+          }
+        end
+      }.new(domain_name)
     end
-  
+    
     # Hilfsmethode um den Domain Namen einer URL zu extrahieren.
     def self.domain_name_of(url)
       match = /https?:\/\/([a-zA-Z0-9\.-]+)/.match(url)
@@ -33,18 +57,17 @@ module Crawler
     end
     
     # Lädt ein Domain Objekt aus der Datenbank für den angegebenen Domain Namen.
-    # Gibt ein Deferable Objekt zurück, welches beim callback mit dem Domain Objekt aufgerufen wird.
+    # Gibt eine Deferrable Instanz zurück, welches beim Callback mit dem Domain Objekt aufgerufen wird.
     def self.for(domain_name)
       Class.new {
         include EM::Deferrable
         
         def initialize(domain_name)
-          Database.select(:domains, {"domain" => domain_name}, ["last_scheduled"]).callback { |result|
+          Database.select(:domains, {"domain" => domain_name}, ["ignore_until"]).callback { |result|
             if result.ntuples == 1
-              puts Domain.new(domain_name, result[0]["last_scheduled"]).inspect
-              succeed(Domain.new(domain_name, result[0]["last_scheduled"]))
+              succeed(Domain.new(domain_name, result[0]["ignore_until"]))
             elsif result.ntuples == 0
-              Database.insert(:domains, {domain: domain_name, last_scheduled: "CURRENT_TIMESTAMP"}).callback do
+              Database.insert(:domains, {domain: domain_name, ignore_until: "CURRENT_TIMESTAMP"}).callback do
                 succeed(Domain.new(domain_name, nil))
               end
             else
