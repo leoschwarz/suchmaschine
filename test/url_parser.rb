@@ -1,5 +1,5 @@
 require 'test/unit'
-require './crawler.rb'
+require './bin/crawler.rb'
 
 class TestURLParser < Test::Unit::TestCase
   BASE_URL1 = "http://example.com"
@@ -39,11 +39,11 @@ class TestURLParser < Test::Unit::TestCase
   private
   def _relative_url(url, n=1)
     if n == 1
-      URLParser.new(BASE_URL1, url).full_path
+      Crawler::URLParser.new(BASE_URL1, url).full_path
     elsif n == 2
-      URLParser.new(BASE_URL2, url).full_path
+      Crawler::URLParser.new(BASE_URL2, url).full_path
     elsif n == 3
-      URLParser.new(BASE_URL3, url).full_path
+      Crawler::URLParser.new(BASE_URL3, url).full_path
     else
       throw "wrong n"
     end
