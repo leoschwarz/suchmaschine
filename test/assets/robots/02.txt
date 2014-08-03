@@ -1,0 +1,3 @@
+User-agent: lightblaze
+Disallow: /test
+Allow: /test

@@ -131,12 +131,10 @@ module Crawler
             allowed = true
             explicitely_allowed = false
             parser.rules.each do |rule|
-              if rule[0] == :disallow
-                if not /^#{rule[1]}/.match(path).nil?
+              if not /^#{rule[1]}/.match(path).nil?
+                if rule[0] == :disallow
                   allowed = false
-                end
-              elsif rule[0] == :allow
-                if not /^#{rule[1]}/.match(path).nil?
+                elsif rule[0] == :allow
                   explicitely_allowed = true
                 end
               end
@@ -181,32 +179,31 @@ module Crawler
       
         match = /([-a-zA-Z]+):[ ]?(.*)$/.match(line)
         if not match.nil?
-          key = match[1]
-          value = match[2]
-        
-          if key == "User-agent"
+          key = match[1].strip
+          value = match[2].strip
+          
+          if key.downcase == "user-agent"
             if group_open
               groups.last[0] << value
             else
               group_open = true
               groups << [[value],[]]
             end
-          elsif key == "Disallow"
+          elsif key.downcase == "disallow"
             if not group_open.nil?
               group_open = false
-              groups.last[1] << [:disallow, value] unless value.empty?
+              groups.last[1] << [:disallow, _convert_to_regex_string(value)] unless value.empty?
             end
-          elsif key == "Allow"
+          elsif key.downcase == "allow"
             if not group_open.nil?
               group_open = false
-              groups.last[1] << [:allow, value]
+              groups.last[1] << [:allow, _convert_to_regex_string(value)]
             end
           end
         end
       end
     
       group_unspecified = []
-    
       groups.each do |group|
         if group[0].include? @robot_name
           @rules = group[1]
@@ -218,6 +215,14 @@ module Crawler
     
       @rules = group_unspecified
     end
+    
+    private
+    def _convert_to_regex_string(value)
+      value.gsub!("*", "(.*)")
+      value.gsub!("?", "\\?")
+      value
+    end
+    
   end
 
   class RobotsParser
