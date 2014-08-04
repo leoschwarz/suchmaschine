@@ -1,11 +1,9 @@
-require 'json'
+require 'oj'
 require 'date'
 
 # Implementierung ähnlich der Google Spezifikation:
 # https://developers.google.com/webmasters/control-crawl-index/docs/robots_txt
 
-# TODO: Diesen Parser sollte man testen, damit der Crawler nacher nicht auf irgendwelchen Webseiten unheil anstellt.
-# TODO: Ausserdem gibt's hier wahrscheinlich auch noch Optimierungspotential (zum Beispiel die Serialisierung in JSON ist zwar praktisch und übersichtlich, aber ziemlich sicher nicht unglaublich schnell)
 
 module Crawler
   class RobotsTxtCacheItem
@@ -151,11 +149,11 @@ module Crawler
     end
   
     def serialize
-      JSON.dump(@rules)
+      Oj.dump(@rules, {mode: :object})
     end
   
     def load_cache(raw)
-      @rules = JSON.load(raw).map{|rule| [rule[0].to_sym, rule[1]]}
+      @rules = Oj.load(raw, {mode: :object}).map{|rule| [rule[0].to_sym, rule[1]]}
     end
   
     def save(type=:insert)
