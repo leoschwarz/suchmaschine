@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'bundler/setup'
 require 'eventmachine'
 require 'em-http-request'
 require 'pg/em/connection_pool'
