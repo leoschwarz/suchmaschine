@@ -12,15 +12,17 @@ class TestRobots < Test::Unit::TestCase
     
     stub_request(:any, "test404.example.com/robots.txt").to_return(status: 404)
     stub_request(:any, "test500.example.com/robots.txt").to_return(status: 500)
+    
+    Crawler.config.robotstxt.use_cache = false
   end
   
   def file(domain, file)
     stub_request(:any, "#{domain}/robots.txt").to_return(body: File.new("./test/assets/robots/#{file}"), status: 200)
   end
   
-  def assert_robots_allowed(url, value, finish=true, user_agent=Crawler::USER_AGENT)
+  def assert_robots_allowed(url, value, finish=true, user_agent=Crawler::config.user_agent)
     em do 
-      Crawler::RobotsParser.new(user_agent, false).allowed?(url).callback{|allowed|
+      Crawler::RobotsParser.new(user_agent).allowed?(url).callback{|allowed|
         message = "Robots should #{value ? "" : "not"} be allowed for '#{url}'."
         assert(allowed==value, message)
         if finish then done end

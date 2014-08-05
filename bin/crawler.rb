@@ -10,13 +10,15 @@ require './config/config.rb'
 require './lib/database.rb'
 require './lib/domain.rb'
 require './lib/task.rb'
-require './lib/robots.rb'
+require './lib/robots_txt_cache_item.rb'
+require './lib/robots_txt_parser.rb'
+require './lib/robots_parser.rb'
 require './lib/url_parser.rb'
 require './lib/html_parser.rb'
 
 
 module Crawler
-  class Crawler
+  class CrawlerMain
     def initialize
       @tasks = Array.new
       @loading_new_tasks = false
@@ -24,11 +26,11 @@ module Crawler
     end
     
     def launch
-      puts "#{USER_AGENT} wurde gestartet."
+      puts "#{Crawler.config.user_agent} wurde gestartet."
     
       EventMachine.run {
         # Warteschlange mit Aufgaben befüllen
-        Task.sample(TASK_QUEUE_SIZE).callback { |tasks|
+        Task.sample(Crawler.config.task_queue_size).callback { |tasks|
           tasks.each {|task| @tasks << task}
           
           # Timer, der dafür zu sorgen hat, dass die Warteschlange immer genug Aufgaben enthält.
@@ -37,7 +39,7 @@ module Crawler
           }
           
           # Start des Crawlens
-          PARALLEL_TASKS.times { do_next_task }
+          Crawler.config.parallel_tasks.times { do_next_task }
         }
       }
     end
@@ -45,7 +47,7 @@ module Crawler
     def update_queue
       unless @loading_new_tasks
         # Sobald weniger als 50% der maximal Anzahl an Aufgaben vorhanden ist, werden neue geladen.
-        if @tasks.length < TASK_QUEUE_SIZE / 2
+        if @tasks.length < Crawler.config.task_queue_size / 2
           # Domains markieren
           @domain_request_count.each { |domain, count|
             Domain.new(domain, nil).ignore_for count
@@ -54,7 +56,7 @@ module Crawler
           
           # Aufgaben laden
           @loading_new_tasks = true
-          Task.sample(TASK_QUEUE_SIZE).callback { |tasks|
+          Task.sample(Crawler.config.task_queue_size).callback { |tasks|
             tasks.each {|task| @tasks << task}
             @loading_new_tasks = false
           }
@@ -71,7 +73,7 @@ module Crawler
         @domain_request_count[task.domain_name]  = 1
       end
       
-      http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: USER_AGENT})
+      http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
       http_request.callback {
         header = http_request.response_header
         
@@ -83,6 +85,7 @@ module Crawler
               links.each {|link| Task.insert(URI.decode link)}
               task.store_result(html)
               
+              puts "[+] #{task.decoded_url}"
               do_next_task
             }
           else
@@ -90,11 +93,10 @@ module Crawler
             Task.insert(URI.decode(url))
             task.mark_done
 
+            puts "[+] #{task.decoded_url}"
             do_next_task
           end
         end
-      
-        puts "[+] #{task.decoded_url}"
       }
       http_request.errback {
         puts "[-] #{task.decoded_url}"
@@ -106,5 +108,5 @@ module Crawler
 end
 
 if __FILE__ == $0
-  Crawler::Crawler.new.launch
+  Crawler::CrawlerMain.new.launch
 end

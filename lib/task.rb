@@ -25,9 +25,7 @@ module Crawler
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      Domain.for_url(encoded_url).callback do |domain|
-        Database.update(:tasklist, {url: decoded_url}, {state: 1, done_at: DateTime.now})
-      end
+      Database.update(:tasklist, {url: decoded_url}, {state: 1, done_at: DateTime.now})
     end
   
     # TODO Dies ist nur eine provisorische "Lösung"
