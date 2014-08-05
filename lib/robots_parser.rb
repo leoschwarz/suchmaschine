@@ -28,12 +28,10 @@ module Crawler
           
           if parser.domains[domain].nil?
             parser.domains[domain] = RobotsTxtParser.new(domain, parser.robot_name)
-            parser.domains[domain].load.callback{
-              succeed parser.domains[domain].allowed?(path)
-            }
-          else
-            succeed parser.domains[domain].allowed?(path)
           end
+          parser.domains[domain].load.callback{
+            succeed parser.domains[domain].allowed?(path)
+          }
         end
       }.new(self, url)
     end

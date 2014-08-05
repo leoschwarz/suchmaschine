@@ -10,6 +10,10 @@ module Crawler
     end
     
     def load
+      if not @cache_item.nil?
+        succeed
+      end
+      
       RobotsTxtCacheItem.for_domain(@domain).callback{|cache_item|
         @cache_item = cache_item
         if @cache_item.status == :ok
@@ -31,20 +35,11 @@ module Crawler
               @cache_item.set_valid_for(:default)
             end
                     
-            @cache_item.save.callback {
-              succeed
-            }.errback {|e|
-              # Dieser Fehler tritt auf, falls zweimal nacheinander in den Cache zu schreiben versucht wird.
-              # Das heisst man kann dieses Problem ignorieren, denn der Wert wurde bereits gespeichert.
-              # TODO: Es ist allerdings unnötiger overhead Dateien doppelt herunterzuladen, deshalb sollte man dies überflüssig machen.
-              if e.class == PG::UniqueViolation
-                succeed
-              else
-                throw e
-              end
-            }
+            _save_cache_item
           }.errback{|e|
-            throw e.error
+            @cache_item.rules = [[:disallow, "/"]]
+            @cache_item.set_valid_for(30)
+            _save_cache_item
           }
         end
       }
@@ -124,6 +119,21 @@ module Crawler
       value.gsub!("\\", "\\\\")
       value.gsub!("?", "\\?")
       value
+    end
+    
+    def _save_cache_item
+      @cache_item.save.callback {
+        succeed
+      }.errback {|e|
+        # Dieser Fehler tritt auf, falls zweimal nacheinander in den Cache zu schreiben versucht wird.
+        # Das heisst man kann dieses Problem ignorieren, denn der Wert wurde bereits gespeichert.
+        # TODO: Es ist allerdings unnötiger overhead Dateien doppelt herunterzuladen, deshalb sollte man dies überflüssig machen.
+        if e.class == PG::UniqueViolation
+          succeed
+        else
+          throw e
+        end
+      }
     end
   end
 end

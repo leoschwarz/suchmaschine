@@ -21,18 +21,17 @@ module Crawler
       if Crawler.config.robotstxt.use_cache
         data = Oj.dump(@rules, {mode: :object})
         if @status == :ok or @status == :outdated
-          Database.update(:robotstxt, {domain: @domain}, {data: data, valid_until: @valid_until})
+          return Database.update(:robotstxt, {domain: @domain}, {data: data, valid_until: @valid_until})
         else
-          Database.insert(:robotstxt, {domain: @domain, data: data, valid_until: @valid_until})
+          return Database.insert(:robotstxt, {domain: @domain, data: data, valid_until: @valid_until})
         end
-      else
-        Class.new{
-          include EM::Deferrable
-          def initialize
-            succeed
-          end
-        }.new
       end
+      Class.new{
+        include EM::Deferrable
+        def initialize
+          succeed
+        end
+      }.new
     end
     
     def set_valid_for(seconds)
