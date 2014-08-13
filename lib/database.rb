@@ -6,8 +6,11 @@
 module Crawler
   class Database
     def initialize
-      @db = PG::EM::ConnectionPool.new(size: 20, dbname: "suchmaschine", host: "10.0.1.3", user: "leo", password: "1234")
-      #@db = PG::EM::ConnectionPool.new(size: 20, dbname: "suchmaschine", host: "localhost", user: "leo", password: "1234")
+      @db = PG::EM::ConnectionPool.new(size: Crawler.config.database.connections,
+                                       dbname: Crawler.config.database.name,
+                                       host: Crawler.config.database.host,
+                                       user: Crawler.config.database.user,
+                                       password: Crawler.config.database.password)
     end
     
     def self.instance
