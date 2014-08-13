@@ -11,9 +11,7 @@ class TestRobots < Test::Unit::TestCase
     file("test7.example.com", "07.txt")
     
     stub_request(:any, "test404.example.com/robots.txt").to_return(status: 404)
-    stub_request(:any, "test500.example.com/robots.txt").to_return(status: 500)
-    
-    Crawler.config.robotstxt.use_cache = false
+    stub_request(:any, "test500.example.com/robots.txt").to_return(status: 500)    
   end
   
   def file(domain, file)

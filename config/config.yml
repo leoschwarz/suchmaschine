@@ -1,0 +1,18 @@
+production: &default
+  task_queue_size: 100   # Anzahl der Aufgaben in der Memory-Warteschleife
+  parallel_tasks: 10     # Anzahl paralleler Downloads
+  user_agent: lightblaze # Name des USER_AGENT Felds für HTTP Requests
+  robots_txt:
+    timeout: 10 # Sekunden
+    use_cache: YES
+    cache_lifetime: 86400 # Sekunden, hier ein Tag.
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+  robots_txt:
+    timeout: 10
+    use_cache: NO
+    cache_lifetime: 0
