@@ -21,7 +21,7 @@ module Crawler
         else
           # Download der robots.txt Datei
           url  = "http://#{@domain}/robots.txt"
-          http = EventMachine::HttpRequest.new(url).get(timeout: Crawler.config.robotstxt.timeout, head: {user_agent: Crawler.config.user_agent})
+          http = EventMachine::HttpRequest.new(url).get(timeout: Crawler.config.robots_txt.timeout, head: {user_agent: Crawler.config.user_agent})
           http.callback {
             c = http.response_header.http_status.to_s[0]
             if c == "2"

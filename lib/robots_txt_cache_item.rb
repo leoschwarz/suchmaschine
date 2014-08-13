@@ -18,7 +18,7 @@ module Crawler
     end
     
     def save
-      if Crawler.config.robotstxt.use_cache
+      if Crawler.config.robots_txt.use_cache
         data = Oj.dump(@rules, {mode: :object})
         if @status == :ok or @status == :outdated
           return Database.update(:robotstxt, {domain: @domain}, {data: data, valid_until: @valid_until})
@@ -36,7 +36,7 @@ module Crawler
     
     def set_valid_for(seconds)
       if seconds == :default
-        @valid_until = DateTime.now + Rational(Crawler.config.robotstxt.cache_lifetime, 86400)
+        @valid_until = DateTime.now + Rational(Crawler.config.robots_txt.cache_lifetime, 86400)
       else
         @valid_until = DateTime.now + Rational(seconds, 86400)
       end
@@ -49,7 +49,7 @@ module Crawler
         include EM::Deferrable
         
         def initialize(domain)
-          if Crawler.config.robotstxt.use_cache
+          if Crawler.config.robots_txt.use_cache
             Database.select(:robotstxt, {domain: domain}, [:data, :valid_until]).callback{ |result|
               data = "[]"
               valid_unitl = nil
