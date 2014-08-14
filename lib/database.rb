@@ -64,26 +64,13 @@ module Crawler
     end
     
     
-    
-    
-    def self.update(table, identifier, values)
-      Database.instance.update(table, identifier, values)
-    end
-    
-    def self.insert(table, values)
-      Database.instance.insert(table, values)
-    end
-    
-    def self.insert_if_not_exists(table, values, identifier_fields)
-      Database.instance.insert_if_not_exists(table, values, identifier_fields)
-    end
-    
-    def self.select(table, identifiers, fields=["*"], limit=nil)
-      Database.instance.select(table, identifiers, fields, limit)
-    end
-    
-    def self.query(sql, params=[])
-      Database.instance.query(sql, params)
+    # Sorgt dafür dass die Singelton Instanz Methoden auch als Klassenmethoden aufgerufen werden können.
+    def self.method_missing(method, *args, &block)
+      if Database.instance.respond_to?(method)
+        Database.instance.send(method, *args, &block)
+      else
+        super
+      end
     end
   end
 end
