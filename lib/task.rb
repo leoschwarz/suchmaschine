@@ -83,7 +83,7 @@ module Crawler
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
             
             if header["location"].nil?
-              html = http_request.response
+              html = request.response
               links = HTMLParser.new(task.encoded_url, html).get_links
               links.each {|link| Task.insert(URI.decode link)} # TODO: Auf callback warten
               task.store_result(html)
@@ -116,7 +116,7 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(n)
-          Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} LIMIT #{n}").callback{ |results|
+          Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} ORDER BY random() LIMIT #{n}").callback{ |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
           }.errback{|e|
             throw e
