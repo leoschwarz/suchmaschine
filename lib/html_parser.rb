@@ -8,11 +8,11 @@ module Crawler
     end
     
     def get_links
-      doc = Nokogiri::HTML(html_parser.html)
+      doc = Nokogiri::HTML(@html)
       urls = []
       doc.xpath('//a[@href]').each do |link|
         if link['rel'] != "nofollow"
-          urls << URLParser.new(html_parser.task.encoded_url, link['href']).full_path
+          urls << URLParser.new(@task.encoded_url, link['href']).full_path
         end
       end
       urls
