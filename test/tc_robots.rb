@@ -1,6 +1,4 @@
-class TestRobots < Test::Unit::TestCase
-  include EventMachine::TestHelper
-  
+class TestRobots < MiniTest::Unit::TestCase  
   def setup
     file("test1.example.com", "01.txt")
     file("test2.example.com", "02.txt")
@@ -19,14 +17,14 @@ class TestRobots < Test::Unit::TestCase
   end
   
   def assert_robots_allowed(url, value, finish=true, user_agent=Crawler::config.user_agent)
-    em do 
+    EM.run do 
       Crawler::RobotsParser.new(user_agent).allowed?(url).callback{|allowed|
         message = "Robots should #{value ? "" : "not"} be allowed for '#{url}'."
         assert(allowed==value, message)
-        if finish then done end
+        if finish then EM.stop end
       }.errback{
         raise
-        if finish then done end
+        if finish then EM.stop end
       }
     end
   end
