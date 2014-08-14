@@ -73,35 +73,40 @@ module Crawler
         @domain_request_count[task.domain_name]  = 1
       end
       
-      http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
-      http_request.callback {
-        header = http_request.response_header
+      RobotsParser.allowed?(task.encoded_url).callback { |allowed|
+        if allowed
+          http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
+          http_request.callback {
+            header = http_request.response_header
         
-        if header["content-type"].include? "text/html"
-          if header["location"].nil?
-            html = http_request.response
-            parser = HTMLParser.new(task, html)
-            parser.get_links.callback { |links|
-              links.each {|link| Task.insert(URI.decode link)}
-              task.store_result(html)
-              
-              puts "[+] #{task.decoded_url}"
-              do_next_task
-            }
-          else
-            url = URLParser.new(task.encoded_url, header["location"]).full_path
-            Task.insert(URI.decode(url))
-            task.mark_done
+            if header["content-type"].include? "text/html"
+              if header["location"].nil?
+                html = http_request.response
+                links = HTMLParser.new(task, html).get_links
+                links.each {|link| Task.insert(URI.decode link)}
+                task.store_result(html)
+            
+                puts "[+] #{task.decoded_url}"
+                EventMachine.next_tick { do_next_task }
+              else
+                url = URLParser.new(task.encoded_url, header["location"]).full_path
+                Task.insert(URI.decode(url))
+                task.mark_done
 
-            puts "[+] #{task.decoded_url}"
-            do_next_task
-          end
+                puts "[+] #{task.decoded_url}"
+                EventMachine.next_tick { do_next_task }
+              end
+            end
+          }
+          http_request.errback {
+            puts "[-] #{task.decoded_url}"
+            EventMachine.next_tick { do_next_task }
+          }
+        else
+          task.mark_disallowed
+          puts "[.] #{task.decoded_url}"
+          EventMachine.next_tick { do_next_task }
         end
-      }
-      http_request.errback {
-        puts "[-] #{task.decoded_url}"
-        
-        do_next_task
       }
     end
   end

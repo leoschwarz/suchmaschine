@@ -27,6 +27,11 @@ module Crawler
     def mark_done
       Database.update(:tasklist, {url: decoded_url}, {state: 1, done_at: DateTime.now})
     end
+    
+    # Markiet als verboten (wegen robots.txt)
+    def mark_disallowed
+      Database.update(:tasklist, {url: decoded_url}, {state: 2, done_at: DateTime.now})
+    end
   
     # TODO Dies ist nur eine provisorische "Lösung"
     def store_result(html)
