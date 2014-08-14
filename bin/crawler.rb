@@ -5,6 +5,7 @@ require 'eventmachine'
 require 'em-http-request'
 require 'pg/em/connection_pool'
 require 'nokogiri'
+require 'em-hiredis'
 
 require './config/config.rb'
 require './lib/database.rb'
@@ -48,12 +49,6 @@ module Crawler
       unless @loading_new_tasks
         # Sobald weniger als 50% der maximal Anzahl an Aufgaben vorhanden ist, werden neue geladen.
         if @tasks.length < Crawler.config.task_queue_size / 2
-          # Domains markieren
-          @domain_request_count.each { |domain, count|
-            Domain.new(domain, nil).ignore_for count
-          }
-          @domain_request_count = {}
-          
           # Aufgaben laden
           @loading_new_tasks = true
           Task.sample(Crawler.config.task_queue_size).callback { |tasks|
@@ -66,19 +61,13 @@ module Crawler
     
     def do_next_task
       task = @tasks.shift
-      
-      if @domain_request_count.has_key? task.domain_name
-        @domain_request_count[task.domain_name] += 1
-      else
-        @domain_request_count[task.domain_name]  = 1
-      end
-      
-      RobotsParser.allowed?(task.encoded_url).callback { |allowed|
-        if allowed
+      task.get_state.callback{|state|
+        if state == :ok
+          Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
           http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
           http_request.callback {
             header = http_request.response_header
-        
+            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
             if header["content-type"].include? "text/html"
               if header["location"].nil?
                 html = http_request.response
@@ -102,11 +91,12 @@ module Crawler
             puts "[-] #{task.decoded_url}"
             EventMachine.next_tick { do_next_task }
           }
-        else
-          task.mark_disallowed
-          puts "[.] #{task.decoded_url}"
+        elsif state == :not_ready
           EventMachine.next_tick { do_next_task }
-        end
+        elsif state == :not_allowed
+          task.mark_disallowed
+          EventMachine.next_tick { do_next_task }
+        end 
       }
     end
   end

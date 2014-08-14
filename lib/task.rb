@@ -49,6 +49,33 @@ module Crawler
       mark_done
     end
     
+    # Ruft ein callback auf mit einem der Werte:
+    # :ok -> alles in Ordnung
+    # :not_ready -> es muss noch gewartet werden
+    # :not_allowed -> robots.txt verbietet das crawlen
+    def get_state
+      Class.new {
+        include EM::Deferrable
+        def initialize(task)
+          RobotsParser.allowed?(task.encoded_url).callback{|allowed|
+            if allowed
+              Database.redis.get("domain.lastvisited.#{task.domain_name}").callback{|last_visited|
+                if (Time.now.to_f - last_visited.to_f) > Crawler.config.crawl_delay
+                  succeed :ok
+                else
+                  succeed :not_ready
+                end
+              }.errback{|e|
+                throw e
+              }
+            else
+              succeed :not_allowed
+            end
+          }
+        end
+      }.new(self)
+    end
+    
     # Lädt ein Sample URLs die noch nicht abgerufen wurden und deren Domains wieder aufgerufen werden dürfen.
     # Gibt ein Deferrable zurück welches mit einem Array von Task Instanzen aufgerufen wird.
     def self.sample(n=100)
@@ -61,7 +88,7 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(n)
-          Database.query("SELECT url FROM tasklist INNER JOIN domains ON tasklist.domain = domains.domain WHERE state = #{TaskState::NEW} AND ignore_until < CURRENT_TIMESTAMP LIMIT #{n}").callback{ |results|
+          Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} LIMIT #{n}").callback{ |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
           }.errback{|e|
             throw e
@@ -77,10 +104,7 @@ module Crawler
         return nil
       end
       
-      domain_name = Domain.domain_name_of(decoded_url)
-      Database.insert_if_not_exists(:domains, {domain: domain_name}, [:domain]).callback{
-        Database.insert_if_not_exists(:tasklist, {url: decoded_url, domain: domain_name, state: TaskState::NEW}, [:url])
-      }
+      Database.insert_if_not_exists(:tasklist, {url: decoded_url, state: TaskState::NEW}, [:url])
     end
   end
 end

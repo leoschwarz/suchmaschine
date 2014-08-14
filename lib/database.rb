@@ -4,13 +4,14 @@
 # (Wahrscheinlich wird dies bei dieser Applikation aber sowieso keine Rolle spielen)
 
 module Crawler
-  class Database
+  class Database    
     def initialize
       @db = PG::EM::ConnectionPool.new(size: Crawler.config.database.connections,
                                        dbname: Crawler.config.database.name,
                                        host: Crawler.config.database.host,
                                        user: Crawler.config.database.user,
                                        password: Crawler.config.database.password)
+      @redis = EM::Hiredis.connect(Crawler.config.redis)
     end
     
     def self.instance
@@ -61,6 +62,10 @@ module Crawler
      
     def query(sql, params=[])
       @db.exec_params_defer(sql, params)
+    end
+    
+    def redis
+      @redis
     end
     
     
