@@ -1,6 +1,6 @@
 production: &default
-  task_queue_size: 100   # Anzahl der Aufgaben in der Memory-Warteschleife
-  parallel_tasks: 15     # Anzahl paralleler Downloads
+  task_queue_size: 1000  # Anzahl der Aufgaben in der Memory-Warteschleife
+  parallel_tasks: 100    # Anzahl paralleler Downloads
   user_agent: lightblaze # Name des USER_AGENT Felds für HTTP Requests
   crawl_delay: 1.0       # Anzahl Sekunden die gewartet werden muss bevor von der gleichen Domain wieder etwas geladen werden darf.
   redis: "redis://127.0.0.1:6379"
@@ -17,6 +17,8 @@ production: &default
 
 development:
   <<: *default
+  task_queue_size: 100
+  parallel_tasks: 15
   redis: "redis://192.168.1.110:6379"
   database:
     connections: 20
