@@ -6,11 +6,6 @@ module Crawler
   
     def initialize(name)
       @name = name
-      if ignore_until.nil?
-        @ignore_until = DateTime.new # t = 0, es wird also auf jeden Fall nicht ignoriert
-      else
-        @ignore_until = DateTime.parse(ignore_until)
-      end
     end
     
     # Hilfsmethode um den Domain Namen einer URL zu extrahieren.

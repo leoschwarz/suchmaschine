@@ -73,6 +73,37 @@ module Crawler
       }.new(self)
     end
     
+    def execute
+      Class.new {
+        include EM::Deferrable
+        def initialize(task)
+          request = EM::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
+          request.callback {
+            header = request.response_header
+            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
+            
+            if header["location"].nil?
+              html = http_request.response
+              links = HTMLParser.new(task.encoded_url, html).get_links
+              links.each {|link| Task.insert(URI.decode link)} # TODO: Auf callback warten
+              task.store_result(html)
+              succeed
+            else
+              url = URLParser.new(task.encoded_url, header["location"]).full_path
+              Task.insert(URI.decode(url)).callback{
+                task.mark_done.callback{
+                  succeed 
+                }
+              }
+            end
+          }
+          request.errback { |error|
+            fail error
+          }
+        end
+      }.new(self)
+    end
+    
     # Lädt ein Sample URLs die noch nicht abgerufen wurden und deren Domains wieder aufgerufen werden dürfen.
     # Gibt ein Deferrable zurück welches mit einem Array von Task Instanzen aufgerufen wird.
     def self.sample(n=100)

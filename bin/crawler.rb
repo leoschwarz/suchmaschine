@@ -31,12 +31,10 @@ module Crawler
       EventMachine.run {
         # Warteschlange mit Aufgaben befüllen
         Task.sample(Crawler.config.task_queue_size).callback { |tasks|
-          tasks.each {|task| @tasks << task}
+          @tasks = tasks
           
           # Timer, der dafür zu sorgen hat, dass die Warteschlange immer genug Aufgaben enthält.
-          EventMachine.add_periodic_timer(0.1) {
-            update_queue
-          }
+          EventMachine.add_periodic_timer(0.1) { update_queue }
           
           # Start des Crawlens
           Crawler.config.parallel_tasks.times { do_next_task }
@@ -69,30 +67,11 @@ module Crawler
       task.get_state.callback{|state|
         if state == :ok
           Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
-          http_request = EventMachine::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
-          http_request.callback {
-            header = http_request.response_header
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
-            if header["content-type"].include? "text/html"
-              if header["location"].nil?
-                html = http_request.response
-                links = HTMLParser.new(task.encoded_url, html).get_links
-                links.each {|link| Task.insert(URI.decode link)}
-                task.store_result(html)
-            
-                puts "[+] #{task.decoded_url}"
-                EventMachine.next_tick { do_next_task }
-              else
-                url = URLParser.new(task.encoded_url, header["location"]).full_path
-                Task.insert(URI.decode(url))
-                task.mark_done
-
-                puts "[+] #{task.decoded_url}"
-                EventMachine.next_tick { do_next_task }
-              end
-            end
-          }
-          http_request.errback {
+          
+          task.execute.callback {
+            puts "[+] #{task.decoded_url}"
+            EventMachine.next_tick { do_next_task }
+          }.errback {
             puts "[-] #{task.decoded_url}"
             EventMachine.next_tick { do_next_task }
           }
