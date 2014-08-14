@@ -71,7 +71,7 @@ module Crawler
             if header["content-type"].include? "text/html"
               if header["location"].nil?
                 html = http_request.response
-                links = HTMLParser.new(task, html).get_links
+                links = HTMLParser.new(task.encoded_url, html).get_links
                 links.each {|link| Task.insert(URI.decode link)}
                 task.store_result(html)
             

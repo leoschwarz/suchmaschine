@@ -1,7 +1,6 @@
-require 'test/unit'
 require './bin/crawler.rb'
 
-class TestURLParser < Test::Unit::TestCase
+class TestURLParser < MiniTest::Unit::TestCase  
   BASE_URL1 = "http://example.com"
   BASE_URL2 = "http://example.com/news/"
   BASE_URL3 = "https://example.com/news"

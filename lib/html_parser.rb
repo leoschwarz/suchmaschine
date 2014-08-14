@@ -1,9 +1,10 @@
 module Crawler
   class HTMLParser
-    attr_accessor :html, :task
+    attr_accessor :html, :base_url
     
-    def initialize(task, html)
-      @task = task
+    # base_url muss UTF8 Zeichen URL kodiert beinhalten
+    def initialize(base_url, html)
+      @base_url = base_url
       @html = html
     end
     
@@ -12,7 +13,7 @@ module Crawler
       urls = []
       doc.xpath('//a[@href]').each do |link|
         if link['rel'] != "nofollow"
-          url = URLParser.new(@task.encoded_url, link['href']).full_path
+          url = URLParser.new(@base_url, link['href']).full_path
           urls << url unless url.nil?
         end
       end
