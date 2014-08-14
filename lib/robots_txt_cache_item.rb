@@ -50,7 +50,7 @@ module Crawler
         
         def initialize(domain)
           if Crawler.config.robots_txt.use_cache
-            Database.select(:robotstxt, {domain: domain}, [:data, :valid_until]).callback{ |result|
+            Database.find(:robotstxt, {domain: domain}, [:data, :valid_until]).callback{ |result|
               data = "[]"
               valid_unitl = nil
               status = :not_found

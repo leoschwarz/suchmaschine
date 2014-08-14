@@ -50,7 +50,7 @@ module Crawler
       @db.exec_params_defer(sql, values.values + identifiers.values)
     end
     
-    def select(table, identifiers, fields=["*"], limit=nil)
+    def find(table, identifiers, fields=["*"], limit=nil)
       sql = "SELECT "
       sql += fields.join(",")
       sql += " FROM #{table} WHERE "

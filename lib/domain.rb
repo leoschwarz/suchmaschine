@@ -43,7 +43,7 @@ module Crawler
         include EM::Deferrable
         
         def initialize(domain_name)
-          Database.select(:domains, {"domain" => domain_name}, ["ignore_until"]).callback { |result|
+          Database.find(:domains, {"domain" => domain_name}, ["ignore_until"]).callback { |result|
             if result.ntuples == 1
               succeed(Domain.new(domain_name, result[0]["ignore_until"]))
             elsif result.ntuples == 0
