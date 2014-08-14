@@ -12,7 +12,8 @@ module Crawler
       urls = []
       doc.xpath('//a[@href]').each do |link|
         if link['rel'] != "nofollow"
-          urls << URLParser.new(@task.encoded_url, link['href']).full_path
+          url = URLParser.new(@task.encoded_url, link['href']).full_path
+          urls << url unless url.nil?
         end
       end
       urls
