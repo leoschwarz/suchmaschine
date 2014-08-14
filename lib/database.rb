@@ -34,6 +34,22 @@ module Crawler
       @db.exec_params_defer(sql, values.values)
     end
     
+    # TODO: Test!
+    # identifiers: array mit schlüsseln der relevanten werte
+    def insert_if_not_exists(table, values, identifier_fields)
+      # "INSERT INTO domains (domain) SELECT $1 WHERE NOT EXISTS ( SELECT domain FROM domains WHERE domain = $1 )"
+      identifiers = {}
+      identifier_fields.each {|field| identifiers[field] = values[field] }
+      sql = "INSERT INTO #{table} ("
+      sql += (0...values.length).to_a.map{|i| values.keys[i].to_s}.join(",")
+      sql += ") SELECT "
+      sql += (1..values.length).to_a.map{|i| "$#{i}"}.join(",")
+      sql += " WHERE NOT EXISTS ( SELECT 1 FROM #{table} WHERE "
+      sql += (0...identifiers.length).to_a.map{|i| "#{identifiers.keys[i]} = $#{values.length+i+1}"}.join(" AND ")
+      sql += " )"
+      @db.exec_params_defer(sql, values.values + identifiers.values)
+    end
+    
     def select(table, identifiers, fields=["*"], limit=nil)
       sql = "SELECT "
       sql += fields.join(",")
@@ -56,6 +72,10 @@ module Crawler
     
     def self.insert(table, values)
       Database.instance.insert(table, values)
+    end
+    
+    def self.insert_if_not_exists(table, values, identifier_fields)
+      Database.instance.insert_if_not_exists(table, values, identifier_fields)
     end
     
     def self.select(table, identifiers, fields=["*"], limit=nil)

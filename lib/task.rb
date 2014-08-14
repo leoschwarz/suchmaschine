@@ -49,19 +49,6 @@ module Crawler
       mark_done
     end
     
-    # Überprüft ob eine URL bereits in der Datenbank registriert ist.
-    # Gibt ein Deferrable zurück welches mit einem Bool-Wert augerufen wird.
-    def self.registered?(decoded_url)
-      Class.new {
-        include EM::Deferrable
-        def initialize(decoded_url)
-          Database.select(:tasklist, {url: decoded_url}, ["url"]).callback { |result|
-            self.succeed(result.ntuples > 0)
-          }
-        end
-      }.new(decoded_url)
-    end
-    
     # Lädt ein Sample URLs die noch nicht abgerufen wurden und deren Domains wieder aufgerufen werden dürfen.
     # Gibt ein Deferrable zurück welches mit einem Array von Task Instanzen aufgerufen wird.
     def self.sample(n=100)
@@ -90,21 +77,9 @@ module Crawler
         return nil
       end
       
-      # Überprüfen ob URL bereits in der Datenbank eingetragen ist
-      self.registered?(decoded_url).callback{ |registered|
-        unless registered
-          # Überprüfen ob Domain bereits in der Datenbank eingetragen ist
-          domain_name = Domain.domain_name_of(decoded_url)
-          Domain.registered?(domain_name).callback{ |domain_registered|
-            if domain_registered
-              Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: TaskState::NEW})
-            else
-              Database.insert(:domains, {domain: domain_name}).callback{
-                Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: TaskState::NEW})
-              }
-            end
-          }
-        end
+      domain_name = Domain.domain_name_of(decoded_url)
+      Database.insert_if_not_exists(:domains, {domain: domain_name}, [:domain]).callback{
+        Database.insert_if_not_exists(:tasklist, {url: decoded_url, domain: domain_name, state: TaskState::NEW}, [:url])
       }
     end
   end

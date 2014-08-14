@@ -26,26 +26,6 @@ module Crawler
       Database.update(:domains, {domain: @name}, {ignore_until: @ignore_until})
     end
     
-    # Überprüft ob eine Domain bereits in der Datenbank registriert ist
-    # Gibt eine Deferrable Instanz zurück welche beim Callback mit einem Bool Wert aufgerufen wird.
-    def self.registered?(domain_name)
-      Class.new {
-        include EM::Deferrable
-        
-        def initialize(domain_name)
-          Database.select(:domains, {"domain" => domain_name}, ["ignore_until"]).callback { |result|
-            if result.ntuples == 1
-              succeed true
-            else
-              succeed false
-            end
-          }.errback{ |e|
-            raise e
-          }
-        end
-      }.new(domain_name)
-    end
-    
     # Hilfsmethode um den Domain Namen einer URL zu extrahieren.
     def self.domain_name_of(url)
       match = /https?:\/\/([a-zA-Z0-9\.-]+)/.match(url)
