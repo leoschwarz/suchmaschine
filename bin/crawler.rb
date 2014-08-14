@@ -5,7 +5,7 @@ require 'eventmachine'
 require 'em-http-request'
 require 'pg/em/connection_pool'
 require 'nokogiri'
-require 'em-hiredis'
+require 'redis'
 
 require './config/config.rb'
 require './lib/database.rb'
@@ -23,7 +23,6 @@ module Crawler
     def initialize
       @tasks = Array.new
       @loading_new_tasks = false
-      @domain_request_count = {}
     end
     
     def launch
@@ -35,7 +34,7 @@ module Crawler
           tasks.each {|task| @tasks << task}
           
           # Timer, der dafür zu sorgen hat, dass die Warteschlange immer genug Aufgaben enthält.
-          EventMachine.add_periodic_timer(1) {
+          EventMachine.add_periodic_timer(0.1) {
             update_queue
           }
           
@@ -61,6 +60,12 @@ module Crawler
     
     def do_next_task
       task = @tasks.shift
+      if task.nil?
+        puts "Keine Aufgaben mehr in der Warteschlange"
+        EM.next_tick{ do_next_task }
+        return
+      end
+      
       task.get_state.callback{|state|
         if state == :ok
           Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)

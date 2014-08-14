@@ -59,15 +59,12 @@ module Crawler
         def initialize(task)
           RobotsParser.allowed?(task.encoded_url).callback{|allowed|
             if allowed
-              Database.redis.get("domain.lastvisited.#{task.domain_name}").callback{|last_visited|
-                if (Time.now.to_f - last_visited.to_f) > Crawler.config.crawl_delay
-                  succeed :ok
-                else
-                  succeed :not_ready
-                end
-              }.errback{|e|
-                throw e
-              }
+              last_visited = Database.redis.get("domain.lastvisited.#{task.domain_name}").to_f
+              if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
+                succeed :ok
+              else
+                succeed :not_ready
+              end
             else
               succeed :not_allowed
             end

@@ -5,9 +5,6 @@ GEM
     cookiejar (0.3.2)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
-    em-hiredis (0.3.0)
-      eventmachine (~> 1.0)
-      hiredis (~> 0.5.0)
     em-http-request (1.1.2)
       addressable (>= 2.3.4)
       cookiejar
@@ -21,13 +18,13 @@ GEM
       eventmachine (>= 1.0.0.beta.4)
     eventmachine (1.0.3)
     hashr (0.0.22)
-    hiredis (0.5.2)
     http_parser.rb (0.6.0)
     mini_portile (0.6.0)
     nokogiri (1.6.2.1)
       mini_portile (= 0.6.0)
     oj (2.9.9)
     pg (0.17.1)
+    redis (3.1.0)
     safe_yaml (1.0.3)
     webmock (1.18.0)
       addressable (>= 2.3.6)
@@ -37,11 +34,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  em-hiredis (~> 0.3.0)
   em-http-request (~> 1.1.2)
   em-pg-client (~> 0.3.4)
   eventmachine (~> 1.0.3)
   hashr (~> 0.0.22)
   nokogiri (~> 1.6.2.1)
   oj (~> 2.9.9)
+  redis (~> 3.1.0)
   webmock (~> 1.18.0)
