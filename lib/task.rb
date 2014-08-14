@@ -1,4 +1,10 @@
 module Crawler
+  module TaskState
+    NEW = 0
+    DONE = 1
+    DISALLOWED = 2
+  end
+  
   class Task
     attr_reader :state, :done_at
   
@@ -25,12 +31,12 @@ module Crawler
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      Database.update(:tasklist, {url: decoded_url}, {state: 1, done_at: DateTime.now})
+      Database.update(:tasklist, {url: decoded_url}, {state: TaskState::DONE, done_at: DateTime.now})
     end
     
     # Markiet als verboten (wegen robots.txt)
     def mark_disallowed
-      Database.update(:tasklist, {url: decoded_url}, {state: 2, done_at: DateTime.now})
+      Database.update(:tasklist, {url: decoded_url}, {state: TaskState::DISALLOWED, done_at: DateTime.now})
     end
   
     # TODO Dies ist nur eine provisorische "Lösung"
@@ -68,7 +74,7 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(n)
-          Database.query("SELECT url FROM tasklist INNER JOIN domains ON tasklist.domain = domains.domain WHERE state = 0 AND ignore_until < CURRENT_TIMESTAMP LIMIT #{n}").callback{ |results|
+          Database.query("SELECT url FROM tasklist INNER JOIN domains ON tasklist.domain = domains.domain WHERE state = #{TaskState::NEW} AND ignore_until < CURRENT_TIMESTAMP LIMIT #{n}").callback{ |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
           }.errback{|e|
             throw e
@@ -91,10 +97,10 @@ module Crawler
           domain_name = Domain.domain_name_of(decoded_url)
           Domain.registered?(domain_name).callback{ |domain_registered|
             if domain_registered
-              Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: 0})
+              Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: TaskState::NEW})
             else
               Database.insert(:domains, {domain: domain_name}).callback{
-                Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: 0})
+                Database.insert(:tasklist, {url: decoded_url, domain: domain_name, state: TaskState::NEW})
               }
             end
           }
