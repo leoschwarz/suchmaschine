@@ -117,7 +117,7 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(n)
-          Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} ORDER BY random() LIMIT #{n}").callback{ |results|
+          Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} ORDER BY priority DESC LIMIT #{n}").callback{ |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
           }.errback{|e|
             throw e
@@ -127,12 +127,24 @@ module Crawler
     end
   
     # Fügt eine neue URL der Datenbank hinzu.
+    # Falls die URL bereits existiert, wird deren Priorität erhöht.
     def self.insert(encoded_url)
-      if url = _prepare_url_for_insert(encoded_url)
-        Database.insert_if_not_exists(:tasklist, {url: url, state: TaskState::NEW}, [:url])
-      else
-        nil
-      end
+      Class.new {
+        include EM::Deferrable
+        def initialize(url)
+          succeed if url.nil?
+          
+          Database.find(:tasklist, {url: url}, [:priority]).callback{ |results|
+            if results.ntuples == 1
+              # Es existiert bereits ein Eintrag, also Updaten
+              Database.update(:tasklist, {url: url}, {priority: results.first["priority"] + 1}).callback{ succeed }
+            else
+              # Es existiert noch kein Eintrag, also erstellen
+              Database.insert(:tasklist, {url: url}).callback{ succeed }
+            end
+          }
+        end
+      }.new(_prepare_url_for_insert(encoded_url))
     end
     
     private

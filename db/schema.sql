@@ -49,7 +49,8 @@ ALTER TABLE public.robotstxt OWNER TO leo;
 CREATE TABLE tasklist (
     url character varying(512) NOT NULL,
     state integer,
-    done_at timestamp with time zone
+    done_at timestamp with time zone,
+    priority integer DEFAULT 0
 );
 
 
