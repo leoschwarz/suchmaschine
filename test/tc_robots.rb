@@ -10,6 +10,9 @@ class TestRobots < MiniTest::Unit::TestCase
     
     stub_request(:any, "test404.example.com/robots.txt").to_return(status: 404)
     stub_request(:any, "test500.example.com/robots.txt").to_return(status: 500)    
+    
+    ## TODO: Problem mit Webmock, die Weiterleitung funktioniert hier nicht richtig... -> Test failt deshalb.
+    #stub_request(:any, "redirect.example.com/robots.txt").to_return(status: 302, body: "", headers: {location: 'http://test4.example.com/robots.txt'})
   end
   
   def file(domain, file)
@@ -112,4 +115,12 @@ class TestRobots < MiniTest::Unit::TestCase
   def test_19_http_500
     assert_robots_allowed("http://test500.example.com/news", false)
   end
+  
+  ## Redirects sollen verfolgt werden
+  #def test_redirect_1
+  #  assert_robots_allowed("http://redirect.example.com/news", true)
+  #end
+  #def test_redirect_2
+  #  assert_robots_allowed("http://redirect.example.com/test", false)
+  #end
 end

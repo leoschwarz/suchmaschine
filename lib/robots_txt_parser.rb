@@ -21,13 +21,15 @@ module Crawler
         else
           # Download der robots.txt Datei
           url  = "http://#{@domain}/robots.txt"
-          http = EventMachine::HttpRequest.new(url).get(timeout: Crawler.config.robots_txt.timeout, head: {user_agent: Crawler.config.user_agent})
+          http = EventMachine::HttpRequest.new(url).get(timeout: Crawler.config.robots_txt.timeout, head: {user_agent: Crawler.config.user_agent}, redirects: 3)
           http.callback {
+            puts http.last_effective_url if url.include? "redirect"
             c = http.response_header.http_status.to_s[0]
+            
             if c == "2"
               @cache_item.rules = parse(http.response.force_encoding("UTF-8"))
               @cache_item.set_valid_for(:default)
-            elsif c == "3" or c == "5" # TODO: Verhalten bei Weiterleitung
+            elsif c == "3" or c == "5"
               @cache_item.rules = [[:disallow, "/"]]
               @cache_item.set_valid_for(30)
             elsif c == "4"
