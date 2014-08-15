@@ -55,7 +55,7 @@ module Crawler
         include EM::Deferrable
         
         def initialize(task_queue)
-          if task_queue.length < Crawler.config.task_queue_size * 0.5
+          if task_queue.length < Crawler.config.task_queue_size * Crawler.config.task_queue_threshold
             if task_queue.loader.loading
               if task_queue.length > 0
                 # Es werden bereits neue Aufgaben geladen und es hat noch Aufgabe, also können wir bereits jetzt eine zurück geben.
