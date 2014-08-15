@@ -137,11 +137,13 @@ module Crawler
           Database.find(:tasklist, {url: url}, [:priority]).callback{ |results|
             if results.ntuples == 1
               # Es existiert bereits ein Eintrag, also Updaten
-              Database.update(:tasklist, {url: url}, {priority: results.first["priority"] + 1}).callback{ succeed }
+              Database.update(:tasklist, {url: url}, {priority: results.first["priority"] + 1}).callback{ succeed }.errback{|e| raise e}
             else
               # Es existiert noch kein Eintrag, also erstellen
-              Database.insert(:tasklist, {url: url}).callback{ succeed }
+              Database.insert(:tasklist, {url: url}).callback{ succeed }.errback{|e| raise e}
             end
+          }.errback{|e|
+            raise e
           }
         end
       }.new(_prepare_url_for_insert(encoded_url))
