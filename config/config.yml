@@ -18,9 +18,9 @@ production: &default
 
 development:
   <<: *default
-  task_queue_size: 100
+  task_queue_size: 1000
   task_queue_threshold: 0.50 
-  parallel_tasks: 15
+  parallel_tasks: 100
   redis: "redis://192.168.1.110:6379"
   database:
     connections: 20
