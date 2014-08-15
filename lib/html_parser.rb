@@ -1,52 +1,38 @@
 module Crawler
-  class HTMLParser
-    attr_accessor :html, :base_url
-    
+  class HTMLParser < Nokogiri::XML::SAX::Document    
     # base_url muss UTF8 Zeichen URL kodiert beinhalten
     def initialize(base_url, html)
       @base_url = base_url
       @html = html
+      @links = []
     end
     
-    # Variante nokogiri einfach
+    # Alternative Implementierungen: test/benchmark/html_parser.rb 
     def get_links
-      doc = Nokogiri::HTML(@html)
-      urls = []
-      doc.xpath('//a[@href]').each do |link|
-        if link['rel'] != "nofollow"
-          url = URLParser.new(@base_url, link['href']).full_path
-          urls << url unless url.nil?
+      parser = Nokogiri::HTML::SAX::Parser.new(self)
+      parser.parse @html
+      @links
+    end
+    
+    def start_element name, attributes = []
+      if name == "a"
+        href = nil
+        rel  = nil
+        attributes.each do |attr|
+          if attr[0] == "href"
+            href = attr[1]
+          elsif attr[0] == "rel"
+            rel = attr[1]
+          end
+        end
+      
+        if not href.nil?
+          if rel.nil? or not rel =~ /nofollow/
+            link = Crawler::URLParser.new(@base_url, href).full_path
+            @links << link unless link.nil?
+          end
         end
       end
-      urls
     end
-    
-    # Variante nokogiri traverse
-    #def get_links_2
-    #  doc = Nokogiri::HTML(@html)
-    #  urls = []
-    #  doc.traverse do |node|
-    #    if node.name == "a" and node.has_attribute? "href"
-    #      rel = node.attr("rel")
-    #      if rel.nil? or not rel.include? "nofollow" 
-    #        url = URLParser.new(@base_url, node.attr("href")).full_path
-    #        urls << url unless url.nil?
-    #      end
-    #    end
-    #  end
-    #  urls
-    #end
-    
-    # Variante ohne rel=nofollow Unterstützung
-    #def get_links_3
-    #  regex = /href\s*=\s*(\"([^"]*)\"|'([^']*)'|([^'">\s]+))/im
-    #  
-    #  @html.scan(regex).map{|result|
-    #    href = result[1] || result[2] || result[3]
-    #    URLParser.new(@base_url, href).full_path
-    #  }
-    #end
-    
-    
   end
 end

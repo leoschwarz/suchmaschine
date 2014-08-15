@@ -25,7 +25,11 @@ module Crawler
     
       url = URI::join(part1, part2).to_s
       # remove #-part of url
-      url = url.split("#").first
+      hash_index = url.index("#")
+      unless hash_index.nil?
+        url = url[0...hash_index]
+      end
+      url
     end
   end
 end
