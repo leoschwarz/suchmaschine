@@ -142,7 +142,7 @@ module Crawler
           Database.find(:tasklist, {url: url}, [:priority]).callback{ |results|
             if results.ntuples == 1
               # Es existiert bereits ein Eintrag, also Updaten
-              Database.update(:tasklist, {url: url}, {priority: results.first["priority"] + 1}).callback{ succeed }.errback{|e| raise e}
+              Database.update(:tasklist, {url: url}, {priority: results.first["priority"].to_i + 1}).callback{ succeed }.errback{|e| raise e}
             else
               # Es existiert noch kein Eintrag, also erstellen
               Database.insert(:tasklist, {url: url}).callback{ succeed }.errback{|e| raise e}
@@ -169,7 +169,8 @@ module Crawler
       # Fragment Identifier wurde bereits von URLParser entfernt.
       
       # Schema entfernen
-      decoded_url.gsub(%r{^https?://}, "")
+      # Siehe: http://stackoverflow.com/a/8711122/595304
+      decoded_url.encode('UTF-16le', :invalid => :replace, :replace => '').encode('UTF-8').gsub(%r{^https?://}, "")
     end
   end
 end
