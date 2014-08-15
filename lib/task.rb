@@ -77,7 +77,8 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(task)
-          request = EM::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
+          task_url = "http://" + task.encoded_url
+          request = EM::HttpRequest.new(task_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
           request.callback {
             header = request.response_header
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
@@ -127,17 +128,29 @@ module Crawler
   
     # Fügt eine neue URL der Datenbank hinzu.
     def self.insert(encoded_url)
-      if encoded_url.nil?
-        return nil
+      if url = _prepare_url_for_insert(encoded_url)
+        Database.insert_if_not_exists(:tasklist, {url: url, state: TaskState::NEW}, [:url])
+      else
+        nil
       end
+    end
+    
+    private
+    # Alle URLs sollen in ein einheitliches Format umgewandelt werden.
+    # - Das Schema wird von den URLs entfernt. (http://www.example.com -> www.example.com)
+    # - Der Fragment Identifier wird entfernt. (example.com/index.html#news -> example.com/index.html)
+    def self._prepare_url_for_insert(encoded_url)
+      # Überprüfen ob nil
+      return nil if encoded_url.nil?
       decoded_url = URI.decode encoded_url
       
       # Länge überprüfen
-      if decoded_url.length > 512
-        return nil
-      end
+      return nil if decoded_url.length > 512
       
-      Database.insert_if_not_exists(:tasklist, {url: decoded_url, state: TaskState::NEW}, [:url])
+      # Fragment Identifier wurde bereits von URLParser entfernt.
+      
+      # Schema entfernen
+      decoded_url.gsub(%r{^https?://}, "")
     end
   end
 end
