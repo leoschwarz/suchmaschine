@@ -120,7 +120,7 @@ module Crawler
           Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} ORDER BY priority DESC LIMIT #{n}").callback{ |results|
             succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
           }.errback{|e|
-            throw e
+            raise e
           }
         end
       }.new(n)

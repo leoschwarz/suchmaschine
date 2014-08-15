@@ -50,7 +50,7 @@ class TestURLParser < MiniTest::Unit::TestCase
     elsif n == 3
       Crawler::URLParser.new(BASE_URL3, url).full_path
     else
-      throw "wrong n"
+      raise "wrong n"
     end
   end
 end

@@ -51,7 +51,7 @@ module Crawler
       explicitely_allowed = false
       
       if @cache_item.nil?
-        throw "Cache Item was not loaded."
+        raise "Cache Item was not loaded."
       end
       
       @cache_item.rules.each do |rule|
@@ -131,7 +131,7 @@ module Crawler
         if e.class == PG::UniqueViolation
           succeed
         else
-          throw e
+          raise e
         end
       }
     end

@@ -18,7 +18,7 @@ module Crawler
           @loading = false
           succeed
         }.errback{|e|
-          throw e
+          raise e
         }
       end
     end
