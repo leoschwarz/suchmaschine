@@ -10,7 +10,12 @@ module Crawler
       begin
         part2 = URI(@link)
       rescue Exception => e
-        part2 = URI(URI.encode(@link))
+        begin
+          part2 = URI(URI.encode(@link))
+        rescue Exception => e
+          # Falls tatsächlich eine schlechte URL in den Parser gerät, ist es am sichersten einfach nil zurückzugeben und dies zu ignorieren
+          return nil
+        end
       end
     
       scheme = part2.scheme

@@ -34,6 +34,12 @@ class TestURLParser < MiniTest::Unit::TestCase
     assert_equal("http://example.com/av%C3%A9c%20b%C3%A9eaucoup%20de%20faut%C3%A8s", _relative_url("avéc béeaucoup de fautès"))
   end
   
+  def test_dont_crash_1
+    # Falls tatsächlich eine schlechte URL in den Parser gerät, ist es am sichersten einfach nil zurückzugeben und dies zu ignorieren
+    rel_url  = "&quot;https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:TimedMediaHandler/Client_download&quot;&gt;download"
+    assert_equal(nil, _relative_url(rel_url))
+  end
+  
   
   private
   def _relative_url(url, n=1)

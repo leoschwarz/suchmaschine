@@ -85,12 +85,12 @@ module Crawler
             if header["location"].nil?
               html = request.response
               links = HTMLParser.new(task.encoded_url, html).get_links
-              links.each {|link| Task.insert(URI.decode link)} # TODO: Auf callback warten
+              links.each {|link| Task.insert(link)} # TODO: Auf callback warten
               task.store_result(html)
               succeed
             else
               url = URLParser.new(task.encoded_url, header["location"]).full_path
-              Task.insert(URI.decode(url)).callback{
+              Task.insert(url).callback{
                 task.mark_done.callback{
                   succeed 
                 }
@@ -126,7 +126,12 @@ module Crawler
     end
   
     # Fügt eine neue URL der Datenbank hinzu.
-    def self.insert(decoded_url)
+    def self.insert(encoded_url)
+      if encoded_url.nil?
+        return nil
+      end
+      decoded_url = URI.decode encoded_url
+      
       # Länge überprüfen
       if decoded_url.length > 512
         return nil
