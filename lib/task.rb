@@ -137,28 +137,30 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(url)
-          succeed if url.nil?
-          
-          Database.find(:tasklist, {url: url}, [:priority]).callback{ |results|
-            if results.ntuples == 1
-              # Es existiert bereits ein Eintrag, also Updaten
-              # TODO: das erhöhen des wertes mit sql erledigen
-              Database.update(:tasklist, {url: url}, {priority: results.first["priority"].to_i + 1}).callback{ succeed }.errback{|e| raise e}
-            else
-              # Es existiert noch kein Eintrag, also erstellen
-              Database.insert(:tasklist, {url: url}).callback{ succeed }.errback{ |e|
-                if e.class == PG::UniqueViolation
-                  # Etwas unschön, aber es kann passieren dass jemand schneller war als wir.
-                  # Auf jeden Fall geht es jetzt darum den Eintrag zu aktualisieren.
-                  Task.insert(url).callback{ succeed }
-                else
-                  raise e
-                end
-              }
-            end
-          }.errback{|e|
-            raise e
-          }
+          if url.nil?
+            succeed
+          else
+            Database.find(:tasklist, {url: url}, [:priority]).callback{ |results|
+              if results.ntuples == 1
+                # Es existiert bereits ein Eintrag, also Updaten
+                # TODO: das erhöhen des wertes mit sql erledigen
+                Database.update(:tasklist, {url: url}, {priority: results.first["priority"].to_i + 1}).callback{ succeed }.errback{|e| raise e}
+              else
+                # Es existiert noch kein Eintrag, also erstellen
+                Database.insert(:tasklist, {url: url}).callback{ succeed }.errback{ |e|
+                  if e.class == PG::UniqueViolation
+                    # Etwas unschön, aber es kann passieren dass jemand schneller war als wir.
+                    # Auf jeden Fall geht es jetzt darum den Eintrag zu aktualisieren.
+                    Task.insert(url).callback{ succeed }
+                  else
+                    raise e
+                  end
+                }
+              end
+            }.errback{|e|
+              raise e
+            }
+          end
         end
       }.new(_prepare_url_for_insert(encoded_url))
     end
