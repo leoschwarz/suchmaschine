@@ -169,8 +169,8 @@ module Crawler
       # Fragment Identifier wurde bereits von URLParser entfernt.
       
       # Schema entfernen
-      # Siehe: http://stackoverflow.com/a/8711122/595304
-      decoded_url.encode('UTF-16le', :invalid => :replace, :replace => '').encode('UTF-8').gsub(%r{^https?://}, "")
+      # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+      decoded_url.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '').gsub(%r{^https?://}, "")
     end
   end
 end

@@ -23,11 +23,11 @@ module Crawler
           url  = "http://#{@domain}/robots.txt"
           http = EventMachine::HttpRequest.new(url).get(timeout: Crawler.config.robots_txt.timeout, head: {user_agent: Crawler.config.user_agent}, redirects: 3)
           http.callback {
-            puts http.last_effective_url if url.include? "redirect"
             c = http.response_header.http_status.to_s[0]
             
-            if c == "2"
-              @cache_item.rules = parse(http.response.force_encoding("UTF-8"))
+            if c == "2"              
+              # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+              @cache_item.rules = parse(http.response.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
               @cache_item.set_valid_for(:default)
             elsif c == "3" or c == "5"
               @cache_item.rules = [[:disallow, "/"]]
