@@ -82,6 +82,19 @@ module Crawler
     def execute
       Class.new {
         include EM::Deferrable
+        def do_link
+          if @links.length > 0
+            link = @links.pop
+            Task.insert(link).callback{
+              EM.next_tick{ self.do_link }
+            }.errback{|e|
+              raise e
+            }
+          else
+            succeed
+          end
+        end
+        
         def initialize(task)
           request = EM::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
           request.callback {
@@ -90,10 +103,10 @@ module Crawler
             
             if header["location"].nil?
               html = request.response
-              links = HTMLParser.new(task.encoded_url, html).get_links
-              links.each {|link| Task.insert(link)} # TODO: Auf callback warten
               task.store_result(html)
-              succeed
+              @links = HTMLParser.new(task.encoded_url, html).get_links
+              
+              do_link
             else
               url = URLParser.new(task.encoded_url, header["location"]).full_path
               Task.insert(url).callback{

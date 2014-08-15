@@ -29,7 +29,7 @@ module Crawler
         if not href.nil?
           if rel.nil? or not rel =~ /nofollow/
             link = Crawler::URLParser.new(@base_url, href).full_path
-            @links << link unless link.nil?
+            @links << link if not (link.nil? or @links.include? link)
           end
         end
       end
