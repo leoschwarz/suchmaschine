@@ -5,23 +5,29 @@ module Crawler
     DISALLOWED = 2
   end
   
+  # @stored_url -> URL die in der Datenbank gespeichert wird. Ohne HTTP/HTTPs Schema, aber mit dekodierten Sonderzeichen
+  # @encoded_url -> URL mit kodierten Sonderzeichen (Beispiel: http://de.wikipedia.org/wiki/K%C3%A4se)
+  # @decoded_url -> URL mit dekodierten Sonderzeichen, also ein UTF-8 string (Beispiel: http://de.wikipedia.org/wiki/Käse)
+  
   class Task
     attr_reader :state, :done_at
   
-    def initialize(encoded_url, state, done_at)
-      @encoded_url = encoded_url
+    def initialize(stored_url, state, done_at)
+      @stored_url = stored_url
       @state = state
       @done_at = done_at
     end
-  
-    # Getter für die URL mit kodierten Sonderzeichen (ohne Sonderzeichen)
-    def encoded_url
-      @encoded_url
+    
+    def stored_url
+      @stored_url
     end
-  
-    # Getter für die URL mit UTF-8 Sonderzeichen (mit Sonderzeichen)
+    
+    def encoded_url
+      @_encoded_url ||= URI.encode decoded_url
+    end
+    
     def decoded_url
-      URI.decode(@encoded_url)
+      @_decoded_url ||= "http://#{@stored_url}"
     end
     
     # Getter für den Domain namen der url
@@ -31,12 +37,12 @@ module Crawler
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      Database.update(:tasklist, {url: decoded_url}, {state: TaskState::DONE, done_at: DateTime.now})
+      Database.update(:tasklist, {url: stored_url}, {state: TaskState::DONE, done_at: DateTime.now})
     end
     
     # Markiet als verboten (wegen robots.txt)
     def mark_disallowed
-      Database.update(:tasklist, {url: decoded_url}, {state: TaskState::DISALLOWED, done_at: DateTime.now})
+      Database.update(:tasklist, {url: stored_url}, {state: TaskState::DISALLOWED, done_at: DateTime.now})
     end
   
     # TODO Dies ist nur eine provisorische "Lösung"
@@ -77,8 +83,7 @@ module Crawler
       Class.new {
         include EM::Deferrable
         def initialize(task)
-          task_url = "http://" + task.encoded_url
-          request = EM::HttpRequest.new(task_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
+          request = EM::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
           request.callback {
             header = request.response_header
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
@@ -118,7 +123,7 @@ module Crawler
         include EM::Deferrable
         def initialize(n)
           Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} ORDER BY priority DESC LIMIT #{n}").callback{ |results|
-            succeed results.map{|result| Task.new(URI.encode(result["url"]), nil, nil)}
+            succeed results.map{|result| Task.new(result["url"], nil, nil)}
           }.errback{|e|
             raise e
           }
