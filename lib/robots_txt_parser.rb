@@ -120,6 +120,8 @@ module Crawler
       value.gsub!("*", "(.*)")
       value.gsub!("\\", "\\\\")
       value.gsub!("?", "\\?")
+      value.gsub!("(", "\\(")
+      value.gsub!(")", "\\)")
       value
     end
     
