@@ -117,12 +117,10 @@ module Crawler
     
     private
     def _convert_to_regex_string(value)
-      value.gsub!("*", "(.*)")
-      value.gsub!("\\", "\\\\")
-      value.gsub!("?", "\\?")
-      value.gsub!("(", "\\(")
-      value.gsub!(")", "\\)")
-      value
+      s = Regexp.quote(value)
+      s.gsub!("\\*", "(.*)")
+      s.gsub!("\\$", "$")
+      s
     end
     
     def _save_cache_item
