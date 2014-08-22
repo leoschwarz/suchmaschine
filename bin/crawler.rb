@@ -5,7 +5,7 @@ require 'eventmachine'
 require 'em-http-request'
 require 'pg/em/connection_pool'
 require 'nokogiri'
-require 'redis'
+require 'em-hiredis'
 
 require './config/config.rb'
 require './lib/database.rb'
@@ -36,14 +36,16 @@ module Crawler
       @task_queue.fetch.callback{|task|
         task.get_state.callback{|state|
           if state == :ok
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
-          
-            task.execute.callback {
-              puts "[+] #{task.decoded_url}"
-              EventMachine.next_tick { do_next_task }
-            }.errback {
-              puts "[-] #{task.decoded_url}"
-              EventMachine.next_tick { do_next_task }
+            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
+              task.execute.callback {
+                puts "[+] #{task.decoded_url}"
+                EventMachine.next_tick { do_next_task }
+              }.errback {
+                puts "[-] #{task.decoded_url}"
+                EventMachine.next_tick { do_next_task }
+              }
+            }.errback{|e|
+              raise e
             }
           elsif state == :not_ready
             EventMachine.next_tick { do_next_task }

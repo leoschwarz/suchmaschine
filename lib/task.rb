@@ -65,12 +65,14 @@ module Crawler
         def initialize(task)
           RobotsParser.allowed?(task.encoded_url).callback{|allowed|
             if allowed
-              last_visited = Database.redis.get("domain.lastvisited.#{task.domain_name}").to_f
-              if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
-                succeed :ok
-              else
-                succeed :not_ready
-              end
+              Database.redis.get("domain.lastvisited.#{task.domain_name}").callback{|last_visited|
+                last_visited = last_visited.to_f
+                if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
+                  succeed :ok
+                else
+                  succeed :not_ready
+                end
+              }.errback{|e| raise e}
             else
               succeed :not_allowed
             end
@@ -99,22 +101,24 @@ module Crawler
           request = EM::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
           request.callback {
             header = request.response_header
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
+            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
             
-            if header["location"].nil?
-              html = request.response
-              task.store_result(html)
-              @links = HTMLParser.new(task.encoded_url, html).get_links
+              if header["location"].nil?
+                html = request.response
+                task.store_result(html)
+                @links = HTMLParser.new(task.encoded_url, html).get_links
               
-              do_link
-            else
-              url = URLParser.new(task.encoded_url, header["location"]).full_path
-              Task.insert(url).callback{
-                task.mark_done.callback{
-                  succeed 
+                do_link
+              else
+                url = URLParser.new(task.encoded_url, header["location"]).full_path
+                Task.insert(url).callback{
+                  task.mark_done.callback{
+                    succeed 
+                  }
                 }
-              }
-            end
+              end
+            }.errback{|e| raise e}
+            
           }
           request.errback { |error|
             fail error

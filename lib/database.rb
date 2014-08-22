@@ -11,7 +11,8 @@ module Crawler
                                        host: Crawler.config.database.host,
                                        user: Crawler.config.database.user,
                                        password: Crawler.config.database.password)
-      @redis = Redis.new(url: Crawler.config.redis)
+      
+      @redis = EM::Hiredis.connect(Crawler.config.redis)
     end
     
     def self.instance
