@@ -27,6 +27,7 @@ module Crawler
         end
       
         if not href.nil?
+          rel = rel.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '') unless rel.nil?
           if rel.nil? or not rel =~ /nofollow/
             link = Crawler::URLParser.new(@base_url, href).full_path
             @links << link if not (link.nil? or @links.include? link)
