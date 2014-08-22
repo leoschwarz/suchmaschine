@@ -98,19 +98,18 @@ module Crawler
         end
         
         def initialize(task)
-          request = EM::HttpRequest.new(task.encoded_url).get(timeout: 10, head: {user_agent: Crawler.config.user_agent})
-          request.callback {
-            header = request.response_header
+          download = Download.new(task.encoded_url)
+          download.callback { |response|
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
             
-              if header["location"].nil?
-                html = request.response
+              if response.header["location"].nil?
+                html = response.body
                 task.store_result(html)
                 @links = HTMLParser.new(task.encoded_url, html).get_links
               
                 do_link
               else
-                url = URLParser.new(task.encoded_url, header["location"]).full_path
+                url = URLParser.new(task.encoded_url, response.header["location"]).full_path
                 Task.insert(url).callback{
                   task.mark_done.callback{
                     succeed 
@@ -118,9 +117,8 @@ module Crawler
                 }
               end
             }.errback{|e| raise e}
-            
           }
-          request.errback { |error|
+          download.errback { |error|
             fail error
           }
         end
