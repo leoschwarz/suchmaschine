@@ -8,6 +8,7 @@ require 'nokogiri'
 require 'em-hiredis'
 
 require './config/config.rb'
+require './lib/logger.rb'
 require './lib/database.rb'
 require './lib/domain.rb'
 require './lib/download.rb'
@@ -24,13 +25,19 @@ module Crawler
   class CrawlerMain
     def initialize
       @task_queue = TaskQueue.new
+      @logger = Crawler::Logger.new
     end
     
     def launch
       EventMachine.run {
         puts "#{Crawler.config.user_agent} wurde gestartet."
         Crawler.config.parallel_tasks.times { do_next_task }
+        EventMachine.add_periodic_timer(Crawler.config.log_interval) { dump_log }
       }
+    end
+    
+    def dump_log
+      @logger.write
     end
     
     def do_next_task
@@ -39,19 +46,21 @@ module Crawler
           if state == :ok
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
               task.execute.callback {
-                puts "[+] #{task.decoded_url}"
+                @logger.register :success
                 EventMachine.next_tick { do_next_task }
               }.errback {
-                puts "[-] #{task.decoded_url}"
+                @logger.register :failure
                 EventMachine.next_tick { do_next_task }
               }
             }.errback{|e|
               raise e
             }
           elsif state == :not_ready
+            @logger.register :not_ready
             EventMachine.next_tick { do_next_task }
           elsif state == :not_allowed
             task.mark_disallowed
+            @logger.register :not_allowed
             EventMachine.next_tick { do_next_task }
           end 
         }
