@@ -28,6 +28,7 @@ GEM
       mini_portile (= 0.6.0)
     oj (2.9.9)
     pg (0.17.1)
+    rocksdb-ruby (0.1.0)
     safe_yaml (1.0.3)
     webmock (1.18.0)
       addressable (>= 2.3.6)
@@ -44,4 +45,5 @@ DEPENDENCIES
   hashr (~> 0.0.22)
   nokogiri (~> 1.6.2.1)
   oj (~> 2.9.9)
+  rocksdb-ruby (~> 0.1.0)
   webmock (~> 1.18.0)

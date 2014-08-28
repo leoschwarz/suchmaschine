@@ -7,6 +7,7 @@ gem 'em-http-request', '~> 1.1.2'
 gem 'em-pg-client', '~> 0.3.4'
 gem 'em-hiredis', '~> 0.3.0'
 gem 'hashr', '~> 0.0.22'
+gem 'rocksdb-ruby', '~> 0.1.0'
 
 gem 'webmock', '~> 1.18.0'
 
