@@ -1,37 +1,53 @@
 module Crawler
   class Logger
-    def initialize
-      ok = false
-      i = 0
-      while not ok
-        i += 1
-        num = i.to_s.rjust(5, "0")
-        @filename = "./log/"+(Time.now.strftime "%Y-%m-%d-#{num}.csv")
-        ok = true unless File.exists? @filename
-      end
-      
-      @counts = {success: 0, failure: 0, not_allowed: 0, not_ready: 0}
-      @t = 0
-      file = File.open(@filename, "w")
-      file.write("Zeit,Erfolge,Fehlschläge,Verboten,Übersprungen\n")
-      file.close
+    def initialize(print_progress = false)
       @start_time = Time.now
+      @counts = {success: 0, failure: 0, not_allowed: 0, not_ready: 0}
+      @file = File.open(get_free_filename, "w")
+      @file.write("Zeit,Erfolge,Fehlschläge,Verboten,Übersprungen\n")
+      
+      @print_progress = print_progress
+      if @print_progress
+        @print_fieldnames = ["Zeit", "Erfolge", "Fehlschläge", "Verboten", "Übersprungen"]
+        puts @print_fieldnames.join(" ")
+      end
     end
     
-    # schreibt eine weitere Zeile in die Log Datei
+    # Schreibt eine Zeile in die Log Datei und gibt sie falls nötig auch auf $stdout aus.
     def write
-      file = File.open(@filename, "a")
-      file.write( serialize )
+      @file.write(serialize)
+      
+      if @print_progress
+        time = (Time.now - @start_time).round
+        puts [
+          time.to_s.rjust(@print_fieldnames[0].length, " "),
+          @counts[:success].to_s.rjust(@print_fieldnames[1].length, " "),
+          @counts[:failure].to_s.rjust(@print_fieldnames[2].length, " "),
+          @counts[:not_allowed].to_s.rjust(@print_fieldnames[3].length, " "),
+          @counts[:not_ready].to_s.rjust(@print_fieldnames[4].length, " ")
+        ].join(" ")
+      end
     end
     
+    # Erhöht den Zähler für einen Ergebnisstyp
     def register(type)
       @counts[type] += 1
     end
     
     private
     def serialize
-      t = (Time.now - @start_time).round
-      s = "#{t},#{@counts[:success]},#{@counts[:failure]},#{@counts[:not_allowed]},#{@counts[:not_ready]}\n"
+      time = (Time.now - @start_time).round
+      "#{time},#{@counts[:success]},#{@counts[:failure]},#{@counts[:not_allowed]},#{@counts[:not_ready]}\n"
+    end
+    
+    def get_free_filename
+      counter = 0
+      loop do
+        counter += 1
+        counter_s = counter.to_s.rjust(5, "0")
+        filename = "./log/"+(Time.now.strftime "%Y-%m-%d-#{counter_s}.csv")
+        return filename unless File.exists? filename
+      end
     end
   end
 end

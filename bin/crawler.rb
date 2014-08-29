@@ -17,12 +17,12 @@ module Crawler
   class CrawlerMain
     def initialize
       @task_queue = TaskQueue.new
-      @logger = Crawler::Logger.new
     end
     
     def launch
       EventMachine.run {
         puts "#{Crawler.config.user_agent} wurde gestartet."
+        @logger = Crawler::Logger.new(true)
         Crawler.config.parallel_tasks.times { do_next_task }
         EventMachine.add_periodic_timer(Crawler.config.log_interval) { dump_log }
       }
