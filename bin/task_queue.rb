@@ -36,7 +36,7 @@ module TaskQueue
       if action == Actions::INSERT_TASK
         url = client.recv(10000)
         queue.insert url
-        db.set("url.state.#{url}", States::NEW)
+        db.put("url.state.#{url}", States::NEW)
         client.close
       elsif action == Actions::FETCH_TASK
         client.write queue.fetch
@@ -48,7 +48,7 @@ module TaskQueue
       elsif action == Actions::SET_STATE
         state = client.recv(1)
         url   = client.recv(10000)
-        db.set("url.state.#{url}", state)
+        db.put("url.state.#{url}", state)
         client.close
       else
         client.close
