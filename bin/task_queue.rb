@@ -1,3 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
 require 'socket'
 require 'rocksdb'
 require_relative '../lib/task_queue/task_queue.rb'
