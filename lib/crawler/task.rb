@@ -86,12 +86,15 @@ module Crawler
         include EM::Deferrable
         def do_link
           if @links.length > 0
-            link = @links.pop
-            Task.insert(link).callback{
+            if (insert = Task.insert(@links.pop))
+              insert.callback{
+                EM.next_tick{ self.do_link }
+              }.errback{|e|
+                raise e
+              }
+            else
               EM.next_tick{ self.do_link }
-            }.errback{|e|
-              raise e
-            }
+            end
           else
             succeed
           end
