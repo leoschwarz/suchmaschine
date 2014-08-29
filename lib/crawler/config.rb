@@ -5,10 +5,10 @@ module Crawler
   class << self
     def config
       if not defined? @@config or @@config.nil?
-        h = YAML.load(File.read("config/config.yml"))
+        h = YAML.load(File.read("config/crawler.yml"))
         environment = ENV["LIGHTBLAZE_ENV"]
         if environment.nil?
-          puts "Warning, no environment specified. Assuming development."
+          puts "Warnung: Die Umgebungsvariable 'LIGHTBLAZE_ENV' ist nicht definiert. Der Standardwert 'development' wurde angenommen."
           environment = "development"
         end
         

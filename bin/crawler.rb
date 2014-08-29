@@ -7,18 +7,8 @@ require 'pg/em/connection_pool'
 require 'nokogiri'
 require 'em-hiredis'
 
-require './config/config.rb'
-require './lib/logger.rb'
-require './lib/database.rb'
-require './lib/domain.rb'
-require './lib/download.rb'
-require './lib/task.rb'
-require './lib/task_queue.rb'
-require './lib/robots_txt_cache_item.rb'
-require './lib/robots_txt_parser.rb'
-require './lib/robots_parser.rb'
-require './lib/url_parser.rb'
-require './lib/html_parser.rb'
+
+require './lib/crawler/crawler.rb'
 
 
 module Crawler
