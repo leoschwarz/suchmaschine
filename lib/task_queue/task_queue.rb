@@ -14,43 +14,89 @@ module TaskQueue
   end
 
   class TaskQueue
-    def initialize
-      @_heap = []
-      @_hash = {}
+    def initialize(save = false, save_location = "/dev/null")
+      @heap = []
+      @hash = {}
+      @save = File.open(save_location, "a") if save
     end
-  
+    
     def insert(url, priority=0)
-      if @_hash.has_key? url
+      if @hash.has_key? url
         increase_priority(url)
       else
         index = heap_insert(TaskQueueItem.new(url, priority))
-        @_hash[url] = index
+        @hash[url] = index
+        
+        unless @save.nil?
+          @save.write("INSERT\t#{url}\t#{priority}\n")
+        end
       end
     end
   
     def increase_priority(url, factor=1)
-      index = @_hash[url]
+      index = @hash[url]
       heap_increase(index, factor)
+      
+      unless @save.nil?
+        @save.write("INCREASE\t#{url}\t#{factor}\n")
+      end
     end
   
     def fetch
-      heap_delete_max
+      url = heap_delete_max
+      
+      unless @save.nil?
+        @save.write("DELETE\t#{url}\n")
+      end
+      
+      url
     end
   
     def size
-      @_heap.size
+      @heap.size
+    end
+    
+    # Dies lädt nicht nur die Daten, sondern reinigt die Datei auch.
+    def load_from_disk
+      # Daten laden
+      @save.close
+      data = {}
+      file = File.open(@save.path, "r")
+      file.each_line do |line|
+        fields = line.strip.split("\t")
+        
+        if fields[0] == "INSERT"
+          url = fields[1]
+          priority = fields[2]
+          data[url] = priority.to_i
+        elsif fields[0] == "INCREASE"
+          url = fields[1]
+          factor = fields[2]
+          data[url] += factor.to_i
+        elsif fields[0] == "DELETE"
+          url = fields[1]
+          data.delete url
+        end
+      end
+      file.close
+      
+      # Die Daten laden (dies schreibt auch automatisch das neue Logfile)
+      @save = File.new(@save.path, "w")
+      data.each_pair do |url, priority|
+        insert(url, priority)
+      end
     end
   
     ##################################################
-    # Methoden für @_heap
+    # Methoden für @heap
     ##################################################
     private
     def heap_insert(item)
-      @_heap << item
+      @heap << item
       current_index = size - 1
       parent_index  = _heap_parent_of(current_index)
     
-      while not parent_index.nil? and item.priority > @_heap[parent_index].priority
+      while not parent_index.nil? and item.priority > @heap[parent_index].priority
         _swap(current_index, parent_index)
       
         current_index = parent_index
@@ -61,27 +107,27 @@ module TaskQueue
     end
   
     def heap_increase(current_index, factor)
-      @_heap[current_index].priority += factor
+      @heap[current_index].priority += factor
     
       parent_index = _heap_parent_of(current_index) 
-      while not parent_index.nil? and @_heap[current_index].priority > @_heap[parent_index].priority
+      while not parent_index.nil? and @heap[current_index].priority > @heap[parent_index].priority
         _swap(current_index, parent_index)
         current_index = parent_index
         parent_index  = _heap_parent_of(current_index)
       end
     
-      @_heap[current_index].priority
+      @heap[current_index].priority
     end
   
     def heap_get_max
-      return @_heap[0]
+      return @heap[0]
     end
   
     def heap_delete_max()
-      deleted_item = @_heap[0]
-      @_heap[0] = @_heap[size - 1]
-      @_heap.delete_at(@_heap.size - 1)
-      @_hash.delete deleted_item.value
+      deleted_item = @heap[0]
+      @heap[0] = @heap[size - 1]
+      @heap.delete_at(@heap.size - 1)
+      @hash.delete deleted_item.value
     
       current_index = 0
       while not current_index.nil?
@@ -93,7 +139,7 @@ module TaskQueue
           current_index = nil
         elsif right_child.nil?
           # Es gibt nur einen linken Kindknoten, dh. nur etwas mit dem verglichen werden muss
-          if @_heap[left_child].priority > @_heap[current_index].priority
+          if @heap[left_child].priority > @heap[current_index].priority
             _swap(left_child, current_index)
             current_index = left_child
           else
@@ -102,15 +148,15 @@ module TaskQueue
         else
           # Es gibt einen rechten und einen linken Kindknoten, wir ersetzen aber nur mit dem grösseren
           # Falls aber beide Kindknoten kleiner sind, sind wir natürlich auch fertig.
-          if @_heap[left_child].priority >= @_heap[right_child].priority
-            if @_heap[left_child].priority > @_heap[current_index].priority
+          if @heap[left_child].priority >= @heap[right_child].priority
+            if @heap[left_child].priority > @heap[current_index].priority
               _swap(left_child, current_index)
               current_index = left_child
             else
               current_index = nil
             end
           else
-            if @_heap[right_child].priority > @_heap[current_index].priority
+            if @heap[right_child].priority > @heap[current_index].priority
               _swap(right_child, current_index)
               current_index = right_child
             else
@@ -127,8 +173,8 @@ module TaskQueue
     ##################################################
     private
     def _swap(index_1, index_2)
-      @_hash[@_heap[index_1].value], @_hash[@_heap[index_2].value] = index_2, index_1
-      @_heap[index_1], @_heap[index_2] = @_heap[index_2], @_heap[index_1]
+      @hash[@heap[index_1].value], @hash[@heap[index_2].value] = index_2, index_1
+      @heap[index_1], @heap[index_2] = @heap[index_2], @heap[index_1]
     end
   
     def _heap_parent_of(index)

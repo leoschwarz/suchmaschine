@@ -3,3 +3,4 @@ cache/
 vendor/
 .bundle/
 log/
+db/task_queue.log

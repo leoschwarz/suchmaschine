@@ -9,7 +9,9 @@ module TaskQueue
   SERVER_GET = "g"
   
   def self.run
-    queue = TaskQueue.new
+    queue = TaskQueue.new(config.save_to_disk, "db/task_queue.log")
+    queue.load_from_disk
+    
     socket = TCPServer.new 2051
     loop do
       client = socket.accept
