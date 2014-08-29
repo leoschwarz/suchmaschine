@@ -128,7 +128,8 @@ module Crawler
     # Fügt eine neue URL der Datenbank hinzu.
     # Falls die URL bereits existiert, wird deren Priorität erhöht.
     def self.insert(encoded_url)
-      TaskQueue.insert(_prepare_url_for_insert(encoded_url))
+      prepared_url = _prepare_url_for_insert(encoded_url)
+      TaskQueue.insert(prepared_url) unless prepared_url.nil?
     end
     
     private
