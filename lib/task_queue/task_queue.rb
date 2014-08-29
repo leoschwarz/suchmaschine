@@ -91,7 +91,8 @@ module TaskQueue
           url = fields[1]
           data.delete url
         else
-          raise "Fehler in Log-Format, Befehl #{fields[0].inspect} wurde nicht erkannt."
+          # TODO: Eventuell sollte man dies dennoch aktivieren, und einfach besser dafür sorgen, dass es nie hierzu kommt.
+          #raise "Fehler in Log-Format, Befehl #{fields[0].inspect} wurde nicht erkannt."
         end
       end
       file.close
