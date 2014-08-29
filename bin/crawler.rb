@@ -9,6 +9,8 @@ require 'em-hiredis'
 
 
 require './lib/crawler/crawler.rb'
+require './config/config.rb'
+load_configuration(Crawler, "crawler.yml")
 
 
 module Crawler

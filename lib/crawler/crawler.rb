@@ -1,4 +1,3 @@
-require_relative './config.rb'
 require_relative './logger.rb'
 require_relative './database.rb'
 require_relative './domain.rb'

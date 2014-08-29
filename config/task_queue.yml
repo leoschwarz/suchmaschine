@@ -1,0 +1,8 @@
+production: &default
+  max_size: 100_000
+
+development:
+  <<: *default
+
+test:
+  <<: *default
