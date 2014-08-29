@@ -24,8 +24,12 @@ module TaskQueue
       if @hash.has_key? url
         increase_priority(url)
       else
-        index = heap_insert(TaskQueueItem.new(url, priority))
-        @hash[url] = index
+        # Nur wenn die Limite noch nicht erreicht wurde, wird die URL hinzugefügt.
+        # Andererseits wird einfach geloggt und die URL erst später richtig abgearbeitet.
+        if TaskQueue.config.max_size > size
+          index = heap_insert(TaskQueueItem.new(url, priority))
+          @hash[url] = index
+        end
         
         unless @save.nil?
           @save.write("INSERT\t#{url}\t#{priority}\n")
@@ -68,7 +72,14 @@ module TaskQueue
         if fields[0] == "INSERT"
           url = fields[1]
           priority = fields[2]
-          data[url] = priority.to_i
+          
+          # Wenn die maximale Grösse erreicht wurde, kann es dazu kommen, dass ein INSERT mehrfach nacheinander im Log vorkommt.
+          # Dies entspräche dann einer Erhöhung der Priorität.
+          if data.has_key? url
+            data[url] += priority.to_i
+          else
+            data[url] = priority.to_i
+          end
         elsif fields[0] == "INCREASE"
           url = fields[1]
           factor = fields[2]
