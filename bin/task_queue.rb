@@ -23,10 +23,14 @@ module TaskQueue
   end
   
   def self.run
+    db = RocksDB::DB.new config.rocksdb_path
+    
+    puts "Die Warteschlange wird geladen und optimiert."
+    puts "Das optimieren, könnte einen Augenblick in Anspruch nehmen."
     queue = TaskQueue.new(config.save_to_disk, "db/task_queue.log")
     queue.load_from_disk
-    
-    db = RocksDB::DB.new config.rocksdb_path
+    puts "Laden der Warteschlange beendet."
+    puts "Der Server läuft nun auf Port 2051."
     
     socket = TCPServer.new 2051
     loop do
