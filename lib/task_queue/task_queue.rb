@@ -4,6 +4,8 @@
 # http://www.cse.hut.fi/en/research/SVG/TRAKLA2/tutorials/heap_tutorial/index.html
 # http://cs.lmu.edu/~ray/notes/pqueues/
 
+require 'fileutils'
+
 module TaskQueue
   class TaskQueueItem
     attr_accessor :value, :priority
@@ -97,6 +99,10 @@ module TaskQueue
       end
       file.close
       
+      # Das alte Logfile an einen sicheren Ort verschieben
+      new_path = "db/task_queue.#{Time.now.to_i}.log"
+      FileUtils.mv(@save.path, new_path)
+            
       # Die Daten laden (dies schreibt auch automatisch das neue Logfile)
       @save = File.new(@save.path, "w")
       data.each_pair do |url, priority|
