@@ -1,91 +1,52 @@
 module Crawler
-  class TaskQueue
-    attr_accessor :loader
-    
-    class Loader
-      include EM::Deferrable
-      attr_accessor :loading
-      
-      def initialize(task_queue)
-        @task_queue = task_queue
-        @loading = false
-      end
-      
-      def run
-        @loading = true
-        Task.sample(Crawler.config.task_queue_size - @task_queue.length).callback{|tasks|
-          @task_queue << tasks
-          @loading = false
-          succeed
-        }.errback{|e|
-          raise e
-        }
-      end
+  class TaskQueueConnection < EventMachine::Connection
+    def initialize(parent, send_data)
+      @parent = parent
+      @received_data = ""
+      @send_data = send_data
     end
     
-    
-    def initialize
-      # Dieses Array beinhaltet die Elemente der Warteschlange. [0] = Ältestes, [n-1] = Neuestes
-      @tasks = Array.new
-      @loader = TaskQueue::Loader.new(self)
+    def post_init
+      send_data(@send_data)
     end
     
-    def pop
-      @tasks.shift
+    def receive_data(chunk)
+      @received_data << chunk
     end
     
-    def length
-      @tasks.length
-    end
-    
-    def push(item)
-      if item.class == Array
-        @tasks += item
+    def unbind
+      if @received_data.length > 0
+        @parent.succeed(Crawler::Task.new(@received_data))
       else
-        @tasks << item
+        @parent.succeed
       end
     end
+  end
+  
+  class TaskQueue
+    include EM::Deferrable
     
-    def << (item)
-      push(item)
+    def initialize(send_data)
+      EM.connect("127.0.0.1", 2051, TaskQueueConnection, self, send_data)
     end
     
-    def fetch
-      Class.new{
-        include EM::Deferrable
-        
-        def initialize(task_queue)
-          if task_queue.length < Crawler.config.task_queue_size * Crawler.config.task_queue_threshold
-            if task_queue.loader.loading
-              if task_queue.length > 0
-                # Es werden bereits neue Aufgaben geladen und es hat noch Aufgabe, also können wir bereits jetzt eine zurück geben.
-                succeed task_queue.pop
-              else
-                # Es werden zwar neue Aufgaben geladen aber es hat noch nicht genug um sofort eine zurückzgeben.
-                # Es muss also auf das Resultat des Ladevorganges gewartet werden.
-                task_queue.loader.callback{
-                  succeed task_queue.pop
-                }
-              end
-            else
-              task_queue.loader = TaskQueue::Loader.new(task_queue)
-              task_queue.loader.run
-              
-              if task_queue.length > 0
-                succeed task_queue.pop
-              else
-                task_queue.loader.callback{
-                  succeed task_queue.pop
-                }
-              end
-            end
-          else
-            # Es hat noch genügend Aufgaben in der Warteschlange.
-            succeed task_queue.pop
-          end
-        end
-      }.new(self)
+    def self.fetch
+      self.new("g")
     end
     
+    def self.insert(url)
+      self.new("p"+url)
+    end
+    
+    def self.get_state(url)
+      self.new("s"+url)
+    end
+    
+    def self.set_state(url, state)
+      if state.length > 1
+        raise "'state' muss ein String mit der Länge 1 sein."
+      end
+      self.new("S"+state+url)
+    end
   end
 end

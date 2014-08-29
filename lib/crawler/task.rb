@@ -1,8 +1,8 @@
 module Crawler
   module TaskState
-    NEW = 0
-    DONE = 1
-    DISALLOWED = 2
+    NEW = "0"
+    SUCCESS = "1"
+    FAILURE = "2"
   end
   
   # @stored_url -> URL die in der Datenbank gespeichert wird. Ohne HTTP/HTTPs Schema, aber mit dekodierten Sonderzeichen
@@ -12,7 +12,7 @@ module Crawler
   class Task
     attr_reader :state, :done_at
   
-    def initialize(stored_url, state, done_at)
+    def initialize(stored_url, state=TaskState::NEW, done_at=nil)
       @stored_url = stored_url
       @state = state
       @done_at = done_at
@@ -37,12 +37,12 @@ module Crawler
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      Database.update(:tasklist, {url: stored_url}, {state: TaskState::DONE, done_at: DateTime.now})
+      TaskQueue.set_state(stored_url, TaskState::SUCCESS)
     end
     
     # Markiet als verboten (wegen robots.txt)
     def mark_disallowed
-      Database.update(:tasklist, {url: stored_url}, {state: TaskState::DISALLOWED, done_at: DateTime.now})
+      TaskQueue.set_state(stored_url, TaskState::FAILURE)
     end
   
     # TODO Dies ist nur eine provisorische "Lösung"
@@ -125,59 +125,10 @@ module Crawler
       }.new(self)
     end
     
-    # Lädt ein Sample URLs die noch nicht abgerufen wurden und deren Domains wieder aufgerufen werden dürfen.
-    # Gibt ein Deferrable zurück welches mit einem Array von Task Instanzen aufgerufen wird.
-    def self.sample(n=100)
-      # FIXME: Zufallsauswahl
-      # Idee:  Man könnte eine Spalte random einführen. Dort wird jeweils beim Schreiben in die Tabelle ein Zufallswert hineingesetzt.
-      #        Diesen Zufallswert kombiniert man nun noch mit einer Stundenzahl oder so. Jetzt werden alle Einträge für die kleinste
-      #        Stunde abgearbeitet, währned zu einem höheren Wert neue Einträge hinzugefügt werden. Hierdurch kann man vermeiden, dass 
-      #        neue Einträge mit einem kleineren Zufallswert (beispielsweise) immer gecrawlt werden, während andere endlos darauf warten.
-      
-      Class.new {
-        include EM::Deferrable
-        def initialize(n)
-          Database.query("SELECT url FROM tasklist WHERE state = #{TaskState::NEW} ORDER BY priority DESC LIMIT #{n}").callback{ |results|
-            succeed results.map{|result| Task.new(result["url"], nil, nil)}
-          }.errback{|e|
-            raise e
-          }
-        end
-      }.new(n)
-    end
-  
     # Fügt eine neue URL der Datenbank hinzu.
     # Falls die URL bereits existiert, wird deren Priorität erhöht.
     def self.insert(encoded_url)
-      Class.new {
-        include EM::Deferrable
-        def initialize(url)
-          if url.nil?
-            succeed
-          else
-            Database.find(:tasklist, {url: url}, [:priority]).callback{ |results|
-              if results.ntuples == 1
-                # Es existiert bereits ein Eintrag, also Updaten
-                # TODO: das erhöhen des wertes mit sql erledigen
-                Database.update(:tasklist, {url: url}, {priority: results.first["priority"].to_i + 1}).callback{ succeed }.errback{|e| raise e}
-              else
-                # Es existiert noch kein Eintrag, also erstellen
-                Database.insert(:tasklist, {url: url}).callback{ succeed }.errback{ |e|
-                  if e.class == PG::UniqueViolation
-                    # Etwas unschön, aber es kann passieren dass jemand schneller war als wir.
-                    # Auf jeden Fall geht es jetzt darum den Eintrag zu aktualisieren.
-                    Task.insert(url).callback{ succeed }
-                  else
-                    raise e
-                  end
-                }
-              end
-            }.errback{|e|
-              raise e
-            }
-          end
-        end
-      }.new(_prepare_url_for_insert(encoded_url))
+      TaskQueue.insert(_prepare_url_for_insert(encoded_url))
     end
     
     private
