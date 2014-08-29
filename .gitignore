@@ -4,3 +4,4 @@ vendor/
 .bundle/
 log/
 db/task_queue.log
+db/tasks/

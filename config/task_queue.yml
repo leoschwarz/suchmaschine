@@ -1,6 +1,7 @@
 production: &default
   max_size: 100_000  # Die maximale Anzahl an Einträgen die im RAM gehalten werden soll.
   save_to_disk: YES  # Sollen überschüssige Einträge und alle Operationen niedergeschrieben werden.
+  rocksdb_path: db/tasks # Pfad zur RocksDB Datenbank (wird bei Bedarf erstellt)
 
 development:
   <<: *default

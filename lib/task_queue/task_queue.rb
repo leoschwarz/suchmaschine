@@ -26,13 +26,14 @@ module TaskQueue
       else
         # Nur wenn die Limite noch nicht erreicht wurde, wird die URL hinzugefügt.
         # Andererseits wird einfach geloggt und die URL erst später richtig abgearbeitet.
-        if TaskQueue.config.max_size > size
+        if ::TaskQueue.config.max_size > size
           index = heap_insert(TaskQueueItem.new(url, priority))
           @hash[url] = index
         end
         
         unless @save.nil?
           @save.write("INSERT\t#{url}\t#{priority}\n")
+          @save.flush
         end
       end
     end
@@ -43,6 +44,7 @@ module TaskQueue
       
       unless @save.nil?
         @save.write("INCREASE\t#{url}\t#{factor}\n")
+        @save.flush
       end
     end
   
@@ -51,6 +53,7 @@ module TaskQueue
       
       unless @save.nil?
         @save.write("DELETE\t#{url}\n")
+        @save.flush
       end
       
       url
@@ -87,6 +90,8 @@ module TaskQueue
         elsif fields[0] == "DELETE"
           url = fields[1]
           data.delete url
+        else
+          raise "Fehler in Log-Format, Befehl #{fields[0].inspect} wurde nicht erkannt."
         end
       end
       file.close
