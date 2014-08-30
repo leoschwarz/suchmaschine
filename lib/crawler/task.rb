@@ -84,21 +84,6 @@ module Crawler
     def execute
       Class.new {
         include EM::Deferrable
-        def do_link
-          if @links.length > 0
-            if (insert = Task.insert(@links.pop))
-              insert.callback{
-                EM.next_tick{ self.do_link }
-              }.errback{|e|
-                raise e
-              }
-            else
-              EM.next_tick{ self.do_link }
-            end
-          else
-            succeed
-          end
-        end
         
         def initialize(task)
           download = Download.new(task.encoded_url)
@@ -112,11 +97,11 @@ module Crawler
                 # Das extrahieren der Links wird in einem Thread in EventMachines ThreadPool durchgeführt.
                 # Erst beim Callback werden die Links dann in die Datenbank geschrieben.
                 operation = proc{ HTMLParser.new(task.encoded_url, html).get_links }
-                callback  = proc{ |links| @links = links; do_link }
+                callback  = proc{ |links| Task.insert(links).callback{ succeed }.errback{|e| raise e} }
                 EM.defer(operation, callback)
               else
                 url = URLParser.new(task.encoded_url, response.header["location"]).full_path
-                Task.insert(url).callback{
+                Task.insert([url]).callback{
                   task.mark_done.callback{
                     succeed 
                   }
@@ -131,11 +116,11 @@ module Crawler
       }.new(self)
     end
     
-    # Fügt eine neue URL der Datenbank hinzu.
-    # Falls die URL bereits existiert, wird deren Priorität erhöht.
-    def self.insert(encoded_url)
-      prepared_url = _prepare_url_for_insert(encoded_url)
-      TaskQueue.insert(prepared_url) unless prepared_url.nil?
+    # Fügt neue URLs der Datenbank hinzu.
+    # Im Falle, dass URLs bereits existiert, wird deren Priorität erhöht.
+    def self.insert(encoded_urls)
+      urls = encoded_urls.map{|url| _prepare_url_for_inserts(url)}.select{|url| not url.nil?}
+      TaskQueue.insert_tasks(urls)
     end
     
     private

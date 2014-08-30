@@ -16,7 +16,7 @@ module Crawler
     
     def unbind
       if @received_data.length > 0
-        @parent.succeed(Crawler::Task.new(@received_data))
+        @parent.succeed(@received_data.split("\t"))
       else
         @parent.succeed
       end
@@ -30,23 +30,22 @@ module Crawler
       EM.connect("127.0.0.1", 2051, TaskQueueConnection, self, send_data)
     end
     
-    def self.fetch
-      self.new("g")
+    def self.fetch_tasks(n=1)
+      self.new("TASK_FETCH\t#{n}\n")
     end
     
-    def self.insert(url)
-      self.new("p"+url)
+    def self.insert_tasks(urls)
+      self.new("TASK_INSERT\t#{urls.join("\t")}\n")
     end
     
-    def self.get_state(url)
-      self.new("s"+url)
+    def self.get_states(urls)
+      self.new("STATE_GET\t#{urls.join("\t")}\n")
     end
     
-    def self.set_state(url, state)
-      if state.length > 1
-        raise "'state' muss ein String mit der Länge 1 sein."
-      end
-      self.new("S"+state+url)
+    # pairs: Hash mit Schlüssel = URL, Wert = Status
+    def self.set_state(pairs)
+      data = pairs.to_a.join("\t")
+      self.new("STATE_SET\t#{data}\n")
     end
   end
 end
