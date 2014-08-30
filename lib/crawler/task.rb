@@ -108,9 +108,12 @@ module Crawler
               if response.header["location"].nil?
                 html = response.body
                 task.store_result(html)
-                @links = HTMLParser.new(task.encoded_url, html).get_links
-              
-                do_link
+                
+                # Das extrahieren der Links wird in einem Thread in EventMachines ThreadPool durchgeführt.
+                # Erst beim Callback werden die Links dann in die Datenbank geschrieben.
+                operation = proc{ HTMLParser.new(task.encoded_url, html).get_links }
+                callback  = proc{ |links| @links = links; do_link }
+                EM.defer(operation, callback)
               else
                 url = URLParser.new(task.encoded_url, response.header["location"]).full_path
                 Task.insert(url).callback{
