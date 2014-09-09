@@ -32,7 +32,7 @@ module TaskQueue
     puts "Laden der Warteschlange beendet. Es befinden sich #{queue.size} Einträge im RAM."
     puts "Der Server läuft nun auf Port 2051."
     
-    socket = TCPSocket.new("localhost", 2051)
+    socket = TCPServer.new 2051
     
     loop do
       client = socket.accept

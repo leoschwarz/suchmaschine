@@ -29,8 +29,8 @@ module Crawler
     end
     
     def do_next_task
-      TaskQueue.fetch(1).callback{|tasks|
-        task = tasks[0]
+      TaskQueue.fetch_tasks(1).callback{|tasks|
+        task = Task.new(tasks[0])
         task.get_state.callback{|state|
           if state == :ok
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
