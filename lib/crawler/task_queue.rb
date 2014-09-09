@@ -43,7 +43,7 @@ module Crawler
     end
     
     # pairs: Hash mit Schlüssel = URL, Wert = Status
-    def self.set_state(pairs)
+    def self.set_states(pairs)
       data = pairs.to_a.join("\t")
       self.new("STATE_SET\t#{data}\n")
     end

@@ -21,7 +21,7 @@ module Crawler
         else
           # Download der robots.txt Datei
           url = "http://#{@domain}/robots.txt"
-          download = Download.new(url)
+          download = Crawler::Download.new(url)
           download.callback{|response|
             c = response.code[0]
             if c == "2"

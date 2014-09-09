@@ -37,12 +37,12 @@ module Crawler
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      TaskQueue.set_state(stored_url, TaskState::SUCCESS)
+      TaskQueue.set_states(stored_url, TaskState::SUCCESS)
     end
     
     # Markiet als verboten (wegen robots.txt)
     def mark_disallowed
-      TaskQueue.set_state(stored_url, TaskState::FAILURE)
+      TaskQueue.set_states(stored_url, TaskState::FAILURE)
     end
   
     # TODO Dies ist nur eine provisorische "Lösung"
@@ -86,7 +86,7 @@ module Crawler
         include EM::Deferrable
         
         def initialize(task)
-          download = Download.new(task.encoded_url)
+          download = Crawler::Download.new(task.encoded_url)
           download.callback { |response|
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
             
