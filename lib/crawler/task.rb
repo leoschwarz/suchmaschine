@@ -60,60 +60,38 @@ module Crawler
     # :not_ready -> es muss noch gewartet werden
     # :not_allowed -> robots.txt verbietet das crawlen
     def get_state
-      Class.new {
-        include EM::Deferrable
-        def initialize(task)
-          RobotsParser.allowed?(task.encoded_url).callback{|allowed|
-            if allowed
-              Database.redis.get("domain.lastvisited.#{task.domain_name}").callback{|last_visited|
-                last_visited = last_visited.to_f
-                if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
-                  succeed :ok
-                else
-                  succeed :not_ready
-                end
-              }.errback{|e| raise e}
-            else
-              succeed :not_allowed
-            end
-          }
+      if RobotsParser.allowed?(encoded_url)
+        last_visited = Database.redis.get("domain.lastvisited.#{domain_name}").to_f
+        if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
+          return :ok
+        else
+          return :not_ready
         end
-      }.new(self)
+      else
+        return :not_allowed
+      end
     end
     
     def execute
-      Class.new {
-        include EM::Deferrable
-        
-        def initialize(task)
-          download = Crawler::Download.new(task.encoded_url)
-          download.callback { |response|
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
-            
-              if response.header["location"].nil?
-                html = response.body
-                task.store_result(html)
-                
-                # Das extrahieren der Links wird in einem Thread in EventMachines ThreadPool durchgeführt.
-                # Erst beim Callback werden die Links dann in die Datenbank geschrieben.
-                operation = proc{ HTMLParser.new(task.encoded_url, html).get_links }
-                callback  = proc{ |links| Task.insert(links).callback{ succeed }.errback{|e| raise e} }
-                EM.defer(operation, callback)
-              else
-                url = URLParser.new(task.encoded_url, response.header["location"]).full_path
-                Task.insert([url]).callback{
-                  task.mark_done.callback{
-                    succeed 
-                  }
-                }
-              end
-            }.errback{|e| raise e}
-          }
-          download.errback { |error|
-            fail error
-          }
+      download = Crawler::Download.new(encoded_url)
+      Database.redis.set("domain.lastvisited.#{domain_name}", Time.now.to_f.to_s)
+      
+      if download.success?
+        if download.response_header["location"].nil?
+          store_result(download.response_body)
+          parser = HTMLParser.new(encoded_url, download.response_body)
+          Task.insert(parser.get_links)
+        else
+          url = URLParser.new(encoded_url, download.response_header["location"]).full_path
+          Task.insert([url])
         end
-      }.new(self)
+        
+        return true
+      else
+        return false
+      end
+      
+      mark_done
     end
     
     # Fügt neue URLs der Datenbank hinzu.

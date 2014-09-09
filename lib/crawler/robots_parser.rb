@@ -2,9 +2,7 @@ module Crawler
   # Implementierung ähnlich der Google Spezifikation:
   # https://developers.google.com/webmasters/control-crawl-index/docs/robots_txt
   
-  class RobotsParser
-    attr_accessor :robot_name, :domains
-    
+  class RobotsParser    
     def initialize(robot_name)
       @robot_name = robot_name
       @domains    = {}
@@ -17,23 +15,18 @@ module Crawler
     
     # Deferrable, callback wird mit Rückgabewert true/false aufgerufen
     def allowed?(url)
-      Class.new {
-        include EM::Deferrable
-        def initialize(parser, url)
-          match  = /^http[s]?:\/\/([a-zA-Z0-9\.-]+)(.*)/.match(url)
-          if match.nil? then return succeed(false) end
-          domain = match[1].downcase
-          path   = match[2]
-          if path.empty? then path = "/" end
-          
-          if parser.domains[domain].nil?
-            parser.domains[domain] = RobotsTxtParser.new(domain, parser.robot_name)
-          end
-          parser.domains[domain].load.callback{
-            succeed parser.domains[domain].allowed?(path)
-          }
-        end
-      }.new(self, url)
+      match  = /^http[s]?:\/\/([a-zA-Z0-9\.-]+)(.*)/.match(url)
+      if match.nil? then return false end
+      domain = match[1].downcase
+      path   = match[2]
+      if path.empty? then path = "/" end
+      
+      if @domains[domain].nil?
+        @domains[domain] = RobotsTxtParser.new(domain, @robot_name)
+      end
+      @domains[domain].load.callback{
+        succeed @domains[domain].allowed?(path)
+      }
     end
     
     def self.allowed?(url)
