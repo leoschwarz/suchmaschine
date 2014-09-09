@@ -37,12 +37,12 @@ module Crawler
     
     # Markiert den Task in der Datenbank als erledigt
     def mark_done
-      TaskQueue.set_states(stored_url, TaskState::SUCCESS)
+      TaskQueue.set_states([stored_url, TaskState::SUCCESS])
     end
     
     # Markiet als verboten (wegen robots.txt)
     def mark_disallowed
-      TaskQueue.set_states(stored_url, TaskState::FAILURE)
+      TaskQueue.set_states([stored_url, TaskState::FAILURE])
     end
   
     # TODO Dies ist nur eine provisorische "Lösung"
