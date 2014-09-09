@@ -30,29 +30,33 @@ module Crawler
     
     def do_next_task
       TaskQueue.fetch_tasks(1).callback{|tasks|
-        task = Task.new(tasks[0])
-        task.get_state.callback{|state|
-          if state == :ok
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
-              task.execute.callback {
-                @logger.register :success
-                EventMachine.next_tick { do_next_task }
-              }.errback {
-                @logger.register :failure
-                EventMachine.next_tick { do_next_task }
+        if tasks.nil?
+          EventMachine.next_tick { do_next_task }
+        else
+          task = Task.new(tasks[0])
+          task.get_state.callback{|state|
+            if state == :ok
+              Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
+                task.execute.callback {
+                  @logger.register :success
+                  EventMachine.next_tick { do_next_task }
+                }.errback {
+                  @logger.register :failure
+                  EventMachine.next_tick { do_next_task }
+                }
+              }.errback{|e|
+                raise e
               }
-            }.errback{|e|
-              raise e
-            }
-          elsif state == :not_ready
-            @logger.register :not_ready
-            EventMachine.next_tick { do_next_task }
-          elsif state == :not_allowed
-            task.mark_disallowed
-            @logger.register :not_allowed
-            EventMachine.next_tick { do_next_task }
-          end 
-        }
+            elsif state == :not_ready
+              @logger.register :not_ready
+              EventMachine.next_tick { do_next_task }
+            elsif state == :not_allowed
+              task.mark_disallowed
+              @logger.register :not_allowed
+              EventMachine.next_tick { do_next_task }
+            end 
+          }
+        end
       }
     end
   end

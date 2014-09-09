@@ -119,7 +119,7 @@ module Crawler
     # Fügt neue URLs der Datenbank hinzu.
     # Im Falle, dass URLs bereits existiert, wird deren Priorität erhöht.
     def self.insert(encoded_urls)
-      urls = encoded_urls.map{|url| _prepare_url_for_inserts(url)}.select{|url| not url.nil?}
+      urls = encoded_urls.map{|url| _prepare_url_for_insert(url)}.select{|url| not url.nil?}
       TaskQueue.insert_tasks(urls)
     end
     
