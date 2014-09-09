@@ -37,7 +37,7 @@ module TaskQueue
     loop do
       client = socket.accept
       buffer = ""
-      while buffer[-1] != "\n"
+      while buffer[-1] != "\n" and buffer[-1] != "\x04" # \x04 -> EOT (End of Transmission)
         buffer << client.recv(5000)
       end
       
