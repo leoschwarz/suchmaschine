@@ -36,11 +36,8 @@ module TaskQueue
     
     loop do
       client = socket.accept
-      buffer = ""
-      while buffer[-1] != "\n" and buffer[-1] != "\x04" # \x04 -> EOT (End of Transmission)
-        buffer << client.recv(5000)
-      end
       
+      buffer = client.recv(10_000_000)
       request = buffer[0...-1].split("\t")
       response = case
         when request[0] == "TASK_INSERT"
