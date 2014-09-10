@@ -22,7 +22,7 @@ module Crawler
         data = Oj.dump(@rules, {mode: :object})
         
         Database.redis.set("txt:data:#{domain}", data)
-        Database.redis.set("txt:valid:#{domain}", valid_until.to_s)
+        Database.redis.set("txt:valid:#{domain}", @valid_until.to_s)
       end
     end
     
