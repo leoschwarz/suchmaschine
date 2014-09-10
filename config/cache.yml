@@ -1,0 +1,8 @@
+production: &default
+  memory_slots: 1000 # Anzahl Elemente die im RAM gespeichert werden, bevor geswappt wird.
+
+development:
+  <<: *default
+
+test:
+  <<: *default

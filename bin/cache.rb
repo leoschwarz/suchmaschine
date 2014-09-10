@@ -1,4 +1,6 @@
 require 'socket'
+require './config/config.rb'
+require './lib/cache/cache.rb'
 
 # TODO: Mehrere Einträge in eine Datei schreiben und stark frequentierte Datensätze im RAM lagern.
 
@@ -14,47 +16,43 @@ require 'socket'
 # fürs Debuggen
 Thread.abort_on_exception = true
 
-
-server = TCPServer.new("127.0.0.1", 2052)
-
-def cache_path(key)
-  # TODO: Verbessern
-  "cache/keyval/#{key}"
-end
-
-loop do
-  Thread.start(server.accept) do |client|
-    message = client.recv(10000000)
-    parts = message.split(" ", 3)
+load_configuration(Cache, "cache.yml")
+module Cache
+  def self.run
+    server = TCPServer.new("127.0.0.1", 2052)
     
-    unless parts[0].nil?
-      action = parts[0].upcase
-    else
-      action = nil
-    end
-    
-    if action == "GET"
-      key = parts[1]
-      
-      file_path = cache_path(key)
-      if File.exists? file_path
-        client.write "STRING " + File.read(file_path)
-        client.close
+    loop do
+      client = server.accept
+      message = client.recv(10000000)
+      parts = message.split(" ", 3)
+  
+      unless parts[0].nil?
+        action = parts[0].upcase
       else
+        action = nil
+      end
+  
+      if action == "GET"
+        key = parts[1]
+        value = MemoryCache.get(key)
+        response = value.nil? ? "NULL" : "STRING "+value
+    
+        client.write response
+        client.close
+      elsif action == "SET"
+        key = parts[1]
+        value = parts[2]
+        MemoryCache.set(key, value)
+    
         client.write "NULL"
         client.close
+      elsif not action.nil?
+        puts "Unbekannte Aktion: #{action}"
       end
-    elsif action == "SET"
-      key = parts[1]
-      value = parts[2]
-      
-      file = File.open(cache_path(key), "w")
-      file.write(value)
-      file.close
-      client.write "NULL"
-      client.close
-    elsif not action.nil?
-      puts "Unbekannte Aktion: #{action}"
     end
   end
+end
+
+if __FILE__ == $0
+  Cache.run
 end
