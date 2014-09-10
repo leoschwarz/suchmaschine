@@ -2,12 +2,21 @@ require 'socket'
 
 module Crawler
   class TaskQueue
-    def run(query)
-      connection = TCPSocket.new("127.0.0.1", 2051)
-      connection.send(query, 0)
-      response = connection.recv(100000)
-      connection.close
-      response.split("\t")
+    def run(query, counter=0)
+      begin
+        connection = TCPSocket.new("127.0.0.1", 2051)
+        connection.send(query, 0)
+        response = connection.recv(100000)
+        connection.close
+        response.split("\t")
+      rescue Exception => e
+        # Es wird bis zu 5 mal versucht, bevor ein Fehler produziert wird.
+        if counter < 5
+          run(query, counter+1)
+        else
+          raise e
+        end
+      end
     end
     
     def self.fetch_raw_tasks(n=1)
