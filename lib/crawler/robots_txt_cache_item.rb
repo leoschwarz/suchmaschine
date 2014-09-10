@@ -21,8 +21,8 @@ module Crawler
       if Crawler.config.robots_txt.use_cache
         data = Oj.dump(@rules, {mode: :object})
         
-        Database.redis.set("txt:data:#{domain}", data)
-        Database.redis.set("txt:valid:#{domain}", @valid_until.to_s)
+        Crawler::Cache.set("robotstxt:data:#{domain}", data)
+        Crawler::Cache.set("robotstxt:valid:#{domain}", @valid_until.to_s)
       end
     end
     
@@ -41,8 +41,8 @@ module Crawler
         return RobotsTxtCacheItem.new(domain, "[]", :not_found, nil)
       end
       
-      data  = Database.redis.get("data:#{domain}")
-      valid = Database.redis.get("valid:#{domain}").to_i
+      data  = Crawler::Cache.get("robotstxt:data:#{domain}")
+      valid = Crawler::Cache.get("robotstxt:valid:#{domain}").to_i
       status = nil
       
       if data.nil?
