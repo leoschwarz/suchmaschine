@@ -10,6 +10,9 @@ require './lib/crawler/crawler.rb'
 require './config/config.rb'
 load_configuration(Crawler, "crawler.yml")
 
+# fürs Debuggen
+Thread.abort_on_exception = true
+
 
 module Crawler
   class CrawlerMain
@@ -17,7 +20,7 @@ module Crawler
       puts "#{Crawler.config.user_agent} wurde gestartet."
       @logger = Crawler::Logger.new(true)
       Crawler.config.parallel_tasks.times{ do_next_task }
-      @timer = Thread.new{ sleep Crawler.config.log_interval; dump_log }
+      @timer = Thread.new{ loop{ sleep Crawler.config.log_interval; dump_log } }
       
       loop do 
         sleep 1
@@ -33,7 +36,7 @@ module Crawler
         loop do
           task = TaskQueue.fetch_task
           state = task.get_state
-          puts task.decoded_url
+          
           if state == :ok
             Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
             if task.execute
@@ -47,7 +50,6 @@ module Crawler
             task.mark_disallowed
             @logger.register :not_allowed
           end
-          
         end
       end
     end

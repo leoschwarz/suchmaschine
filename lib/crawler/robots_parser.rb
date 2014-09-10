@@ -24,9 +24,8 @@ module Crawler
       if @domains[domain].nil?
         @domains[domain] = RobotsTxtParser.new(domain, @robot_name)
       end
-      @domains[domain].load.callback{
-        succeed @domains[domain].allowed?(path)
-      }
+      @domains[domain].load_if_needed
+      @domains[domain].allowed?(path)
     end
     
     def self.allowed?(url)

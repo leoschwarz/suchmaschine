@@ -7,9 +7,9 @@ module Crawler
       @cache_item = nil
     end
     
-    def load
+    def load_if_needed
       if not @cache_item.nil?
-        succeed
+        return
       end
       
       @cache_item = RobotsTxtCacheItem.for_domain(@domain)
