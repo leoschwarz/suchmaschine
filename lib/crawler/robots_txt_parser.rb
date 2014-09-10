@@ -14,16 +14,15 @@ module Crawler
       
       @cache_item = RobotsTxtCacheItem.for_domain(@domain)
       if @cache_item.status != :ok
-        # Download der robots.txt Datei
-        
         begin
+          # Download der robots.txt Datei
           url = "http://#{@domain}/robots.txt"
           download = Crawler::Download.new(url)
           c = download.response_header["status-code"]
         
           if c == "2"
             # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
-            @cache_item.rules = parse(response.body.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
+            @cache_item.rules = parse(download.response_body.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
             @cache_item.set_valid_for(:default)
           elsif c == "3" or c == "5"
             @cache_item.rules = [[:disallow, "/"]]
