@@ -1,18 +1,10 @@
 production: &default
-  task_queue_size: 1000  # Anzahl der Aufgaben in der Memory-Warteschlange
-  task_queue_threshold: 0.75 # Sobald die Warteschlange nur zu sovielen Prozent gefüllt ist, werden neue Einträge geladen
   parallel_tasks: 100    # Anzahl paralleler Downloads
   user_agent: lightblaze # Name des USER_AGENT Felds für HTTP Requests
   max_response_length: 512000 # 1024 * 500 Bytes, also 500kB
   crawl_delay: 1.0       # Anzahl Sekunden die gewartet werden muss bevor von der gleichen Domain wieder etwas geladen werden darf.
   log_interval: 5        # Anzahl Sekunden zwischen den Logs
   redis: "redis://127.0.0.1:6379"
-  database:
-    connections: 20
-    name: suchmaschine
-    host: 127.0.0.1
-    user: leo
-    password: 1234
   robots_txt:
     timeout: 10 # Sekunden
     use_cache: YES
@@ -20,20 +12,8 @@ production: &default
 
 development:
   <<: *default
-  task_queue_size: 1000
-  task_queue_threshold: 0.50 
   parallel_tasks: 100
   redis: "redis://127.0.0.1:6379"
-  robots_txt:
-    timeout: 10
-    use_cache: NO
-    cache_lifetime: 0
-  database:
-    connections: 20
-    name: suchmaschine
-    host: 192.168.1.110
-    user: leo
-    password: 1234
 
 test:
   <<: *default
