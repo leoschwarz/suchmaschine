@@ -18,8 +18,8 @@ module Crawler
           # Download der robots.txt Datei
           url = "http://#{@domain}/robots.txt"
           download = Crawler::Download.new(url)
-          c = download.response_header["status-code"]
-        
+          c = download.response_header["status-code"][0]
+          
           if c == "2"
             # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
             @cache_item.rules = parse(download.response_body.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
