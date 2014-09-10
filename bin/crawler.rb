@@ -3,7 +3,6 @@
 require 'bundler/setup'
 require 'nokogiri'
 require 'redis'
-require 'rocksdb'
 
 
 require './lib/crawler/crawler.rb'

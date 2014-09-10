@@ -17,17 +17,12 @@ module Crawler
       @valid_until = valid_until
     end
     
-    def self.db
-      # TODO: Konfigurationsauslagerung!
-      @@db ||= RocksDB::DB.new "cache/robotstxt"
-    end
-    
     def save
       if Crawler.config.robots_txt.use_cache
         data = Oj.dump(@rules, {mode: :object})
         
-        self.db.put("data:#{domain}", data)
-        self.db.put("valid:#{domain}", valid_until.to_s)
+        Database.redis.set("txt:data:#{domain}", data)
+        Database.redis.set("txt:valid:#{domain}", valid_until.to_s)
       end
     end
     
@@ -46,8 +41,8 @@ module Crawler
         return RobotsTxtCacheItem.new(domain, "[]", :not_found, nil)
       end
       
-      data  = self.db.get("data:#{domain}")
-      valid = self.db.get("valid:#{domain}").to_i
+      data  = Database.redis.get("data:#{domain}")
+      valid = Database.redis.get("valid:#{domain}").to_i
       status = nil
       
       if data.nil?
