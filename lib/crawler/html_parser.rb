@@ -1,38 +1,53 @@
+# TODO: Effizienzoptimierung + Tests
+
 module Crawler
-  class HTMLParser < Nokogiri::XML::SAX::Document    
-    # base_url muss UTF8 Zeichen URL kodiert beinhalten
+  class HTMLParser
+    attr_reader :indexing_allowed, :following_allowed, :links, :text
+    
     def initialize(base_url, html)
       @base_url = base_url
-      @html = html
-      @links = []
-    end
-    
-    # Alternative Implementierungen: test/benchmark/html_parser.rb 
-    def get_links
-      parser = Nokogiri::HTML::SAX::Parser.new(self)
-      parser.parse @html
-      @links
-    end
-    
-    def start_element name, attributes = []
-      if name == "a"
-        href = nil
-        rel  = nil
-        attributes.each do |attr|
-          if attr[0] == "href"
-            href = attr[1]
-          elsif attr[0] == "rel"
-            rel = attr[1]
-          end
-        end
+      @doc      = Nokogiri::HTML(@html, nil, "UTF-8")
       
-        if not href.nil?
-          rel = rel.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '') unless rel.nil?
-          if rel.nil? or not rel =~ /nofollow/
-            link = Crawler::URLParser.new(@base_url, href).full_path
-            @links << link if not (link.nil? or @links.include? link)
+      parse()
+    end
+    
+    def parse
+      # Standardwerte
+      @indexing_allowed  = true
+      @following_allowed = true
+      @links = []
+      @text  = ""
+      
+      # 'robots' Meta-Tag
+      # TODO: Varianten der Gross- und Kleinschreibung im XPath
+      meta_robots_tag = @doc.at_xpath("//meta[@name='robots']/@content")
+      unless meta_robots_tag.nil?
+        meta_robots = meta_robots.text.downcase
+        if meta_robots.include? "noindex"
+          @indexing_allowed  = false
+        elsif meta_robots.include? "nofollow"
+          @following_allowed = false
+        end
+      end
+      
+      # Links
+      if @following_allowed
+        @doc.xpath('//a[@href]').each do |link|
+          if not link['rel'].include? "nofollow"
+            url = URLParser.new(@base_url, link['href']).full_path
+            unless url.nil?
+              @links << [link.text, url]
+            end
           end
         end
+      end
+      
+      # Text
+      if @indexing_allowed
+        @doc.search("script").each{|el| el.unlink}
+        @doc.search("style").each{|el| el.unlink}
+        @doc.xpath("//comment()").remove
+        @text = @doc.text.gsub(/\s+/, " ").strip
       end
     end
   end

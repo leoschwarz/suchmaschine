@@ -2,6 +2,7 @@ require 'socket'
 require 'uri'
 
 # TODO: Weiterleitungsmanagment! (3xx-Redirect)
+# TODO: Kodierungserkennung
 
 module Crawler
   class Download

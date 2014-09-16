@@ -72,26 +72,36 @@ module Crawler
       end
     end
     
+    # Führt die Aufgabe aus und gibt true zurück falls die Aufgabe erfolgreich ausgeführt wurde.
     def execute
       download = Crawler::Download.new(encoded_url)
+      
       Database.redis.set("domain.lastvisited.#{domain_name}", Time.now.to_f.to_s)
       
       if download.success?
         if download.response_header["location"].nil?
-          store_result(download.response_body)
           parser = HTMLParser.new(encoded_url, download.response_body)
-          Task.insert(parser.get_links)
+          
+          # TODO: Das Dokument zu speichern ist überflüssig wenn indexieren verboten ist.
+          document      = Document.new(parser.text)
+          document_data = DocumentData.new(encoded_url, Time.now.to_i, parser.indexing_allowed, parser.following_allowed, parser.links, document.hash)
+          document.save
+          document_data.save
+          
+          if parser.following_allowed
+            Task.insert(parser.links.map{|link| link[1]})
+          end    
         else
           url = URLParser.new(encoded_url, download.response_header["location"]).full_path
           Task.insert([url])
         end
         
+        # TODO: ENTFERNEN!
+        mark_done
         return true
       else
         return false
-      end
-      
-      mark_done
+      end      
     end
     
     # Fügt neue URLs der Datenbank hinzu.
