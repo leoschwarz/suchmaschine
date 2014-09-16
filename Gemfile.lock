@@ -1,6 +1,9 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    RubyInline (3.12.3)
+      ZenTest (~> 4.3)
+    ZenTest (4.10.1)
     addressable (2.3.6)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
@@ -20,6 +23,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  RubyInline (~> 3.12.3)
   hashr (~> 0.0.22)
   nokogiri (~> 1.6.2.1)
   oj (~> 2.9.9)
