@@ -42,14 +42,14 @@ module Crawler
       self.new.run("STATE_SET\t#{data}\n")
     end
     
-    def self.get_urldata(urls)
-      self.new.run("URLDATA_GET\t#{urls.join("\t")}\n")
+    def self.get_docdata(urls)
+      self.new.run("DOCDATA_GET\t#{urls.join("\t")}\n")
     end
     
     # pairs: Hash mit Schlüssel = URL, Wert = Status
-    def self.set_urldata(pairs)
+    def self.set_docdata(pairs)
       data = pairs.to_a.join("\t")
-      self.new.run("URLDATA_SET\t#{data}\n")
+      self.new.run("DOCDATA_SET\t#{data}\n")
     end
   end
 end
