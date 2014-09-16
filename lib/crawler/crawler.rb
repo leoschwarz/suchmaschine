@@ -1,12 +1,2 @@
-require_relative './logger.rb'
-require_relative './database.rb'
-require_relative './domain.rb'
-require_relative './download.rb'
-require_relative './task.rb'
-require_relative './task_queue.rb'
-require_relative './robots_txt_cache_item.rb'
-require_relative './robots_txt_parser.rb'
-require_relative './robots_parser.rb'
-require_relative './url_parser.rb'
-require_relative './html_parser.rb'
-require_relative './cache.rb'
+# Alle Dateien im Verzeichnis laden 
+Dir[File.join(File.dirname(__FILE__), './*.rb')].each {|file| require file }
