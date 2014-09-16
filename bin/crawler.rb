@@ -2,7 +2,6 @@
 
 require 'bundler/setup'
 require 'nokogiri'
-require 'redis'
 
 
 require './lib/crawler/crawler.rb'
@@ -37,7 +36,6 @@ module Crawler
           state = task.get_state
           
           if state == :ok
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s)
             if task.execute
               @logger.register :success
             else

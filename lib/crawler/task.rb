@@ -59,9 +59,11 @@ module Crawler
     # :ok -> alles in Ordnung
     # :not_ready -> es muss noch gewartet werden
     # :not_allowed -> robots.txt verbietet das crawlen
+    
+    # TODO: Aktualisieren
     def get_state
       if RobotsParser.allowed?(encoded_url)
-        last_visited = Database.redis.get("domain.lastvisited.#{domain_name}").to_f
+#        last_visited = Database.redis.get("domain.lastvisited.#{domain_name}").to_f
         if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
           return :ok
         else
@@ -75,9 +77,7 @@ module Crawler
     # Führt die Aufgabe aus und gibt true zurück falls die Aufgabe erfolgreich ausgeführt wurde.
     def execute
       download = Crawler::Download.new(encoded_url)
-      
-      Database.redis.set("domain.lastvisited.#{domain_name}", Time.now.to_f.to_s)
-      
+            
       if download.success?
         if download.response_header["location"].nil?
           parser = HTMLParser.new(encoded_url, download.response_body)
