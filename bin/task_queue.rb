@@ -13,7 +13,9 @@ load_configuration(TaskQueue, "task_queue.yml")
 # TASK_INSERT\tURL1[\tURL2\t...]\n
 # TASK_FETCH\tN\n
 # STATE_GET\tURL1[\tURL2\t...]\n
-# STATE_SET\tURL1[\tSTATE1\t...]\n
+# STATE_SET\tURL1\tSTATE1[\t...]\n
+# URLDATA_GET\tURL1[\tURL2\t...]\n
+# URLDATA_SET\tURL1\tDATA1[\t...]\n
 
 module TaskQueue
   module States
@@ -59,6 +61,16 @@ module TaskQueue
             db.put("url.state.#{request[2*i+1]}", request[2*i+2])
           end
           String.new
+        when request[0] == "URLDATA_GET"
+          urls = request[1..-1]
+          urls.map{|url| db.get("url.data.#{url}")}.join("\t")
+        when request[0] == "URLDATA_SET"
+          pairs = (request.size-1) / 2
+          (0...pairs).each do |i|
+            db.put("url.data.#{request[2*i+1]}", request[2*i+2])
+          end
+          String.new
+        end
       end
       
       #puts "RES #{response.inspect}"
