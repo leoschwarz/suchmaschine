@@ -1,6 +1,6 @@
 production: &default
   ssd:
-    path: "/mnt/ssd/keyvalue/"
+    path: "/mnt/sdb/suchmaschine/"
     max_size: 10_000_000_000 # Bytes
   task_queue:
     max_active: 100_000 # Die maximale Anzahl an Einträgen die im RAM gehalten werden soll.
