@@ -44,7 +44,8 @@ module Crawler
           elsif state == :not_ready
             @logger.register :not_ready
           elsif state == :not_allowed
-            task.mark_disallowed
+            # TODO : Verbessern
+            #task.mark_disallowed
             @logger.register :not_allowed
           end
         end

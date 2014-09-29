@@ -35,11 +35,6 @@ module Crawler
       Domain.domain_name_of(encoded_url)
     end
     
-    # Markiet als verboten (wegen robots.txt)
-    def mark_disallowed
-      TaskQueue.set_states([stored_url, TaskState::FAILURE])
-    end
-    
     # Gibt einen der folgenden Werte zurück:
     # :ok -> alles in Ordnung
     # :not_ready -> es muss noch gewartet werden
