@@ -28,7 +28,10 @@ module Database
     
     def set(key, document)
       path = _path_for_key(key)
-      size_change = document.bytesize - File.size(path)
+      size_change = document.bytesize
+      if File.exists? path
+        size_change -= File.size(path)
+      end
       
       # Es muss solange ausgelagert werden, bis es genug Platz hat.
       while @current_size-oldsize+newsize >= max_size
