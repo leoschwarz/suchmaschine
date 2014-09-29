@@ -35,27 +35,12 @@ module Crawler
       Domain.domain_name_of(encoded_url)
     end
     
-    # Markiert den Task in der Datenbank als erledigt
-    def mark_done
-      TaskQueue.set_states([stored_url, TaskState::SUCCESS])
-    end
-    
     # Markiet als verboten (wegen robots.txt)
     def mark_disallowed
       TaskQueue.set_states([stored_url, TaskState::FAILURE])
     end
-  
-    # TODO Dies ist nur eine provisorische "Lösung"
-    def store_result(html)
-      require 'digest/md5'
-      filename = "./cache/html/#{Digest::MD5.hexdigest(decoded_url)}"
-      f = open(filename, "w")
-      f.write(html)
-      f.close
-      mark_done
-    end
     
-    # Ruft ein callback auf mit einem der Werte:
+    # Gibt einen der folgenden Werte zurück:
     # :ok -> alles in Ordnung
     # :not_ready -> es muss noch gewartet werden
     # :not_allowed -> robots.txt verbietet das crawlen
@@ -82,11 +67,14 @@ module Crawler
         if download.response_header["location"].nil?
           parser = HTMLParser.new(encoded_url, download.response_body)
           
-          # TODO: Das Dokument zu speichern ist überflüssig wenn indexieren verboten ist.
-          document      = Document.new(parser.text)
-          document_data = DocumentData.new(encoded_url, Time.now.to_i, parser.indexing_allowed, parser.following_allowed, parser.links, document.hash)
+          # Ergebniss speichern
+          document = Document.new(encoded_url: encoded_url)
+          document.timestamp      = Time.now.to_i
+          document.index_allowed  = parser.indexing_allowed
+          document.follow_allowed = parser.following_allowed
+          document.links          = parser.links
+          document.text           = parser.text
           document.save
-          document_data.save
           
           if parser.following_allowed
             Task.insert(parser.links.map{|link| link[1]})
@@ -96,8 +84,6 @@ module Crawler
           Task.insert([url])
         end
         
-        # TODO: ENTFERNEN!
-        mark_done
         return true
       else
         return false
@@ -108,7 +94,7 @@ module Crawler
     # Im Falle, dass URLs bereits existiert, wird deren Priorität erhöht.
     def self.insert(encoded_urls)
       urls = encoded_urls.map{|url| _prepare_url_for_insert(url)}.select{|url| not url.nil?}
-      TaskQueue.insert_tasks(urls)
+      Database.queue_insert(urls)
     end
     
     private
