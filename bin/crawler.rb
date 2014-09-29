@@ -33,21 +33,8 @@ module Crawler
       Thread.new do
         loop do
           task = Database.queue_fetch
-          state = task.get_state
-          
-          if state == :ok
-            if task.execute
-              @logger.register :success
-            else
-              @logger.register :failure
-            end
-          elsif state == :not_ready
-            @logger.register :not_ready
-          elsif state == :not_allowed
-            # TODO : Verbessern
-            #task.mark_disallowed
-            @logger.register :not_allowed
-          end
+          result = task.execute
+          @logger.register result
         end
       end
     end

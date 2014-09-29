@@ -1,42 +1,22 @@
 module Crawler
-  module TaskState
-    NEW = "0"
-    SUCCESS = "1"
-    FAILURE = "2"
-  end
-  
   class Task
-    attr_reader :url, :state, :done_at
+    attr_reader :url
   
-    def initialize(url, state=TaskState::NEW, done_at=nil)
+    def initialize(url)
       @url = url
-      @state = state
-      @done_at = done_at
     end
     
-    # Gibt einen der folgenden Werte zurück:
-    # :ok -> alles in Ordnung
-    # :not_ready -> es muss noch gewartet werden
-    # :not_allowed -> robots.txt verbietet das crawlen
-    
-    # TODO: Aktualisieren
-    def get_state
-      if RobotsParser.allowed?(@url.encoded)
-#        last_visited = Database.redis.get("domain.lastvisited.#{domain_name}").to_f
-#        if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
-          return :ok
-#        else
-#          return :not_ready
-#        end
-      else
+    # Bearbeitet die URL und gibt einen der folgedenen Werte zurück:
+    # :success -> Alles lief einwandfrei.
+    # :failure -> Es gab einen Fehler beim Download. (zBsp. ein HTTP-Fehler)
+    # :not_allowed -> Die URL darf nicht heruntergeladen werden
+    def execute
+      # Überprüfen ob es erlaubt ist die Seite herunterzuladen
+      unless RobotsParser.allowed?(@url.encoded)
         return :not_allowed
       end
-    end
-    
-    # Führt die Aufgabe aus und gibt true zurück falls die Aufgabe erfolgreich ausgeführt wurde.
-    def execute
+      
       download = Crawler::Download.new(@url)
-            
       if download.success?
         if download.response_header["location"].nil?
           parser = HTMLParser.new(@url, download.response_body)
@@ -58,9 +38,9 @@ module Crawler
           Task.insert([url])
         end
         
-        return true
+        return :success
       else
-        return false
+        return :failure
       end      
     end
     

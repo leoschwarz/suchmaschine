@@ -26,7 +26,7 @@ module Crawler
     end
     
     def save
-      Database.document_set(@encoded_url, serialize)
+      Database.document_set("web:"+@encoded_url, serialize)
     end
     
     def self.parse(json)
@@ -35,7 +35,7 @@ module Crawler
     end
     
     def self.get(encoded_url)
-      raw_data = Database.document_get(encoded_url)
+      raw_data = Database.document_get("web:"+encoded_url)
       if not raw_data.nil?
         self.parse(raw_data)
       else
