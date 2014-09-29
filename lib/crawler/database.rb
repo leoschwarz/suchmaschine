@@ -5,7 +5,7 @@ module Crawler
     end
     
     def self.queue_fetch()
-      Task.new(URL.new self._run("QUEUE_FETCH")[0])
+      Task.new(URL.stored self._run("QUEUE_FETCH")[0])
     end
     
     # TODO LinkData
