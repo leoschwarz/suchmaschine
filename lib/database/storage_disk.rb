@@ -34,7 +34,7 @@ module Database
       end
       
       # Es muss solange ausgelagert werden, bis es genug Platz hat.
-      while @current_size-oldsize+newsize >= max_size
+      while @current_size+size_change >= max_size
         swap_item
       end
       
