@@ -31,11 +31,11 @@ module Crawler
           document.save
           
           if parser.following_allowed
-            Task.insert(parser.links.map{|link| link[1]})
+            Task.insert(parser.links.map{|link| URL.encoded link[1]})
           end    
         else
           url = URLParser.new(@url.encoded, download.response_header["location"]).full_path
-          Task.insert([url])
+          Task.insert([URL.encoded url])
         end
         
         return :success
