@@ -79,7 +79,7 @@ module Database
         client = socket.accept
       
         buffer = client.recv(10_000_000)
-        request = buffer[0...-1].split("\t")
+        request = buffer.split("\t")
             
         response = case
           when request[0] == "QUEUE_INSERT"

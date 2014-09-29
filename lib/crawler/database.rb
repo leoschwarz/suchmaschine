@@ -21,7 +21,7 @@ module Crawler
     private
     def self._run(query)
       begin
-        connection = TCPSocket.new("127.0.0.1", 205)
+        connection = TCPSocket.new("127.0.0.1", 2051)
         connection.write(query)
         response   = connection.recv(10000000)
         connection.close
