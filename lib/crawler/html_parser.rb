@@ -22,10 +22,11 @@ module Crawler
       # TODO: Varianten der Gross- und Kleinschreibung im XPath
       meta_robots_tag = @doc.at_xpath("//meta[@name='robots']/@content")
       unless meta_robots_tag.nil?
-        meta_robots = meta_robots.text.downcase
+        meta_robots = meta_robots_tag.text.downcase
         if meta_robots.include? "noindex"
           @indexing_allowed  = false
-        elsif meta_robots.include? "nofollow"
+        end
+        if meta_robots.include? "nofollow"
           @following_allowed = false
         end
       end

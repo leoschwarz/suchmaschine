@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'nokogiri'
+require 'curb'
 
 
 require './lib/crawler/crawler.rb'

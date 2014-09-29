@@ -18,7 +18,7 @@ module Crawler
       
       download = Crawler::Download.new(@url)
       if download.success?
-        if download.response_header["location"].nil?
+        if download.redirect_url.nil?
           parser = HTMLParser.new(@url, download.response_body)
           
           # Ergebniss speichern
@@ -34,7 +34,7 @@ module Crawler
             Task.insert(parser.links.map{|link| URL.encoded link[1]})
           end    
         else
-          url = URLParser.new(@url.encoded, download.response_header["location"]).full_path
+          url = URLParser.new(@url.encoded, download.redirect_url).full_path
           Task.insert([URL.encoded(url)])
         end
         
