@@ -1,3 +1,5 @@
+require 'singleton'
+
 module Database
   class StorageRAM
     include Singleton

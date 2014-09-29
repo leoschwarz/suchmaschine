@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'socket'
 require './config/config.rb'
 require './lib/cache/cache.rb'
