@@ -13,10 +13,6 @@ module Crawler
       @encoded_url = encoded_url
     end
     
-    alias :encoded :encoded_url
-    alias :decoded :decoded_url
-    alias :stored :stored_url
-    
     def encoded_url
       @encoded_url
     end
@@ -28,6 +24,10 @@ module Crawler
     def stored_url
       @_stored_url ||= URI.decode(@encoded_url.gsub(%r{^https?://}, ""))
     end
+    
+    alias :encoded :encoded_url
+    alias :decoded :decoded_url
+    alias :stored :stored_url
     
     def domain_name
       Domain.domain_name_of(@encoded_url)
