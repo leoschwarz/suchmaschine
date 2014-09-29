@@ -35,7 +35,7 @@ module Crawler
           end    
         else
           url = URLParser.new(@url.encoded, download.response_header["location"]).full_path
-          Task.insert([URL.encoded url])
+          Task.insert([URL.encoded(url)])
         end
         
         return :success
