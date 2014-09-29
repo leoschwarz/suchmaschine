@@ -44,11 +44,11 @@ module Crawler
     def get_state
       if RobotsParser.allowed?(encoded_url)
 #        last_visited = Database.redis.get("domain.lastvisited.#{domain_name}").to_f
-        if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
+#        if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
           return :ok
-        else
-          return :not_ready
-        end
+#        else
+#          return :not_ready
+#        end
       else
         return :not_allowed
       end

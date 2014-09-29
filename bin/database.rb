@@ -93,9 +93,9 @@ module Database
           when request[0] == "LINK_DATA_DELETE"
             handle_link_data_delete(request[1..-1])
           when request[0] == "DOCUMENT_SET"
-            handle_document_set(request[1..-1])
+            handle_document_set(request[1], request[2])
           when request[0] == "DOCUMENT_GET"
-            handle_document_get(request[1..-1])
+            handle_document_get(request[1])
         end
         
         client.write response
