@@ -59,61 +59,49 @@ module Crawler
     # :ok -> alles in Ordnung
     # :not_ready -> es muss noch gewartet werden
     # :not_allowed -> robots.txt verbietet das crawlen
+    
+    # TODO: Aktualisieren
     def get_state
-      Class.new {
-        include EM::Deferrable
-        def initialize(task)
-          RobotsParser.allowed?(task.encoded_url).callback{|allowed|
-            if allowed
-              Database.redis.get("domain.lastvisited.#{task.domain_name}").callback{|last_visited|
-                last_visited = last_visited.to_f
-                if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
-                  succeed :ok
-                else
-                  succeed :not_ready
-                end
-              }.errback{|e| raise e}
-            else
-              succeed :not_allowed
-            end
-          }
+      if RobotsParser.allowed?(encoded_url)
+#        last_visited = Database.redis.get("domain.lastvisited.#{domain_name}").to_f
+        if (Time.now.to_f - last_visited) > Crawler.config.crawl_delay
+          return :ok
+        else
+          return :not_ready
         end
-      }.new(self)
+      else
+        return :not_allowed
+      end
     end
     
+    # Führt die Aufgabe aus und gibt true zurück falls die Aufgabe erfolgreich ausgeführt wurde.
     def execute
-      Class.new {
-        include EM::Deferrable
-        
-        def initialize(task)
-          download = Crawler::Download.new(task.encoded_url)
-          download.callback { |response|
-            Database.redis.set("domain.lastvisited.#{task.domain_name}", Time.now.to_f.to_s).callback{
+      download = Crawler::Download.new(encoded_url)
             
-              if response.header["location"].nil?
-                html = response.body
-                task.store_result(html)
-                
-                # Das extrahieren der Links wird in einem Thread in EventMachines ThreadPool durchgeführt.
-                # Erst beim Callback werden die Links dann in die Datenbank geschrieben.
-                operation = proc{ HTMLParser.new(task.encoded_url, html).get_links }
-                callback  = proc{ |links| Task.insert(links).callback{ succeed }.errback{|e| raise e} }
-                EM.defer(operation, callback)
-              else
-                url = URLParser.new(task.encoded_url, response.header["location"]).full_path
-                Task.insert([url]).callback{
-                  task.mark_done.callback{
-                    succeed 
-                  }
-                }
-              end
-            }.errback{|e| raise e}
-          }
-          download.errback { |error|
-            fail error
-          }
+      if download.success?
+        if download.response_header["location"].nil?
+          parser = HTMLParser.new(encoded_url, download.response_body)
+          
+          # TODO: Das Dokument zu speichern ist überflüssig wenn indexieren verboten ist.
+          document      = Document.new(parser.text)
+          document_data = DocumentData.new(encoded_url, Time.now.to_i, parser.indexing_allowed, parser.following_allowed, parser.links, document.hash)
+          document.save
+          document_data.save
+          
+          if parser.following_allowed
+            Task.insert(parser.links.map{|link| link[1]})
+          end    
+        else
+          url = URLParser.new(encoded_url, download.response_header["location"]).full_path
+          Task.insert([url])
         end
-      }.new(self)
+        
+        # TODO: ENTFERNEN!
+        mark_done
+        return true
+      else
+        return false
+      end      
     end
     
     # Fügt neue URLs der Datenbank hinzu.

@@ -1,7 +1,5 @@
 module Crawler
   class RobotsTxtParser
-    include EM::Deferrable
-    
     attr_accessor :domain, :cache_item
     def initialize(domain, robot_name)
       @domain     = domain
@@ -9,43 +7,40 @@ module Crawler
       @cache_item = nil
     end
     
-    def load
+    def load_if_needed
       if not @cache_item.nil?
-        succeed
+        return
       end
       
-      RobotsTxtCacheItem.for_domain(@domain).callback{|cache_item|
-        @cache_item = cache_item
-        if @cache_item.status == :ok
-          succeed
-        else
+      @cache_item = RobotsTxtCacheItem.for_domain(@domain)
+      if @cache_item.status != :ok
+        begin
           # Download der robots.txt Datei
           url = "http://#{@domain}/robots.txt"
           download = Crawler::Download.new(url)
-          download.callback{|response|
-            c = response.code[0]
-            if c == "2"
-              # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
-              @cache_item.rules = parse(response.body.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
-              @cache_item.set_valid_for(:default)
-            elsif c == "3" or c == "5"
-              @cache_item.rules = [[:disallow, "/"]]
-              @cache_item.set_valid_for(30)
-            elsif c == "4"
-              @cache_item.rules = []
-              @cache_item.set_valid_for(:default)
-            end
-                    
-            _save_cache_item
-          }
-          download.errback{|e|
+          c = download.response_header["status-code"][0]
+          
+          if c == "2"
+            # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+            @cache_item.rules = parse(download.response_body.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''))
+            @cache_item.set_valid_for(:default)
+          elsif c == "3" or c == "5"
             @cache_item.rules = [[:disallow, "/"]]
             @cache_item.set_valid_for(30)
-            _save_cache_item
-          }
+          elsif c == "4"
+            @cache_item.rules = []
+            @cache_item.set_valid_for(:default)
+          end
+        
+          @cache_item.save
+        rescue Exception
+          # TODO: Hier nicht Exception fangen.
+          @cache_item.rules = [[:disallow, "/"]]
+          @cache_item.set_valid_for(30)
+          @cache_item.save
         end
-      }
-      self
+      end
+      
     end
     
     def allowed?(path)
@@ -121,21 +116,6 @@ module Crawler
       s.gsub!("\\*", "(.*)")
       s.gsub!("\\$", "$")
       s
-    end
-    
-    def _save_cache_item
-      @cache_item.save.callback {
-        succeed
-      }.errback {|e|
-        # Dieser Fehler tritt auf, falls zweimal nacheinander in den Cache zu schreiben versucht wird.
-        # Das heisst man kann dieses Problem ignorieren, denn der Wert wurde bereits gespeichert.
-        # TODO: Es ist allerdings unnötiger overhead Dateien doppelt herunterzuladen, deshalb sollte man dies überflüssig machen.
-        if e.class == PG::UniqueViolation
-          succeed
-        else
-          raise e
-        end
-      }
     end
   end
 end

@@ -20,52 +20,39 @@ module Crawler
     def save
       if Crawler.config.robots_txt.use_cache
         data = Oj.dump(@rules, {mode: :object})
-        if @status == :ok or @status == :outdated
-          return Database.update(:robotstxt, {domain: @domain}, {data: data, valid_until: @valid_until})
-        else
-          return Database.insert(:robotstxt, {domain: @domain, data: data, valid_until: @valid_until})
-        end
+        
+        Crawler::Cache.set("robotstxt:data:#{domain}", data)
+        Crawler::Cache.set("robotstxt:valid:#{domain}", @valid_until.to_s)
       end
-      Class.new{
-        include EM::Deferrable
-        def initialize
-          succeed
-        end
-      }.new
     end
     
     def set_valid_for(seconds)
       if seconds == :default
-        @valid_until = DateTime.now + Rational(Crawler.config.robots_txt.cache_lifetime, 86400)
+        @valid_until = Time.now.to_i + Crawler.config.robots_txt.cache_lifetime
       else
-        @valid_until = DateTime.now + Rational(seconds, 86400)
+        @valid_until = Time.now.to_i + seconds
       end
     end
     
     # Sucht nach einem robots.txt Cache-Eintrag für eine bestimmte Domain.
-    # Gibt ein Deferrable zurück, falls ein noch gültiger Cacheintrag gefunden wird, wird dieser als Erfolg zurück gegeben, falls dieser bereits ungültig wurde wird ein Fehler mit :outdated und falls gar keiner vorhanden ist mit :none aufgerufen.
+    # Falls ein noch gültiger Cacheintrag gefunden wird, wird dieser als Erfolg zurück gegeben, falls dieser bereits ungültig wurde wird :outdated und falls gar keiner vorhanden ist mit :none zurückgegeben.
     def self.for_domain(domain)
-      Class.new {
-        include EM::Deferrable
-        
-        def initialize(domain)
-          if Crawler.config.robots_txt.use_cache
-            Database.find(:robotstxt, {domain: domain}, [:data, :valid_until]).callback{ |result|
-              data = "[]"
-              valid_unitl = nil
-              status = :not_found
-              if result.ntuples == 1
-                data = result[0]["data"]
-                valid_until = DateTime.parse(result[0]["valid_until"])
-                status = valid_until > DateTime.now ? :ok : :outdated
-              end
-              succeed RobotsTxtCacheItem.new(domain, data, status, valid_until)
-            }
-          else
-            succeed RobotsTxtCacheItem.new(domain, "[]", :not_found, nil)
-          end
-        end
-      }.new(domain)
+      unless Crawler.config.robots_txt.use_cache
+        return RobotsTxtCacheItem.new(domain, "[]", :not_found, nil)
+      end
+      
+      data  = Crawler::Cache.get("robotstxt:data:#{domain}")
+      valid = Crawler::Cache.get("robotstxt:valid:#{domain}").to_i
+      status = nil
+      
+      if data.nil?
+        data = "[]"
+        status = :not_found
+      else
+        status = valid > Time.now.to_i
+      end
+      
+      RobotsTxtCacheItem.new(domain, data, status, valid)
     end
   end
 end

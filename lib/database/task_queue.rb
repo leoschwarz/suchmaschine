@@ -6,7 +6,8 @@
 
 require 'fileutils'
 
-module TaskQueue
+
+module Database
   class TaskQueueItem
     attr_accessor :value, :priority
     def initialize(value, priority)
@@ -16,10 +17,11 @@ module TaskQueue
   end
 
   class TaskQueue
-    def initialize(save = false, save_location = "/dev/null")
+    def initialize(storage_path)
       @heap = []
       @hash = {}
-      @save = File.open(save_location, "a") if save
+      @save = File.open(storage_path, "a")
+      @save_buffer = []
     end
     
     def insert(url, priority=0)
@@ -28,15 +30,12 @@ module TaskQueue
       else
         # Nur wenn die Limite noch nicht erreicht wurde, wird die URL hinzugefügt.
         # Andererseits wird einfach geloggt und die URL erst später richtig abgearbeitet.
-        if ::TaskQueue.config.max_size > size
+        if Database.config.task_queue.max_active > size
           index = heap_insert(TaskQueueItem.new(url, priority))
           @hash[url] = index
         end
         
-        unless @save.nil?
-          @save.write("INSERT\t#{url}\t#{priority}\n")
-          @save.flush
-        end
+        _write_log "INSERT\t#{url}\t#{priority}\n"
       end
     end
   
@@ -44,20 +43,12 @@ module TaskQueue
       index = @hash[url]
       heap_increase(index, factor)
       
-      unless @save.nil?
-        @save.write("INCREASE\t#{url}\t#{factor}\n")
-        @save.flush
-      end
+      _write_log "INCREASE\t#{url}\t#{factor}\n"
     end
   
     def fetch
       url = heap_delete_max
-      
-      unless @save.nil?
-        @save.write("DELETE\t#{url}\n")
-        @save.flush
-      end
-      
+      _write_log "DELETE\t#{url}\n"
       url
     end
   
@@ -100,6 +91,7 @@ module TaskQueue
       file.close
       
       # Das alte Logfile an einen sicheren Ort verschieben
+      # TODO dies ist noch etwas unschön
       new_path = "db/task_queue.#{Time.now.to_i}.log"
       FileUtils.mv(@save.path, new_path)
             
@@ -195,6 +187,15 @@ module TaskQueue
     # Hilfs Methoden
     ##################################################
     private
+    def _write_log(str)
+      @save_buffer << str
+      if @save_buffer.size >= Database.config.task_queue.storage_buffer
+        @save.write(@save_buffer.join(""))
+        @save.flush
+        @save_buffer.clear
+      end
+    end
+    
     def _swap(index_1, index_2)
       @hash[@heap[index_1].value], @hash[@heap[index_2].value] = index_2, index_1
       @heap[index_1], @heap[index_2] = @heap[index_2], @heap[index_1]
