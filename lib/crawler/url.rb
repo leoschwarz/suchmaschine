@@ -13,9 +13,9 @@ module Crawler
       @encoded_url = encoded_url
     end
     
-    alias :encoded, :encoded_url
-    alias :decoded, :decoded_url
-    alias :stored, :stored_url
+    alias :encoded :encoded_url
+    alias :decoded :decoded_url
+    alias :stored :stored_url
     
     def encoded_url
       @encoded_url
