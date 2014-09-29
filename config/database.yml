@@ -1,0 +1,14 @@
+production: &default
+  ssd:
+    dir: "/mnt/ssd/keyvalue/"
+    max_size: 10_000_000_000 # Bytes
+  task_queue:
+    max_active: 100_000 # Die maximale Anzahl an Einträgen die im RAM gehalten werden soll.
+    storage_path: "db/task_queue.log"
+    storage_buffer: 500 # Die Anzahl Transaktionen die im RAM bleiben soll bevor sie geschrieben werden. 
+
+development:
+  <<: *default
+
+test:
+  <<: *default
