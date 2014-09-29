@@ -5,7 +5,7 @@ module Crawler
     attr_reader :indexing_allowed, :following_allowed, :links, :text
     
     def initialize(base_url, html)
-      @base_url = base_url
+      @base_url = base_url.encoded_url
       @doc      = Nokogiri::HTML(@html, nil, "UTF-8")
       
       parse()

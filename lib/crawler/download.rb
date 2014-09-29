@@ -8,8 +8,8 @@ module Crawler
   class Download
     attr_accessor :response_header, :response_body, :uri
     
-    def initialize(encoded_url)
-      @uri = URI(encoded_url)
+    def initialize(url)
+      @uri = URI(url.encoded)
       @raw_response = ""
       
       # Ausführen
