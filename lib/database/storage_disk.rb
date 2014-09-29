@@ -66,6 +66,10 @@ module Database
       raise NotImplementedError
     end
     
+    def include?(key)
+      File.exists?(_path_for_key key)
+    end
+    
     private
     def _path_for_key(key)
       hash = Digest::MD5.hexdigest(key)

@@ -53,6 +53,10 @@ module Database
       
       nil
     end
+    
+    def include?(key)
+      @data.has_key? key
+    end
   
     private
     def mark_newest_item(key, delete_old)

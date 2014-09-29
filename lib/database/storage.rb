@@ -22,6 +22,11 @@ module Database
       nil
     end
     
+    # Gibt an ob ein Eintrag enthalten ist.
+    def self.include?(key)
+      StorageRAM.instance.include?(key) || StorageSSD.instance.include?(key)
+    end
+    
     # Löscht das Dokument aus der gesamten Hierarchie
     def self.delete(key)
       StorageRAM.instance.delete(key)

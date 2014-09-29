@@ -36,7 +36,11 @@ module Database
     end
     
     def handle_queue_fetch
-      @queue.fetch
+      url = @queue.fetch
+      while Storage.include? url
+        url = @queue.fetch
+      end
+      url
     end
     
     def handle_link_data_add(paired_data)
@@ -58,12 +62,12 @@ module Database
     end
     
     def handle_document_set(url, document)
-      DocumentStorage.set(url, document)
+      Storage.set(url, document)
       nil
     end
     
     def handle_document_get(url)
-      DocumentStorage.get(url)
+      Storage.get(url)
     end
     
     
