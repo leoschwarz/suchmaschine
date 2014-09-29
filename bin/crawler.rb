@@ -32,7 +32,7 @@ module Crawler
     def do_next_task
       Thread.new do
         loop do
-          task = TaskQueue.fetch_task
+          task = Database.queue_fetch
           state = task.get_state
           
           if state == :ok
