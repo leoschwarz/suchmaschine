@@ -23,7 +23,7 @@ module Crawler
     end
     
     def self.deserialize(json)
-      new(Oj.parse(json, {mode: :object}))
+      new(Oj.load(json, {mode: :object}))
     end
     
     private
