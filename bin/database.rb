@@ -13,6 +13,8 @@ load_configuration(Database, "database.yml")
 #
 # QUEUE_INSERT\tURL1[...]
 # QUEUE_FETCH
+# CACHE_SET\tKEY\tVALUE
+# CACHE_GET\tKEY
 # DOCUMENT_SET\tURL\tDOCUMENT
 # DOCUMENT_GET\tURL
 # DOCUMENT_INFO_SET\tURL\tDOCUMENT_INFO
@@ -41,6 +43,15 @@ module Database
         url = @queue.fetch
       end
       url
+    end
+    
+    def handle_cache_set(key, value)
+      StorageSSD.instance.set("cache:"+key, value)
+      nil
+    end
+    
+    def handle_cache_get(key, value)
+      StorageSSD.instance.get("cache:"+key, values)
     end
     
     def handle_document_set(url, document)
@@ -76,6 +87,10 @@ module Database
             handle_queue_insert(request[1..-1])
           when request[0] == "QUEUE_FETCH"
             handle_queue_fetch
+          when request[0] == "CACHE_SET"
+            handle_cache_set(request[1], request[2])
+          when request[0] == "CACHE_GET"
+            handle_cache_get(request[1])
           when request[0] == "DOCUMENT_SET"
             handle_document_set(request[1], request[2])
           when request[0] == "DOCUMENT_GET"

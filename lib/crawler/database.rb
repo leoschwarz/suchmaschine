@@ -8,6 +8,14 @@ module Crawler
       Task.new(URL.stored self._run("QUEUE_FETCH")[0])
     end
     
+    def self.cache_set(key, value)
+      self._run("CACHE_SET\t#{key}\t#{value}")
+    end
+    
+    def self.cache_get(key)
+      self._run("CACHE_GET\t"+key)
+    end
+    
     def self.document_set(url, document)
       self._run("DOCUMENT_SET\t#{url}\t#{document}")
     end

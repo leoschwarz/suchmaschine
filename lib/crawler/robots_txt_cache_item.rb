@@ -10,19 +10,17 @@ module Crawler
   class RobotsTxtCacheItem
     attr_accessor :domain, :status, :rules
     
-    def initialize(domain, serialized_data, status, valid_until)
+    def initialize(domain, rules, status, valid_until)
       @domain = domain
-      @rules = Oj.load(serialized_data, {mode: :object}).map{|rule| [rule[0].to_sym, rule[1]]}
+      @rules = rules.map{|rule| [rule[0].to_sym, rule[1]]}
       @status = status
       @valid_until = valid_until
     end
     
     def save
       if Crawler.config.robots_txt.use_cache
-        data = Oj.dump(@rules, {mode: :object})
-        
-        Crawler::Cache.set("robotstxt:data:#{domain}", data)
-        Crawler::Cache.set("robotstxt:valid:#{domain}", @valid_until.to_s)
+        data = Oj.dump({valid_until: @valid_until, rules: @rules}, {mode: :object})        
+        Database.cache_set("robotstxt:#{domain}", data)
       end
     end
     
@@ -41,15 +39,16 @@ module Crawler
         return RobotsTxtCacheItem.new(domain, "[]", :not_found, nil)
       end
       
-      data  = Crawler::Cache.get("robotstxt:data:#{domain}")
-      valid = Crawler::Cache.get("robotstxt:valid:#{domain}").to_i
-      status = nil
+      data   = Crawler::Cache.get("robotstxt:#{domain}")
+      rules  = []
+      status = :not_found
+      valid_until = nil
       
-      if data.nil?
-        data = "[]"
-        status = :not_found
-      else
-        status = valid > Time.now.to_i
+      unless data.nil?
+        deserialized = Oj.load(data, {mode: :object})
+        valid_until  = deserialized[:valid_until]
+        rules        = deserialized[:rules]
+        status = valid_until > Time.now.to_i
       end
       
       RobotsTxtCacheItem.new(domain, data, status, valid)
