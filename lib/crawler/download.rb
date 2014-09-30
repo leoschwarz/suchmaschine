@@ -10,7 +10,7 @@ module Crawler
       begin
         curl = Curl::Easy.new(url.encoded) do |curl|
           curl.headers["User-Agent"] = Crawler.config.user_agent
-          curl.verbose = true
+          curl.verbose = false
           curl.timeout = 10
           
           curl.on_body {|chunk|

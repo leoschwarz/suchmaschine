@@ -1,7 +1,7 @@
 require 'oj'
 
 module Crawler
-  class SerizableStruct
+  class SerializableStruct
     def initialize(data={})
       @data = data
     end
