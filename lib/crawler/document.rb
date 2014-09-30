@@ -1,4 +1,4 @@
-require 'digest/md5s'
+require 'digest/md5'
 require_relative './serializable_struct.rb'
 
 module Crawler
