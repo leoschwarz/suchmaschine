@@ -36,7 +36,7 @@ module Crawler
     # Falls ein noch gültiger Cacheintrag gefunden wird, wird dieser als Erfolg zurück gegeben, falls dieser bereits ungültig wurde wird :outdated und falls gar keiner vorhanden ist mit :none zurückgegeben.
     def self.for_domain(domain)
       unless Crawler.config.robots_txt.use_cache
-        return RobotsTxtCacheItem.new(domain, "[]", :not_found, nil)
+        return RobotsTxtCacheItem.new(domain, [], :not_found, nil)
       end
       
       data   = Crawler::Cache.get("robotstxt:#{domain}")
@@ -48,7 +48,7 @@ module Crawler
         deserialized = Oj.load(data, {mode: :object})
         valid_until  = deserialized[:valid_until]
         rules        = deserialized[:rules]
-        status = valid_until > Time.now.to_i
+        status = valid_until > Time.now.to_i ? :ok : :outdated
       end
       
       RobotsTxtCacheItem.new(domain, rules, status, valid_until)
