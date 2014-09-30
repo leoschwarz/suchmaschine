@@ -8,14 +8,20 @@ module Crawler
       Task.new(URL.stored self._run("QUEUE_FETCH")[0])
     end
     
-    # TODO LinkData
-    
     def self.document_set(url, document)
       self._run("DOCUMENT_SET\t#{url}\t#{document}")
     end
     
     def self.document_get(urls)
       self._run("DOCUMENT_GET\t"+urls.join("\t"))
+    end
+    
+    def self.document_info_set(url, docinfo)
+      self._run("DOCUMENT_INFO_SET\t#{url}\t#{docinfo}")
+    end
+    
+    def self.document_info_get(url)
+      self._run("DOCUMENT_INFO_GET\t#{url}")
     end
     
     private

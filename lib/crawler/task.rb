@@ -20,18 +20,24 @@ module Crawler
       if download.success?
         if download.redirect_url.nil?
           parser = HTMLParser.new(@url, download.response_body)
+          links  = parser.links.map{|link| [link[0], URL.encoded(link[1]).stored]}
           
           # Ergebniss speichern
-          document = Document.new(encoded_url: @url.encoded)
-          document.timestamp      = Time.now.to_i
-          document.index_allowed  = parser.indexing_allowed
-          document.follow_allowed = parser.following_allowed
-          document.links          = parser.links
-          document.text           = parser.text
+          document = Document.new
+          document.url   = @url.stored
+          document.links = links
+          document.text  = parser.text
           document.save
           
+          docinfo = DocumentInfo.new
+          docinfo.url = @url.stored
+          docinfo.document = document
+          docinfo.added_at = Time.now.to_i
+          docinfo.permissions = {index: parser.indexing_allowed, follow: parser.following_allowed}
+          docinfo.save
+          
           if parser.following_allowed
-            Task.insert(parser.links.map{|link| URL.encoded link[1]})
+            Task.insert(links.map{|pairs| pairs[1]})
           end    
         else
           url = URLParser.new(@url.encoded, download.redirect_url).full_path
