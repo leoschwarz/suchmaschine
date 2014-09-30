@@ -1,4 +1,5 @@
 require 'digest/md5s'
+require_relative './serializable_struct.rb'
 
 module Crawler
   # FELDER::

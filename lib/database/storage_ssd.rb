@@ -1,3 +1,5 @@
+require_relative './storage_disk.rb'
+
 module Database
   class StorageSSD < StorageDisk
     def root_path
