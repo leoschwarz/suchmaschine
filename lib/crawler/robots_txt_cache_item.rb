@@ -51,7 +51,7 @@ module Crawler
         status = valid_until > Time.now.to_i
       end
       
-      RobotsTxtCacheItem.new(domain, data, status, valid)
+      RobotsTxtCacheItem.new(domain, data, status, valid_until)
     end
   end
 end
