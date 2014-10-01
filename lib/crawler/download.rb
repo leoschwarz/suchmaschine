@@ -1,6 +1,6 @@
 module Crawler
   class Download
-    attr_reader :success, :redirect_url, :response_body, :status
+    attr_reader :redirect_url, :response_body, :status
     
     def initialize(url)
       @response_body = ""
@@ -33,6 +33,10 @@ module Crawler
       @success  = curl.status[0] == "2"
       @redirect = curl.redirect_url unless curl.redirect_url == -1
       @status   = curl.status
+    end
+    
+    def success?
+      @success
     end
   end
 end
