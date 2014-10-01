@@ -39,7 +39,7 @@ module Crawler
           if link['rel'].nil? or not link['rel'].include? "nofollow"
             url = URLParser.new(@base_url, link['href']).full_path
             unless url.nil?
-              @links << [link.text, url]
+              @links << [_clean_text(link.text), url]
             end
           end
         end
@@ -50,8 +50,13 @@ module Crawler
         @doc.search("script").each{|el| el.unlink}
         @doc.search("style").each{|el| el.unlink}
         @doc.xpath("//comment()").remove
-        @text = @doc.text.gsub(/\s+/, " ").strip
+        @text = _clean_text(@doc.text)
       end
+    end
+    
+    private
+    def _clean_text(text)
+      text.gsub(/\s+/, " ").strip
     end
   end
 end
