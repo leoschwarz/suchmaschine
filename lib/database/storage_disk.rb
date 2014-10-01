@@ -26,7 +26,11 @@ module Database
       raise NotImplementedError
     end
     
-    def set(key, document)
+    def set(key, _document)
+      # Dokument komprimieren
+      document = LZ4::compress(_document)
+      
+      # Dokument speichern
       path = _path_for_key(key)
       size_change = document.bytesize
       if File.exists? path
@@ -50,7 +54,7 @@ module Database
     def get(key)
       path = _path_for_key(key)
       if File.exists? path
-        return File.read(path)
+        return LZ4::uncompress(File.read(path))
       else
         return nil
       end

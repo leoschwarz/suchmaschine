@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'socket'
+require 'lz4-ruby'
 require_relative '../lib/database/database'
 require_relative '../config/config.rb'
 
