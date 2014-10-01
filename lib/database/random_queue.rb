@@ -21,6 +21,8 @@ module Database
           all_items.delete(url)
         end
       end
+      
+      @items = []
       all_items.each do |item|
         insert(item)
       end
