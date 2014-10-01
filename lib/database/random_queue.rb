@@ -33,7 +33,7 @@ module Database
     
     def fetch
       index = rand(0...@items.size)
-      delete(@items[index])
+      _delete(@items[index])
       @items.slice! index
     end
     
