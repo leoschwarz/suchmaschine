@@ -12,15 +12,19 @@ module Database
       @write_buffer = []
       
       # Alte Werte einlesen
-      @items = []
+      all_items = []
       File.read(old_file).lines.each do |line|
         cmd, url = line.split(" ", 2)
         if cmd == "INSERT"
-          insert(url)
+          all_items << url
         elsif cmd == "DELETE"
-          delete(url)
+          all_items.delete(url)
         end
       end
+      all_items.each do |item|
+        insert(item)
+      end
+      all_items = nil
     end
     
     def insert(url)
