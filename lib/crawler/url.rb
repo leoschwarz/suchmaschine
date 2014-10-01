@@ -68,9 +68,9 @@ module Crawler
       # Den Fragmentidentifier von der URL entfernen (falls vorhanden)
       hash_index = url.index("#")
       if hash_index.nil?
-        URI.encoded url
+        URL.encoded url
       else
-        URI.encoded url[0...hash_index]
+        URL.encoded url[0...hash_index]
       end
     end
     
