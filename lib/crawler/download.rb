@@ -24,6 +24,7 @@ module Crawler
             end          
           }
         end
+        curl.perform
       rescue Exception => e
         @success = false
         return
