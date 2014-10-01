@@ -90,17 +90,19 @@ module Crawler
           # Falsches Schema
           return nil
         end
-      rescue URI.InvalidURIError
+      rescue URI::InvalidURIError
       end
       
       # 2. Versuch: die URL enthält kodierbare Sonderzeichen...
       if second_try
         begin
           return self.from_unknown(URI.encode(string).to_s, false)
-        rescue URI.InvalidURIError
+        rescue URI::InvalidURIError
           return nil
         end
       end
+      
+      nil
     end
   end
 end
