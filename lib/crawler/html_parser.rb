@@ -6,7 +6,7 @@ module Crawler
     
     def initialize(base_url, html)
       @base_url = base_url.encoded_url
-      @doc      = Nokogiri::HTML(@html, nil, "UTF-8")
+      @doc      = Nokogiri::HTML(html, nil, "UTF-8")
       
       parse()
     end
@@ -34,7 +34,7 @@ module Crawler
       # Links
       if @following_allowed
         @doc.xpath('//a[@href]').each do |link|
-          if not link['rel'].include? "nofollow"
+          if link['rel'].nil? or not link['rel'].include? "nofollow"
             url = URLParser.new(@base_url, link['href']).full_path
             unless url.nil?
               @links << [link.text, url]
