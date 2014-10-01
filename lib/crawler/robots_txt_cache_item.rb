@@ -39,7 +39,7 @@ module Crawler
         return RobotsTxtCacheItem.new(domain, [], :not_found, nil)
       end
       
-      data   = Crawler::Cache.get("robotstxt:#{domain}")
+      data   = Database.cache_get("robotstxt:#{domain}")
       rules  = []
       status = :not_found
       valid_until = nil
