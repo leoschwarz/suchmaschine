@@ -7,12 +7,10 @@ module Crawler
     end
     
     def method_missing(method, *args, &block)
-      if args.size == 1
-        if method[-1] == "="
-          _set(method[0..-2].to_sym, args[0])
-        else
-          _get(method)
-        end
+      if args.size == 1 and method[-1] == "="
+        _set(method[0..-2].to_sym, args[0])
+      elsif args.size == 0
+        _get(method)
       else
         super
       end
