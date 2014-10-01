@@ -2,7 +2,7 @@ require 'uri'
 
 module Crawler
   
-  # @stored_url -> URL die in der Datenbank gespeichert wird. Ohne HTTP/HTTPs Schema, aber mit dekodierten Sonderzeichen
+  # @stored_url -> URL die in der Datenbank gespeichert wird. Ohne HTTP/HTTPS Schema, mit kodierten Sonderzeichen
   # @encoded_url -> URL mit kodierten Sonderzeichen (Beispiel: http://de.wikipedia.org/wiki/K%C3%A4se)
   # @decoded_url -> URL mit dekodierten Sonderzeichen, also ein UTF-8 string (Beispiel: http://de.wikipedia.org/wiki/Käse)
   
@@ -22,7 +22,7 @@ module Crawler
     end
     
     def stored_url
-      @_stored_url ||= URI.decode(@encoded_url.gsub(%r{^https?://}, ""))
+      @_stored_url ||= @encoded_url.gsub(%r{^https?://}, "")
     end
     
     alias :encoded :encoded_url
@@ -42,7 +42,7 @@ module Crawler
     end
     
     def self.stored(url)
-      new("http://"+URI.encode(url))
+      new("http://"+url)
     end
   end
 end
