@@ -40,7 +40,7 @@ module Crawler
             Task.insert(links.map{|pairs| pairs[1]})
           end    
         else
-          Task.insert([@url.join_with download.redirect_url])
+          Task.insert([@url.join_with(download.redirect_url)])
         end
         
         return :success
