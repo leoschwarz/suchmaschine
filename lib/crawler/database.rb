@@ -5,7 +5,7 @@ module Crawler
     end
     
     def self.queue_fetch()
-      Task.new(URL.stored self._run("QUEUE_FETCH")[0])
+      Task.new(URL.stored self._run("QUEUE_FETCH", false))
     end
     
     def self.cache_set(key, value)
@@ -13,7 +13,7 @@ module Crawler
     end
     
     def self.cache_get(key)
-      self._run("CACHE_GET\t"+key)[0]
+      self._run("CACHE_GET\t"+key, false)
     end
     
     def self.document_set(url, document)
@@ -29,11 +29,11 @@ module Crawler
     end
     
     def self.document_info_get(url)
-      self._run("DOCUMENT_INFO_GET\t#{url}")[0]
+      self._run("DOCUMENT_INFO_GET\t#{url}", false)
     end
     
     private
-    def self._run(query)
+    def self._run(query, split_results=true)
       begin
         connection = TCPSocket.new("127.0.0.1", 2051)
         connection.write(query)
@@ -41,7 +41,11 @@ module Crawler
         connection.close
         
         unless response.nil? or response.empty?
-          return response.split("\t")
+          if split_results
+            return response.split("\t")
+          else
+            return response
+          end
         end
       rescue Exception
         # TODO
