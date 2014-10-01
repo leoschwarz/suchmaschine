@@ -6,7 +6,9 @@ module Crawler
     
     def initialize(base_url, html)
       @base_url = base_url.encoded_url
-      @doc      = Nokogiri::HTML(html, nil, "UTF-8")
+      # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+      # TODO: Dieses Problem eleganter lösen
+      @doc      = Nokogiri::HTML(html.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''), nil, "UTF-8")
       
       parse()
     end
