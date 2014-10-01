@@ -50,9 +50,9 @@ module Crawler
       end      
     end
     
-    # URLs an die Datenbank übergeben
+    # URLs an die Datenbank übergeben (im URL.stored Format)
     def self.insert(urls)
-      Database.queue_insert urls.map{|url| url.stored}.select{|url| url.bytesize < 512}
+      Database.queue_insert urls.select{|url| url.bytesize < 512}
     end
   end
 end
