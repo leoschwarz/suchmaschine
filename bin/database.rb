@@ -51,8 +51,8 @@ module Database
       nil
     end
     
-    def handle_cache_get(key, value)
-      StorageSSD.instance.get("cache:"+key, values)
+    def handle_cache_get(key)
+      StorageSSD.instance.get("cache:"+key)
     end
     
     def handle_document_set(url, document)
