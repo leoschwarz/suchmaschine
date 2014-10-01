@@ -26,21 +26,24 @@ module Database
   class Server
     def initialize
       puts "Die Warteschlange wird geladen und optimiert..."
-      @queue = TaskQueue.new(Database.config.task_queue.storage_path)
-      @queue.load_from_disk
+      @queue = RandomQueue.new(Database.config.task_queue.storage_path)
       puts "Es wurden #{@queue.size} Einträge geladen."
     end
     
     def handle_queue_insert(urls)
       urls.each do |url|
-        @queue.insert(url)
+        @queue.insert(url) unless has_doc_info?(url)
       end
       nil
     end
     
+    def has_doc_info?(url)
+      StorageSSD.instance.include?("docinfo:"+url)
+    end
+    
     def handle_queue_fetch
       url = @queue.fetch
-      while Storage.include? url
+      while has_doc_info? url
         url = @queue.fetch
       end
       url
