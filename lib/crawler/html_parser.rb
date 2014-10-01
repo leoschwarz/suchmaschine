@@ -5,7 +5,7 @@ module Crawler
     attr_reader :indexing_allowed, :following_allowed, :links, :text
     
     def initialize(base_url, html)
-      @base_url = base_url.encoded_url
+      @base_url = base_url
       # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
       # TODO: Dieses Problem eleganter lösen
       @doc      = Nokogiri::HTML(html.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''), nil, "UTF-8")
@@ -37,7 +37,7 @@ module Crawler
       if @following_allowed
         @doc.xpath('//a[@href]').each do |link|
           if link['rel'].nil? or not link['rel'].include? "nofollow"
-            url = URLParser.new(@base_url, link['href']).full_path
+            url = @base_url.join_with(link['href'])
             unless url.nil?
               @links << [_clean_text(link.text), url]
             end

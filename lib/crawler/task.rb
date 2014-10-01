@@ -20,7 +20,7 @@ module Crawler
       if download.success?
         if download.redirect_url.nil?
           parser = HTMLParser.new(@url, download.response_body)
-          links  = parser.links.map{|link| [link[0], URL.encoded(link[1]).stored]}
+          links  = parser.links.map{|link| [link[0], link[1].stored]}
           
           # Ergebniss speichern
           document = Document.new
@@ -40,8 +40,7 @@ module Crawler
             Task.insert(links.map{|pairs| pairs[1]})
           end    
         else
-          url = URLParser.new(@url.encoded, download.redirect_url).full_path
-          Task.insert([URL.encoded(url)])
+          Task.insert([@url.join_with download.redirect_url])
         end
         
         return :success
