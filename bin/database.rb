@@ -80,25 +80,28 @@ module Database
         client = socket.accept
       
         buffer = client.recv(10_000_000)
-        request = buffer.split("\t")
+        action, parameters = buffer.split("\t", 2)
             
-        response = case
-          when request[0] == "QUEUE_INSERT"
-            handle_queue_insert(request[1..-1])
-          when request[0] == "QUEUE_FETCH"
+        response = case action
+          when "QUEUE_INSERT"
+            handle_queue_insert(parameters.split("\t"))
+          when "QUEUE_FETCH"
             handle_queue_fetch
-          when request[0] == "CACHE_SET"
-            handle_cache_set(request[1], request[2])
-          when request[0] == "CACHE_GET"
-            handle_cache_get(request[1])
-          when request[0] == "DOCUMENT_SET"
-            handle_document_set(request[1], request[2])
-          when request[0] == "DOCUMENT_GET"
-            handle_document_get(request[1])
-          when request[0] == "DOCUMENT_INFO_SET"
-            handle_document_info_set(request[1], request[2])
-          when request[0] == "DOCUMENT_INFO_GET"
-            handle_document_info_get(request[1])
+          when "CACHE_SET"
+            key, value = parameters.split("\t", 2)
+            handle_cache_set(key, value)
+          when "CACHE_GET"
+            handle_cache_get(parameters)
+          when "DOCUMENT_SET"
+            key, value = parameters.split("\t", 2)
+            handle_document_set(key, value)
+          when "DOCUMENT_GET"
+            handle_document_get(parameters)
+          when "DOCUMENT_INFO_SET"
+            key, value = parameters.split("\t", 2)
+            handle_document_info_set(key, value)
+          when "DOCUMENT_INFO_GET"
+            handle_document_info_get(parameters)
         end
         
         client.write response
