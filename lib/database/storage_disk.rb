@@ -1,5 +1,4 @@
 require 'singleton'
-require 'digest/md5'
 
 module Database
   class StorageDisk
@@ -79,8 +78,7 @@ module Database
     
     private
     def _path_for_key(key)
-      hash = Digest::MD5.hexdigest(key)
-      "#{root_path}/#{hash}"
+      "#{root_path}/#{key}"
     end
   end
 end
