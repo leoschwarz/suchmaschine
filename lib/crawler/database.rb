@@ -13,7 +13,7 @@ module Crawler
     end
     
     def self.cache_get(key)
-      self._run("CACHE_GET\t"+key)
+      self._run("CACHE_GET\t"+key)[0]
     end
     
     def self.document_set(url, document)
@@ -29,7 +29,7 @@ module Crawler
     end
     
     def self.document_info_get(url)
-      self._run("DOCUMENT_INFO_GET\t#{url}")
+      self._run("DOCUMENT_INFO_GET\t#{url}")[0]
     end
     
     private
