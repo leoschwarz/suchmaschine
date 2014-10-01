@@ -30,9 +30,24 @@ module Crawler
         return
       end
       
-      @success  = curl.status[0] == "2"
-      @redirect = curl.redirect_url unless curl.redirect_url == -1
-      @status   = curl.status
+      # Die Library spukt leider manchmal Fehler aus, wenn etwas nicht klappt...
+      begin
+        @success = curl.status[0] == "2" 
+      rescue Exception
+        @success = false
+      end
+      
+      begin
+        @status = curl.status
+      rescue Exception
+        @status = "500"
+      end
+      
+      begin
+        @redirect = curl.redirect_url unless curl.redirect_url == -1
+      rescue Exception
+        @redirect = nil
+      end
     end
     
     def success?
