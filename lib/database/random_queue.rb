@@ -2,9 +2,9 @@ module Database
   class RandomQueue
     def initialize(file_path)
       # Die Alte Datei umbenennen
-      old_file = "#{file_path}.#{Time.now.to_i}"
+      old_file_path = "#{file_path}.#{Time.now.to_i}"
       if File.exists? file_path
-        `mv "#{file_path}" "#{old_file}"`
+        `mv "#{file_path}" "#{old_file_path}"`
       end
       
       # Neue Datei aufsetzen
@@ -12,21 +12,24 @@ module Database
       @write_buffer = []
       
       # Alte Werte einlesen
-      all_items = []
-      File.read(old_file).lines.each do |line|
+      @items = []
+      old_file = File.open(old_file_path, "r")
+      old_file.each_line do |line|
         cmd, url = line.split(" ", 2)
+        
         if cmd == "INSERT"
-          all_items << url
+          insert(url)
         elsif cmd == "DELETE"
-          all_items.delete(url)
+          # Löschen falls vorhanden
+          if @items.include? url
+            @items.delete(url)
+          else
+            # Ansonsten einfach vormerken
+            _delete(url)
+          end
         end
       end
-      
-      @items = []
-      all_items.each do |item|
-        insert(item)
-      end
-      all_items = nil
+      old_file.close
     end
     
     def insert(url)
