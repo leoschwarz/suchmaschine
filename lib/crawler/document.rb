@@ -6,18 +6,21 @@ module Crawler
   # - url
   # - links
   # - text
-  
+
   class Document < SerializableStruct
-    def hash
-      Digest::MD5.hexdigest self.text
+    attr_accessor :hash
+
+    def self.load(hash)
+      doc = Document.parse(Database.document_get(hash))
+      doc.hash = hash
+      doc
     end
-    
-    def self.load(url)
-      Document.parse(Database.document_get(url))
-    end
-    
+
     def save
-      Database.document_set(self.url, serialize)
+      serialized = self.serialize
+      @hash      = Digest::MD5.hexdigest(serialized)
+      Database.document_set(@hash, serialized)
+      @hash
     end
   end
 end
