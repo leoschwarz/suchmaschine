@@ -16,12 +16,12 @@ module Crawler
       self._run("CACHE_GET\t"+key, false)
     end
     
-    def self.document_set(url, document)
-      self._run("DOCUMENT_SET\t#{url}\t#{document}")
+    def self.document_set(hash, document)
+      self._run("DOCUMENT_SET\t#{hash}\t#{document}")
     end
     
-    def self.document_get(urls)
-      self._run("DOCUMENT_GET\t"+urls.join("\t"))
+    def self.document_get(hashes)
+      self._run("DOCUMENT_GET\t"+hashes.join("\t"))
     end
     
     def self.document_info_set(url, docinfo)

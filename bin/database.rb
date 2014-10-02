@@ -59,13 +59,13 @@ module Database
       StorageSSD.instance.get("cache:"+key)
     end
     
-    def handle_document_set(url, document)
-      StorageHDD.instance.set("doc:"+Digest::MD5.hexdigest(url), document)
+    def handle_document_set(hash, document)
+      StorageHDD.instance.set("doc:"+hash, document)
       nil
     end
     
-    def handle_document_get(url)
-      StorageHDD.instance.get("doc:"+Digest::MD5.hexdigest(url))
+    def handle_document_get(hash)
+      StorageHDD.instance.get("doc:"+hash)
     end
     
     def handle_document_info_set(url, docinfo)
