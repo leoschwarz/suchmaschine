@@ -29,6 +29,11 @@ module Database
       @url_storage = URLStorage.new(Database.config.url_storage.directory)
     end
     
+    # Methode wird beim beenden des Servers aufgerufen und speichert wichtige Daten
+    def stop
+      @url_storage.save_everything
+    end
+    
     def handle_queue_insert(urls)
       urls.each do |url|
         @url_storage.insert(url) unless has_doc_info?(url)
@@ -115,5 +120,12 @@ module Database
 end
 
 if __FILE__ == $0
-  Database::Server.new.run
+  server = Database::Server.new
+  begin
+    server.run
+  rescue SystemExit, Interrupt
+    puts "Daten werden gespeichert..."
+    server.stop
+    puts "Daten wurden gespeichert."
+  end
 end
