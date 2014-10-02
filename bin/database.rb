@@ -3,6 +3,7 @@
 require 'bundler/setup'
 require 'socket'
 require 'lz4-ruby'
+require 'digest/md5'
 require_relative '../lib/database/database'
 require_relative '../config/config.rb'
 
@@ -26,21 +27,24 @@ module Database
   class Server
     def initialize
       puts "Die Warteschlange wird geladen und optimiert..."
-      @queue = TaskQueue.new(Database.config.task_queue.storage_path)
-      @queue.load_from_disk
+      @queue = RandomQueue.new(Database.config.task_queue.storage_path)
       puts "Es wurden #{@queue.size} Einträge geladen."
     end
     
     def handle_queue_insert(urls)
       urls.each do |url|
-        @queue.insert(url)
+        @queue.insert(url) unless has_doc_info?(url)
       end
       nil
     end
     
+    def has_doc_info?(url)
+      StorageSSD.instance.include?("docinfo:"+Digest::MD5.hexdigest(url))
+    end
+    
     def handle_queue_fetch
       url = @queue.fetch
-      while Storage.include? url
+      while has_doc_info? url
         url = @queue.fetch
       end
       url
@@ -56,21 +60,21 @@ module Database
     end
     
     def handle_document_set(url, document)
-      StorageHDD.instance.set("doc:"+url, document)
+      StorageHDD.instance.set("doc:"+Digest::MD5.hexdigest(url), document)
       nil
     end
     
     def handle_document_get(url)
-      StorageHDD.instance.get("doc:"+url)
+      StorageHDD.instance.get("doc:"+Digest::MD5.hexdigest(url))
     end
     
     def handle_document_info_set(url, docinfo)
-      StorageSSD.instance.set("docinfo:"+url, docinfo)
+      StorageSSD.instance.set("docinfo:"+Digest::MD5.hexdigest(url), docinfo)
       nil
     end
     
     def handle_document_info_get(url)
-      StorageSSD.instance.get("docinfo:"+url)
+      StorageSSD.instance.get("docinfo:"+Digest::MD5.hexdigest(url))
     end
     
     def run

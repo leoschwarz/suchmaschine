@@ -64,13 +64,17 @@ module Crawler
       end
       
       # Die URIs zusammenfügen
-      url = URI::join(self.to_uri, url.to_uri).to_s
-      # Den Fragmentidentifier von der URL entfernen (falls vorhanden)
-      hash_index = url.index("#")
-      if hash_index.nil?
-        URL.encoded url
-      else
-        URL.encoded url[0...hash_index]
+      begin
+        url = URI::join(self.to_uri, url.to_uri).to_s
+        # Den Fragmentidentifier von der URL entfernen (falls vorhanden)
+        hash_index = url.index("#")
+        if hash_index.nil?
+          URL.encoded url
+        else
+          URL.encoded url[0...hash_index]
+        end
+      rescue Exception
+        return nil
       end
     end
     
