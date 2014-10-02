@@ -28,8 +28,8 @@ module Database
     end
     
     def next_batchname
-      batch_counter += 1
-      batch_counter.to_s(16)
+      self.batch_counter += 1
+      self.batch_counter.to_s(16)
     end
     
     def serialize

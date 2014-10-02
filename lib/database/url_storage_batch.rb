@@ -2,7 +2,7 @@ module Database
   class URLStorageBatch
     attr_accessor :path, :size
     
-    def intialize(path)
+    def initialize(path)
       @path    = path
       @size    = 0
       @urls    = []
