@@ -5,6 +5,9 @@ production: &default
   hdd:
     path: "./db/keyval/"
     max_size: 20_000_000_000 # Bytes
+  url_storage:
+    directory: './db/urls/'
+    batch_size: 100_000
   task_queue:
     max_active: 100_000 # Die maximale Anzahl an Einträgen die im RAM gehalten werden soll.
     storage_path: "db/task_queue.log"

@@ -26,14 +26,12 @@ load_configuration(Database, "database.yml")
 module Database
   class Server
     def initialize
-      puts "Die Warteschlange wird geladen und optimiert..."
-      @queue = RandomQueue.new(Database.config.task_queue.storage_path)
-      puts "Es wurden #{@queue.size} Einträge geladen."
+      @url_storage = URLStorage.new(Database.config.url_storage.directory)
     end
     
     def handle_queue_insert(urls)
       urls.each do |url|
-        @queue.insert(url) unless has_doc_info?(url)
+        @url_storage.insert(url) unless has_doc_info?(url)
       end
       nil
     end
@@ -43,9 +41,9 @@ module Database
     end
     
     def handle_queue_fetch
-      url = @queue.fetch
+      url = @url_storage.fetch
       while has_doc_info? url
-        url = @queue.fetch
+        url = @url_storage.fetch
       end
       url
     end
