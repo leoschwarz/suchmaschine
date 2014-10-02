@@ -59,7 +59,7 @@ module Database
     
     # Speichert alles zu speichernde
     def save_everything
-      @current_full_batch.save
+      @current_full_batch.save unless @current_full_batch.nil?
       @current_open_batch.save
       @metadata.save
     end
