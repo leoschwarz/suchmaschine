@@ -1,7 +1,5 @@
-/cache/
 .DS_Store
-vendor/
 .bundle/
 log/
-db/task_queue.log*
-db/tasks/
+db/*
+
