@@ -4,9 +4,9 @@ require 'bundler/setup'
 require 'nokogiri'
 require 'curb'
 
-
-require './lib/crawler/crawler.rb'
-require './config/config.rb'
+require_relative '../lib/crawler/crawler.rb'
+require_relative '../lib/common/common.rb'
+require_relative '../config/config.rb'
 load_configuration(Crawler, "crawler.yml")
 
 # fürs Debuggen

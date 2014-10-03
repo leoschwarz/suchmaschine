@@ -35,10 +35,8 @@ module Crawler
     private
     def self._run(query, split_results=true)
       begin
-        connection = TCPSocket.new("127.0.0.1", 2051)
-        connection.puts(query)
-        response   = connection.gets.strip
-        connection.close
+        client = Common::FastClient.new("127.0.0.1", 2051)
+        response = client.request(query)
         
         unless response.nil? or response.empty?
           if split_results

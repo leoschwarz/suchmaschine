@@ -4,6 +4,7 @@ require 'bundler/setup'
 require 'socket'
 require 'lz4-ruby'
 require 'digest/md5'
+require_relative '../lib/common/common.rb'
 require_relative '../lib/database/database'
 require_relative '../config/config.rb'
 
@@ -12,7 +13,6 @@ load_configuration(Database, "database.yml")
 # API Dokumentation :: 
 # 
 # [...] = Weitere Tab-getrennte Werte(paare)
-# Hinweis: Befehle müssen mit einem newline-byte beendet werden.
 #
 # QUEUE_INSERT\tURL1[...]
 # QUEUE_FETCH
@@ -27,12 +27,49 @@ load_configuration(Database, "database.yml")
 module Database
   class Server
     def initialize
-      @url_storage = URLStorage.new(Database.config.url_storage.directory)
+      @server = Common::FastServer.new("127.0.0.1", 2051)
+      @server.on_start do 
+        @url_storage = URLStorage.new(Database.config.url_storage.directory)
+      end
+      
+      @server.on_stop do
+        @url_storage.save_everything
+        puts "Daten erfolgreich gespeichert."
+      end
+      
+      @server.on_request do |request|
+        action, parameters = request.split("\t", 2)
+        handle_action(action, parameters)
+      end
     end
     
-    # Methode wird beim beenden des Servers aufgerufen und speichert wichtige Daten
-    def stop
-      @url_storage.save_everything
+    def start
+      @server.start
+    end
+    
+    # Verschiedene Handler für verschiedene Aktionen
+    def handle_action(action, parameters)
+      case action
+        when "QUEUE_INSERT"
+          handle_queue_insert(parameters.split("\t"))
+        when "QUEUE_FETCH"
+          handle_queue_fetch
+        when "CACHE_SET"
+          key, value = parameters.split("\t", 2)
+          handle_cache_set(key, value)
+        when "CACHE_GET"
+          handle_cache_get(parameters)
+        when "DOCUMENT_SET"
+          key, value = parameters.split("\t", 2)
+          handle_document_set(key, value)
+        when "DOCUMENT_GET"
+          handle_document_get(parameters)
+        when "DOCUMENT_INFO_SET"
+          key, value = parameters.split("\t", 2)
+          handle_document_info_set(key, value)
+        when "DOCUMENT_INFO_GET"
+          handle_document_info_get(parameters)
+      end
     end
     
     def handle_queue_insert(urls)
@@ -80,53 +117,10 @@ module Database
     def handle_document_info_get(url)
       StorageSSD.instance.get("docinfo:"+Digest::MD5.hexdigest(url))
     end
-    
-    def run
-      socket = TCPServer.new 2051
-      puts "Der Server läuft nun auf Port 2051."
-    
-      loop do
-        client = socket.accept
-      
-        buffer = client.gets.strip
-        action, parameters = buffer.split("\t", 2)
-            
-        response = case action
-          when "QUEUE_INSERT"
-            handle_queue_insert(parameters.split("\t"))
-          when "QUEUE_FETCH"
-            handle_queue_fetch
-          when "CACHE_SET"
-            key, value = parameters.split("\t", 2)
-            handle_cache_set(key, value)
-          when "CACHE_GET"
-            handle_cache_get(parameters)
-          when "DOCUMENT_SET"
-            key, value = parameters.split("\t", 2)
-            handle_document_set(key, value)
-          when "DOCUMENT_GET"
-            handle_document_get(parameters)
-          when "DOCUMENT_INFO_SET"
-            key, value = parameters.split("\t", 2)
-            handle_document_info_set(key, value)
-          when "DOCUMENT_INFO_GET"
-            handle_document_info_get(parameters)
-        end
-        
-        client.puts response
-        client.close
-      end
-    end
   end
 end
 
 if __FILE__ == $0
   server = Database::Server.new
-  begin
-    server.run
-  rescue SystemExit, Interrupt
-    puts "Daten werden gespeichert..."
-    server.stop
-    puts "Daten wurden gespeichert."
-  end
+  server.start
 end
