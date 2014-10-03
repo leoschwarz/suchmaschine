@@ -27,14 +27,17 @@ load_configuration(Database, "database.yml")
 module Database
   class Server
     def initialize
-      puts "Die Warteschlange wird geladen und optimiert..."
-      @queue = RandomQueue.new(Database.config.task_queue.storage_path)
-      puts "Es wurden #{@queue.size} Einträge geladen."
+      @url_storage = URLStorage.new(Database.config.url_storage.directory)
+    end
+    
+    # Methode wird beim beenden des Servers aufgerufen und speichert wichtige Daten
+    def stop
+      @url_storage.save_everything
     end
     
     def handle_queue_insert(urls)
       urls.each do |url|
-        @queue.insert(url) unless has_doc_info?(url)
+        @url_storage.insert(url) unless has_doc_info?(url)
       end
       nil
     end
@@ -44,9 +47,9 @@ module Database
     end
     
     def handle_queue_fetch
-      url = @queue.fetch
+      url = @url_storage.fetch
       while has_doc_info? url
-        url = @queue.fetch
+        url = @url_storage.fetch
       end
       url
     end
@@ -60,13 +63,13 @@ module Database
       StorageSSD.instance.get("cache:"+key)
     end
     
-    def handle_document_set(url, document)
-      StorageHDD.instance.set("doc:"+Digest::MD5.hexdigest(url), document)
+    def handle_document_set(hash, document)
+      StorageHDD.instance.set("doc:"+hash, document)
       nil
     end
     
-    def handle_document_get(url)
-      StorageHDD.instance.get("doc:"+Digest::MD5.hexdigest(url))
+    def handle_document_get(hash)
+      StorageHDD.instance.get("doc:"+hash)
     end
     
     def handle_document_info_set(url, docinfo)
@@ -118,5 +121,12 @@ module Database
 end
 
 if __FILE__ == $0
-  Database::Server.new.run
+  server = Database::Server.new
+  begin
+    server.run
+  rescue SystemExit, Interrupt
+    puts "Daten werden gespeichert..."
+    server.stop
+    puts "Daten wurden gespeichert."
+  end
 end

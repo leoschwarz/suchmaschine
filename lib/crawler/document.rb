@@ -11,7 +11,9 @@ module Crawler
     attr_accessor :hash
 
     def self.load(hash)
-      doc = Document.parse(Database.document_get(hash))
+      raw = Database.document_get(hash)
+      return nil if raw.nil? or raw.empty?
+      doc = Document.parse(raw[0])
       doc.hash = hash
       doc
     end
