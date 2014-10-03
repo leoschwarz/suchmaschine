@@ -40,7 +40,14 @@ module Crawler
             Task.insert(links.map{|pairs| pairs[1]})
           end    
         else
-          Task.insert([@url.join_with(download.redirect_url)])
+          destination_url = @url.join_with(download.redirect_url)
+          Task.insert([destination_url.stored]) unless destination_url.nil?
+          
+          docinfo          = DocumentInfo.new
+          docinfo.url      = @url.stored
+          docinfo.redirect = destination_url.stored unless destination_url.nil?
+          docinfo.added_at = Time.now.to_i
+          docinfo.save
         end
         
         return :success
