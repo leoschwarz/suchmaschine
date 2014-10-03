@@ -12,6 +12,7 @@ load_configuration(Database, "database.yml")
 # API Dokumentation :: 
 # 
 # [...] = Weitere Tab-getrennte Werte(paare)
+# Hinweis: Befehle müssen mit einem newline-byte beendet werden.
 #
 # QUEUE_INSERT\tURL1[...]
 # QUEUE_FETCH
@@ -84,7 +85,7 @@ module Database
       loop do
         client = socket.accept
       
-        buffer = client.recv(10_000_000)
+        buffer = client.gets.strip
         action, parameters = buffer.split("\t", 2)
             
         response = case action
@@ -109,7 +110,7 @@ module Database
             handle_document_info_get(parameters)
         end
         
-        client.write response
+        client.puts response
         client.close
       end
     end
