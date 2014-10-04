@@ -1,3 +1,5 @@
+require 'lz4-ruby'
+
 module Database
   class URLStorageBatch
     attr_accessor :path, :size
@@ -14,21 +16,20 @@ module Database
     
     # Lädt die Datei.
     def load
-      file = File.open(@path, "r")
-      file.each_line do |line|
+      raw = LZ4::uncompress(File.read(@path))
+      raw.each_line do |line|
         @urls << line.strip
         @size += 1
       end
-      file.close
       
       @urls.shuffle!
     end
     
     # Speichert die Datei.
     def save
-      file = File.open(@path, "w")
-      file.write(@urls.join("\n"))
-      file.close
+      File.open(@path, "w") do |file|
+        file.write(LZ4::compress(@urls.join("\n")))
+      end
     end
     
     # Löscht die Datei.

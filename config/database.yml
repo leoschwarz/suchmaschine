@@ -7,7 +7,7 @@ production: &default
     max_size: 20_000_000_000 # Bytes
   url_storage:
     directory: './db/urls/'
-    batch_size: 100_000
+    batch_size: 200_000
   server:
     host: "0.0.0.0"
     port: 2051
