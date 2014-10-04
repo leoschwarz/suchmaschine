@@ -4,16 +4,16 @@ production: &default
   max_response_length: 512000 # 1024 * 500 Bytes, also 500kB
   crawl_delay: 1.0       # Anzahl Sekunden die gewartet werden muss bevor von der gleichen Domain wieder etwas geladen werden darf.
   log_interval: 5        # Anzahl Sekunden zwischen den Logs
-  redis: "redis://127.0.0.1:6379"
   robots_txt:
     timeout: 10 # Sekunden
     use_cache: YES
     cache_lifetime: 86400 # Sekunden, hier ein Tag.
+  database:
+    host: "127.0.0.1"
+    port: 2051
 
 development:
   <<: *default
-  parallel_tasks: 100
-  redis: "redis://127.0.0.1:6379"
 
 test:
   <<: *default

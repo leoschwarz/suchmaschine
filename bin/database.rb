@@ -26,7 +26,7 @@ Common::load_configuration(Database, "database.yml")
 module Database
   class Server
     def initialize
-      @server = Common::FastServer.new("0.0.0.0", 2051)
+      @server = Common::FastServer.new(Database.config.server.host, Database.config.server.port)
       @server.on_start do 
         @url_storage = URLStorage.new(Database.config.url_storage.directory)
       end

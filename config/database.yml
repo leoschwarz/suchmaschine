@@ -8,10 +8,9 @@ production: &default
   url_storage:
     directory: './db/urls/'
     batch_size: 100_000
-  task_queue:
-    max_active: 100_000 # Die maximale Anzahl an Einträgen die im RAM gehalten werden soll.
-    storage_path: "db/task_queue.log"
-    storage_buffer: 500 # Die Anzahl Transaktionen die im RAM bleiben soll bevor sie geschrieben werden. 
+  server:
+    host: "0.0.0.0"
+    port: 2051
 
 development:
   <<: *default

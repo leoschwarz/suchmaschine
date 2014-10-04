@@ -42,7 +42,7 @@ module Crawler
       options[:response_required] = false if options[:response_required].nil?
       options[:retries_left]      = 3     if options[:retries_left].nil?
       
-      client   = Common::FastClient.new("127.0.0.1", 2051)
+      client   = Common::FastClient.new(Crawler.config.database.host, Crawler.config.database.port)
       response = client.request(query)
       if options[:response_required]
         if response.nil? or response.empty?
