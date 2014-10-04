@@ -3,7 +3,7 @@
 
 require_relative '../bin/database.rb'
 require 'oj'
-require 'lz4'
+require 'lz4-ruby'
 
 $data_dir = Database.config.paths.ssd
 
