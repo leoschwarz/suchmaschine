@@ -20,8 +20,8 @@ module Crawler
       self._run("DOCUMENT_SET\t#{hash}\t#{document}")
     end
     
-    def self.document_get(hashes)
-      self._run("DOCUMENT_GET\t"+hashes.join("\t"))
+    def self.document_get(hash)
+      self._run("DOCUMENT_GET\t"+hash)
     end
     
     def self.document_info_set(url, docinfo)
