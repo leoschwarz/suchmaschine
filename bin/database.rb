@@ -6,9 +6,8 @@ require 'lz4-ruby'
 require 'digest/md5'
 require_relative '../lib/common/common.rb'
 require_relative '../lib/database/database'
-require_relative '../config/config.rb'
 
-load_configuration(Database, "database.yml")
+Common::load_configuration(Database, "database.yml")
 
 # API Dokumentation :: 
 # 

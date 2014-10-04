@@ -6,8 +6,8 @@ require 'curb'
 
 require_relative '../lib/crawler/crawler.rb'
 require_relative '../lib/common/common.rb'
-require_relative '../config/config.rb'
-load_configuration(Crawler, "crawler.yml")
+
+Common::load_configuration(Crawler, "crawler.yml")
 
 # fürs Debuggen
 Thread.abort_on_exception = true
