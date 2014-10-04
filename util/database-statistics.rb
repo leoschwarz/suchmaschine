@@ -13,7 +13,7 @@ puts "DOCINFO EINTRÄGE : #{docinfo_paths.size}"
 
 domain_counts = {}
 docinfo_paths.each do |path|
-  url = Oj.load LZ4::uncompress(File.read(path))
+  url = Oj.load(LZ4::uncompress(File.read(path))).url
   match = /https?:\/\/([a-zA-Z0-9\.-]+)/.match(url)
   if not match.nil?
     domain_name = match[1].downcase
