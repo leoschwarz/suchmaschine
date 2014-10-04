@@ -1,54 +1,64 @@
 module Crawler
   class Database
     def self.queue_insert(urls)
-      self._run("QUEUE_INSERT\t"+urls.join("\t"))
+      self.run("QUEUE_INSERT\t#{urls.join("\t")}")
     end
     
     def self.queue_fetch()
-      Task.new(URL.stored self._run("QUEUE_FETCH", false))
+      stored_url = self.run("QUEUE_FETCH", {response_required: true})
+      Task.new(URL.stored stored_url)
     end
     
     def self.cache_set(key, value)
-      self._run("CACHE_SET\t#{key}\t#{value}")
+      self.run("CACHE_SET\t#{key}\t#{value}")
     end
     
     def self.cache_get(key)
-      self._run("CACHE_GET\t"+key, false)
+      self.run("CACHE_GET\t#{key}")
     end
     
     def self.document_set(hash, document)
-      self._run("DOCUMENT_SET\t#{hash}\t#{document}")
+      self.run("DOCUMENT_SET\t#{hash}\t#{document}")
     end
     
     def self.document_get(hash)
-      self._run("DOCUMENT_GET\t"+hash)
+      self.run("DOCUMENT_GET\t#{hash}")
     end
     
     def self.document_info_set(url, docinfo)
-      self._run("DOCUMENT_INFO_SET\t#{url}\t#{docinfo}")
+      self.run("DOCUMENT_INFO_SET\t#{url}\t#{docinfo}")
     end
     
     def self.document_info_get(url)
-      self._run("DOCUMENT_INFO_GET\t#{url}", false)
+      self.run("DOCUMENT_INFO_GET\t#{url}")
     end
     
-    private
-    def self._run(query, split_results=true)
-      begin
-        client = Common::FastClient.new("127.0.0.1", 2051)
-        response = client.request(query)
-        
-        unless response.nil? or response.empty?
-          if split_results
-            return response.split("\t")
+    # Führt ein 'query' auf dem Datenbankserver aus.
+    # Optionen:
+    # response_required: [Boolean] Muss eine Antwort erhalten werden?
+    #                              Falls keine zurück gegeben wird, wird erneut versucht eine Antwort zu erhalten.
+    # retries_left: [Integer]      Wieviele Wiederholversuche verbleiben
+    def self.run(query, options={})
+      options[:response_required] = false if options[:response_required].nil?
+      options[:retries_left]      = 3     if options[:retries_left].nil?
+      
+      client   = Common::FastClient.new("127.0.0.1", 2051)
+      response = client.request(query)
+      if options[:response_required]
+        if response.nil? or response.empty?
+          # Darf noch ein Request gesendet werden?
+          if options[:retries_left] > 0
+            options[:retries_left] -= 1
+            # 1s warten bis erneut versucht wird:
+            sleep 1
+            return self.run(query, options)
           else
-            return response
+            raise RuntimeError.new("Fehler bei der Ausführung einer Datenbankabfrage.")
           end
         end
-      rescue Exception
-        # TODO
       end
-      nil
+      
+      response
     end
   end
 end

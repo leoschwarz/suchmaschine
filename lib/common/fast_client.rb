@@ -9,11 +9,23 @@ module Common
     
     # Führt die Anfrage aus und gibt das Resultat als String zurück.
     def request(req)
-      socket = TCPSocket.new(@host, @port)
-      socket.puts(req)
-      response = socket.gets.strip
-      socket.close
-      response
+      begin
+        socket = TCPSocket.new(@host, @port)
+        socket.puts(req)
+        response = socket.gets
+        response.strip! unless response.nil?
+        socket.close
+      
+        unless response.nil?
+          if response.empty?
+            response = nil
+          end
+        end
+      
+        response
+      rescue SystemCallError
+        nil
+      end
     end
   end
 end
