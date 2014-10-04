@@ -5,7 +5,7 @@ module Crawler
   class RobotsParser    
     def initialize(robot_name)
       @robot_name = robot_name
-      @domains    = {}
+      @parsers    = Common::RAMCacheFIFO.new(200)
     end
     
     def self.instance(robot_name)
@@ -21,11 +21,8 @@ module Crawler
       path   = match[2]
       if path.empty? then path = "/" end
       
-      if @domains[domain].nil?
-        @domains[domain] = RobotsTxtParser.new(domain, @robot_name)
-      end
-      @domains[domain].load_if_needed
-      @domains[domain].allowed?(path)
+      @parsers[domain] ||= RobotsTxtParser.new(domain, @robot_name)
+      @parsers[domain].allowed?(path)
     end
     
     def self.allowed?(url)

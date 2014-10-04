@@ -4,14 +4,10 @@ module Crawler
     def initialize(domain, robot_name)
       @domain     = domain
       @robot_name = robot_name
-      @cache_item = nil
+      load
     end
     
-    def load_if_needed
-      if not @cache_item.nil?
-        return
-      end
-      
+    def load
       @cache_item = RobotsTxtCacheItem.for_domain(@domain)
       if @cache_item.status != :ok
         begin
