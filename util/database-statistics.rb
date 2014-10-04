@@ -5,7 +5,7 @@ require_relative '../bin/database.rb'
 require 'oj'
 require 'lz4-ruby'
 
-$data_dir = Database.config.paths.ssd
+$data_dir = Database.config.ssd.path
 
 puts "CACHE EINTRÄGE   : #{Dir["#{$data_dir}cache:*"].size}"
 docinfo_paths = Dir["#{$data_dir}docinfo:*"]
