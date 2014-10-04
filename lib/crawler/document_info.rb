@@ -8,6 +8,7 @@ module Crawler
   # + permissions.index [Boolean]
   # + permissions.follow [Boolean]
   # - document_hash [String]
+  # - redirect [String] (nur definiert wenn vorhanden)
 
   class DocumentInfo < SerializableStruct
     def document
