@@ -7,6 +7,8 @@ require_relative '../lib/indexer/indexer.rb'
 require 'lz4-ruby'
 require 'oj'
 
+Common::load_configuration(Indexer, "indexer.yml")
+
 module Indexer
   class Main
     def run
