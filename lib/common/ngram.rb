@@ -11,7 +11,7 @@ module Common
       VALUE count_ngrams_c(VALUE text, VALUE rb_ngram_size) {
         VALUE counter = rb_hash_new();
         VALUE ngram;
-        int old_count, i, j;
+        int old_count, i;
         int length = RSTRING_LEN(text);
         int ngram_size = FIX2INT(rb_ngram_size);
         for (i=0; i <= length-ngram_size; i++) {
