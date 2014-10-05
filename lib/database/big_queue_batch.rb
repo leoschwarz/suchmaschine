@@ -1,7 +1,7 @@
 require 'lz4-ruby'
 
 module Database
-  class URLStorageBatch
+  class BigQueueBatch
     attr_accessor :path, :size
     
     def initialize(path)
@@ -54,7 +54,7 @@ module Database
     end
     
     def full?
-      @size >= Database.config.url_storage.batch_size
+      @size >= Database.config.batch_size
     end
     
     def empty?

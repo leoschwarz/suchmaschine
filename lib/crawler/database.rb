@@ -1,11 +1,11 @@
 module Crawler
   class Database
     def self.queue_insert(urls)
-      self.run("QUEUE_INSERT\t#{urls.join("\t")}")
+      self.run("DOWNLOAD_QUEUE_INSERT\t#{urls.join("\t")}")
     end
     
     def self.queue_fetch()
-      stored_url = self.run("QUEUE_FETCH", {response_required: true})
+      stored_url = self.run("DOWNLOAD_QUEUE_FETCH", {response_required: true})
       Task.new(URL.stored stored_url)
     end
     

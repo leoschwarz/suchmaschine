@@ -1,22 +1,22 @@
 module Database
-  class URLStorage
+  class BigQueue
     def initialize(directory)
       # Initialisierung
       @directory = directory
-      @metadata = URLStorageMetadata.open_directory(directory)
-      @metadata = URLStorageMetadata.new(File.join(directory, "metadata.json")) if @metadata.nil?
+      @metadata = BigQueueMetadata.open_directory(directory)
+      @metadata = BigQueueMetadata.new(File.join(directory, "metadata.json")) if @metadata.nil?
       
-      # Eine URLStorageBatch Instanz für den ersten vollen Stapel erzeugen, falls möglich.
+      # Eine BigQueueBatch Instanz für den ersten vollen Stapel erzeugen, falls möglich.
       if @metadata.full_batches.size > 0
-        @current_full_batch = URLStorageBatch.new(batch_path(@metadata.full_batches[0]))
+        @current_full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[0]))
       end
       
-      # Eine URLStorageBatch Instanz für den momentan zu befüllenden Stapel erzeugen.
+      # Eine BigQueueBatch Instanz für den momentan zu befüllenden Stapel erzeugen.
       if @metadata.open_batch.nil?
         @metadata.open_batch = @metadata.next_batchname
         @metadata.save
       end
-      @current_open_batch = URLStorageBatch.new(batch_path(@metadata.open_batch))
+      @current_open_batch = BigQueueBatch.new(batch_path(@metadata.open_batch))
     end
     
     # Schreibt eine URL in das System.
@@ -27,7 +27,7 @@ module Database
         @metadata.open_batch = @metadata.next_batchname
         @metadata.save
         @current_open_batch.save
-        @current_open_batch = URLStorageBatch.new(batch_path(@metadata.open_batch))
+        @current_open_batch = BigQueueBatch.new(batch_path(@metadata.open_batch))
       end
       
       # Eintrag hinzufügen
@@ -50,7 +50,7 @@ module Database
           @current_full_batch = nil
           return nil
         else
-          @current_full_batch = URLStorageBatch.new(batch_path(@metadata.full_batches[0]))
+          @current_full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[0]))
         end
       end
       

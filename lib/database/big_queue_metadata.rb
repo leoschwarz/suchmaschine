@@ -1,7 +1,7 @@
 require 'oj'
 
 module Database
-  class URLStorageMetadata
+  class BigQueueMetadata
     def initialize(path, data=nil)
       @path = path
       @data = data
@@ -48,7 +48,7 @@ module Database
     end
     
     # Öffnet die metadata.json Datei in einem bestimmten Verzeichniss.
-    # Bei Erfolg wird eine URLStorageMetadata Instanz zurückgegeben,
+    # Bei Erfolg wird eine BigQueueMetadata Instanz zurückgegeben,
     # ansonsten wird nil zurückgegeben.
     def self.open_directory(dir)
       path = File.join(dir, "metadata.json")
