@@ -15,14 +15,12 @@ module Common
         int length = RSTRING_LEN(text);
         int ngram_size = FIX2INT(rb_ngram_size);
         for (i=0; i <= length-ngram_size; i++) {
-          for (j=1; j<=ngram_size; j++) {
-            ngram = rb_str_substr(text, i, j);
-            if (RTEST(rb_hash_aref(counter, ngram))) {
-              old_count = FIX2INT(rb_hash_aref(counter, ngram));
-              rb_hash_aset(counter, ngram, INT2FIX(old_count+1));
-            } else if (!NIL_P(ngram)) { /* ngram kann manchmal nil sein... */
-              rb_hash_aset(counter, ngram, INT2FIX(1));
-            }
+          ngram = rb_str_substr(text, i, ngram_size);
+          if (RTEST(rb_hash_aref(counter, ngram))) {
+            old_count = FIX2INT(rb_hash_aref(counter, ngram));
+            rb_hash_aset(counter, ngram, INT2FIX(old_count+1));
+          } else if (!NIL_P(ngram)) { /* ngram kann manchmal nil sein... */
+            rb_hash_aset(counter, ngram, INT2FIX(1));
           }
         }
       
