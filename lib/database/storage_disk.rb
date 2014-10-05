@@ -5,12 +5,12 @@ module Database
     include Singleton
     
     def initialize
-      @current_size = 0
-      
-      # Dateien auszählen
-      Dir["#{root_path}/*"].each do |file|
-        @current_size += File.size(file)
-      end
+#      @current_size = 0
+#      
+#      # Dateien auszählen
+#      Dir["#{root_path}/*"].each do |file|
+#        @current_size += File.size(file)
+#      end
     end
     
     # Pfad zum Stammverzeichniss der Dateistruktur
@@ -31,18 +31,18 @@ module Database
       
       # Dokument speichern
       path = _path_for_key(key)
-      size_change = document.bytesize
-      if File.exists? path
-        size_change -= File.size(path)
-      end
-      
-      # Es muss solange ausgelagert werden, bis es genug Platz hat.
-      while @current_size+size_change >= max_size
-        swap_item
-      end
-      
-      # Byte Zähler aktualisieren
-      @current_size += size_change
+#      size_change = document.bytesize
+#      if File.exists? path
+#        size_change -= File.size(path)
+#      end
+#      
+#      # Es muss solange ausgelagert werden, bis es genug Platz hat.
+#      while @current_size+size_change >= max_size
+#        swap_item
+#      end
+#      
+#      # Byte Zähler aktualisieren
+#      @current_size += size_change
       
       file = File.open(path, "w")
       file.write(document)
@@ -62,15 +62,15 @@ module Database
     def delete(key)
       path = _path_for_key(key)
       if File.exists? path
-        @current_size -= File.size(path)
+#        @current_size -= File.size(path)
         File.unlink(key)
       end
       nil
     end
     
-    def swap_item
-      raise NotImplementedError
-    end
+#    def swap_item
+#      raise NotImplementedError
+#    end
     
     def include?(key)
       File.exists?(_path_for_key key)
