@@ -87,7 +87,7 @@ module Database
         end
       elsif queue == :index
         items.each do |docinfo_key|
-          @queues[:index].insert(url)
+          @queues[:index].insert(docinfo_key)
         end
       end
       
