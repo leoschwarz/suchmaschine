@@ -36,7 +36,8 @@ module Database
       end
       
       @server.on_stop do
-        @url_storage.save_everything
+        @queues[:download].save_everything
+        @queues[:index].save_everything
         puts "Daten erfolgreich gespeichert."
       end
       
