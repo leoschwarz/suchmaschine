@@ -20,7 +20,7 @@ Common::load_configuration(Database, "database.yml")
 # CACHE_GET\tKEY
 # DOCUMENT_SET\tURL\tDOCUMENT
 # DOCUMENT_GET\tURL
-# DOCUMENT_INFO_SET\tURL\tDOCUMENT_INFO
+# DOCUMENT_INFO_SET\tURL\tDOCUMENT_INFO -> Dies speichert die Dokumentinfo UND gibt dieses in die INDEX Warteschlange auf.
 # DOCUMENT_INFO_GET\tURL
 
 
@@ -74,7 +74,8 @@ module Database
           handle_document_get(parameters)
         when "DOCUMENT_INFO_SET"
           key, value = parameters.split("\t", 2)
-          handle_document_info_set(key, value)
+          doc_id = handle_document_info_set(key, value)
+          handle_queue_insert(:index, doc_id)
         when "DOCUMENT_INFO_GET"
           handle_document_info_get(parameters)
       end
@@ -129,8 +130,9 @@ module Database
     end
     
     def handle_document_info_set(url, docinfo)
-      StorageSSD.instance.set("docinfo:"+Digest::MD5.hexdigest(url), docinfo)
-      nil
+      doc_id = Digest::MD5.hexdigest(url)
+      StorageSSD.instance.set("docinfo:"+doc_id, docinfo)
+      doc_id
     end
     
     def handle_document_info_get(url)
