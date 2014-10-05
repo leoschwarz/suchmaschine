@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require 'socket'
 require 'lz4-ruby'
 require 'digest/md5'
 require_relative '../lib/common/common.rb'
