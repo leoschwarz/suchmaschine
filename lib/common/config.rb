@@ -1,4 +1,3 @@
-require 'hashr'
 require 'yaml'
 
 module Common
@@ -16,10 +15,25 @@ module Common
         environment = "development"
       end
     
-      module_ref.class_variable_set(:@@config, Hashr.new(data[environment]))
+      module_ref.class_variable_set(:@@config, NeatHash.new(data[environment]))
       module_ref.send :define_singleton_method, :config do
         self.class_variable_get(:@@config)
       end
+    end
+  end
+  
+  class NeatHash
+    # TODO: Wahrscheinlich ist dies unschön genug, dass es sich doch lohnen würde
+    #       evtl. den 'config'-Hash direkt zu verwenden.
+    def self.load(hash)
+      klass = Class.new
+      hash.each_pair do |key, value|
+        if value.class == Hash
+          value = self.load(value)
+        end
+        klass.class_eval{ define_method(key){ value } }
+      end
+      klass.new
     end
   end
 end

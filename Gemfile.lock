@@ -8,7 +8,6 @@ GEM
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     curb (0.8.6)
-    hashr (0.0.22)
     lz4-ruby (0.3.3)
     mini_portile (0.6.0)
     nokogiri (1.6.2.1)
@@ -25,7 +24,6 @@ PLATFORMS
 DEPENDENCIES
   RubyInline (~> 3.12.3)
   curb (~> 0.8.6)
-  hashr (~> 0.0.22)
   lz4-ruby (~> 0.3.3)
   nokogiri (~> 1.6.2.1)
   oj (~> 2.9.9)
