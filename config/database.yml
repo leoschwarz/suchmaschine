@@ -10,6 +10,8 @@ production: &default
     directory: './db/urls/'
   index_queue:
     directory: './db/index/'
+  index:
+    directory: '/mnt/sdb/suchmaschine/index/'
   server:
     host: "0.0.0.0"
     port: 2051

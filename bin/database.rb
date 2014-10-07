@@ -16,6 +16,7 @@ Common::load_configuration(Database, "database.yml")
 # DOWNLOAD_QUEUE_FETCH
 # INDEX_QUEUE_INSERT\tDOCINFO1[...]
 # INDEX_QUEUE_FETCH
+# INDEX_APPEND\tWORD1\tDOCINFO_HASH1[...] -> Fügt die jeweiligen DOCINFO Einträge zu den Index Files hinzu.
 # CACHE_SET\tKEY\tVALUE
 # CACHE_GET\tKEY
 # DOCUMENT_SET\tHASH\tDOCUMENT
@@ -38,6 +39,7 @@ module Database
       @server.on_stop do
         @queues[:download].save_everything
         @queues[:index].save_everything
+        Index.instance.save_everything
         puts "Daten erfolgreich gespeichert."
       end
       
@@ -62,6 +64,9 @@ module Database
           handle_queue_insert(:index, parameters.split("\t"))
         when "INDEX_QUEUE_FETCH"
           handle_queue_fetch(:index)
+        when "INDEX_APPEND"
+          pairs = parameters.split("\t").each_slice(2)
+          handle_index_append(pairs)
         when "CACHE_SET"
           key, value = parameters.split("\t", 2)
           handle_cache_set(key, value)
@@ -108,6 +113,12 @@ module Database
         return url
       elsif queue == :index
         return @queues[:index].fetch
+      end
+    end
+    
+    def handle_index_append(pairs)
+      pairs.each do |word, docinfo_id|
+        Index.instance.append(word, docinfo_id)
       end
     end
     

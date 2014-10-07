@@ -18,12 +18,10 @@ module Common
     def []=(key, value)
       if self.include?(key)
         # Schlüssel aus der Warteschlange nehmen.
-        @queue.delete(key)
-        @items_count -= 1
+        self.delete(key)
       elsif @items_count+1>@max_items
         # Ältesten Eintrag löschen.
-        @items.delete(@queue.shift)
-        @items_count -= 1
+        self.delete(@queue[0])
       end
       
       @items_count += 1
@@ -31,8 +29,21 @@ module Common
       @items[key] = value
     end
     
+    def delete(key)
+      @queue.delete(key)
+      item = @items.delete(key)
+      item.removed_from_cache if item.respond_to? :removed_from_cache
+      @items_count -= 1
+    end
+    
     def include?(key)
       @items.has_key?(key)
+    end
+    
+    def remove_all
+      @items.keys.each do |key|
+        self.delete(key)
+      end
     end
   end
 end

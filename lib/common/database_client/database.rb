@@ -16,6 +16,10 @@ module Common
       def self.index_queue_fetch()
         self.run("INDEX_QUEUE_FETCH")
       end
+      
+      def self.index_append(pairs)
+        self.run("INDEX_APPEND\t#{pairs.flatten.join("\t")}"
+      end
     
       def self.cache_set(key, value)
         self.run("CACHE_SET\t#{key}\t#{value}")
