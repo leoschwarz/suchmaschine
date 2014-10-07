@@ -1,65 +1,29 @@
 module Database
   class BigQueue
     def initialize(directory)
-      # Initialisierung
+      # Metainformation laden.
       @directory = directory
-      @metadata = BigQueueMetadata.open_directory(directory)
-      @metadata = BigQueueMetadata.new(File.join(directory, "metadata.json")) if @metadata.nil?
-      
-      # Eine BigQueueBatch Instanz für einen vollen Stapel erzeugen, falls möglich.
-      load_random_full_batch
-      
-      # Eine BigQueueBatch Instanz für den momentan zu befüllenden Stapel erzeugen.
-      if @metadata.open_batch.nil?
-        @metadata.open_batch = @metadata.next_batchname
-        @metadata.save
-      end
-      @open_batch = BigQueueBatch.new(batch_path(@metadata.open_batch))
+      @metadata   = BigQueueMetadata.open_directory(directory)
+      @metadata ||= BigQueueMetadata.new(File.join(directory, "metadata.json"))
     end
     
     # Schreibt eine URL in das System.
     def insert(url)
-      # Neuen Stapel laden, falls der alte voll ist.
-      if @open_batch.full?
-        @metadata.full_batches << @metadata.open_batch
-        @metadata.open_batch = @metadata.next_batchname
-        @metadata.save
-        @open_batch.save
-        @open_batch = BigQueueBatch.new(batch_path(@metadata.open_batch))
-      end
-      
-      # Eintrag hinzufügen
+      load_open_batch
       @open_batch.insert(url)
     end
     
     # Nimmt eine URL aus dem System.
     def fetch
-      if @full_batch.nil?
-        return nil
-      end
-      
-      if @full_batch.empty?
-        # Den Stapel löschen und den Eintrag aus metadata.json löschen und versuchen einen neuen zu laden.
-        @full_batch.delete
-        @metadata.full_batches.delete_at(@full_batch_index)
-        @metadata.save
-        if @metadata.full_batches.empty?
-          # Es gibt keinen weiteren vollen Stapel
-          @full_batch_index = nil
-          @full_batch = nil
-          return nil
-        else
-          load_random_full_batch
-        end
-      end
-      
+      load_full_batch
+      return nil if @full_batch.nil?    
       @full_batch.fetch
     end
     
     # Speichert alles zu speichernde
     def save_everything
       @full_batch.save unless @full_batch.nil?
-      @open_batch.save
+      @open_batch.save unless @open_batch.nil?
       @metadata.save
     end
     
@@ -68,14 +32,43 @@ module Database
       File.join(@directory, "batch:#{name}")
     end
     
-    # Eine BigQueueBatch Instanz für einen vollen Stapel erzeugen, falls möglich.
-    def load_random_full_batch
-      if @metadata.full_batches.size > 0
-        @full_batch_index = rand(0...@metadata.full_batches.size)
-        @full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[@full_batch_index]))
+    def load_full_batch
+      if @full_batch.nil? || @full_batch.empty?
+        # Falls bereits ein Stapel existiert, dieser aber leer ist, muss dieser gelöscht werden.
+        unless @full_batch.nil?
+          @full_batch.delete
+          @metadata.full_batches.delete_at(@full_batch_index)
+          @metadata.save
+          @full_batch_index = nil
+          @full_batch = nil
+        end
+        
+        # Neuen Stapel laden, falls möglich
+        if @metadata.full_batches.size > 0
+          @full_batch_index = rand(0...@metadata.full_batches.size)
+          @full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[@full_batch_index]))
+        end
+      end
+    end
+    
+    def load_open_batch
+      if @open_batch.nil?
+        # Es ist noch kein Stapel geöffnet.
+        if @metadata.open_batch.nil?
+          @metadata.open_batch = @metadata.next_batchname
+          @metadata.save
+        end
+        @open_batch = BigQueueBatch.new(batch_path(@metadata.open_batch))
       else
-        @full_batch_index = nil
-        @full_batch = nil
+        # Es ist bereits ein Stapel geöffnet,
+        # falls dieser voll ist: Speichern + neuen Stapel laden
+        if @open_batch.full?
+          @metadata.full_batches << @metadata.open_batch
+          @metadata.open_batch = @metadata.next_batchname
+          @metadata.save
+          @open_batch.save
+          @open_batch = BigQueueBatch.new(batch_path(@metadata.open_batch))
+        end
       end
     end
   end
