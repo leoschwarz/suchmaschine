@@ -15,7 +15,7 @@ module Common
     end
     
     def self.field(name, default=nil)
-      @@_fields       = {} if @@_fields.nil?
+      @@_fields       = {} if not defined? @@_fields
       @@_fields[name] = default
       define_method("#{name}"){ instance_variable_get("@_data")[name] }
       define_method("#{name}="){ |value| instance_variable_get("@_data")[name] = value }

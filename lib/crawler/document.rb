@@ -1,5 +1,4 @@
 require 'digest/md5'
-require_relative './serializable_struct.rb'
 
 module Crawler
   # FELDER::
@@ -7,7 +6,7 @@ module Crawler
   # - links
   # - text
 
-  class Document < SerializableObject
+  class Document < Common::SerializableObject
     field :url
     field :links, []
     field :text

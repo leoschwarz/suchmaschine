@@ -1,5 +1,3 @@
-require_relative './serializable_struct.rb'
-
 module Crawler
   # FELDER::
   # - url [String]
@@ -10,7 +8,7 @@ module Crawler
   # - document_hash [String]
   # - redirect [String] (nur definiert wenn vorhanden)
 
-  class DocumentInfo < SerializableObject
+  class DocumentInfo < Common::SerializableObject
     field :url
     field :added_at
     field :permissions, {index: nil, follow: nil}
