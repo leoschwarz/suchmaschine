@@ -17,11 +17,11 @@ module Crawler
     def launch
       puts "#{Crawler.config.user_agent} wurde gestartet."
       @logger = Crawler::Logger.new(true)
-      Crawler.config.parallel_tasks.times{ do_next_task }
+      Crawler.config.parallel_tasks.times{ start_thread }
       @timer = Thread.new{ loop{ sleep Crawler.config.log_interval; dump_log } }
       
       loop do 
-        sleep 1
+        sleep 100
       end
     end
     
@@ -29,11 +29,10 @@ module Crawler
       @logger.write
     end
     
-    def do_next_task
+    def start_thread
       Thread.new do
         loop do
-          task = Task.new(Crawler::Database.download_queue_fetch)
-          result = task.execute
+          result = Task.fetch.execute
           @logger.register result
         end
       end

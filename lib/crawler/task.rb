@@ -60,5 +60,9 @@ module Crawler
     def self.insert(urls)
       Crawler::Database.download_queue_insert urls.select{|url| url.bytesize < 512}
     end
+    
+    def self.fetch
+      Task.new(Crawler::Database.download_queue_fetch)
+    end
   end
 end
