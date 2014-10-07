@@ -11,6 +11,7 @@ module Common
     end
     
     def self.deserialize(json)
+      return nil if json.nil?
       self.new(Oj.load(json, {mode: :object}))
     end
     
