@@ -6,7 +6,7 @@ module Database
     
     def initialize
       # TODO LRU-Implementierung verwenden (FIFO macht hier wenig Sinn; Platzhalter)
-      @cache = Common::RamCacheFIFO.new(1000)
+      @cache = Common::RAMCacheFIFO.new(1000)
     end
     
     # Fügt docinfo_id zu einem existierendem Index File hinzu oder erstellt ein neues.
