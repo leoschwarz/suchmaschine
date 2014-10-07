@@ -5,8 +5,7 @@ module Database
     include Singleton
     
     def initialize
-      # TODO LRU-Implementierung verwenden (FIFO macht hier wenig Sinn; Platzhalter)
-      @index_items = Common::RAMCacheFIFO.new(1000)
+      @index_items = Common::RAMCacheLRU.new(1000)
     end
     
     # Fügt docinfo_id zu einem existierendem Index File hinzu oder erstellt ein neues.
