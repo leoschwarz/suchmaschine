@@ -18,7 +18,7 @@ module Common
       end
       
       def self.index_append(pairs)
-        self.run("INDEX_APPEND\t#{pairs.flatten.join("\t")}"
+        self.run("INDEX_APPEND\t#{pairs.flatten.join("\t")}")
       end
     
       def self.cache_set(key, value)
