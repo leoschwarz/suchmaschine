@@ -4,8 +4,8 @@ require 'bundler/setup'
 require 'nokogiri'
 require 'curb'
 
-require_relative '../lib/crawler/crawler.rb'
 require_relative '../lib/common/common.rb'
+require_relative '../lib/crawler/crawler.rb'
 
 Common::load_configuration(Crawler, "crawler.yml")
 
@@ -14,6 +14,9 @@ Thread.abort_on_exception = true
 
 
 module Crawler
+  include Common::DatabaseClient
+  Database.configure(self.config.database.host, self.config.database.port)
+  
   class CrawlerMain
     def launch
       puts "#{Crawler.config.user_agent} wurde gestartet."
@@ -33,7 +36,7 @@ module Crawler
     def do_next_task
       Thread.new do
         loop do
-          task = Database.queue_fetch
+          task = Task.new(URL.stored(Crawler::Database.download_queue_fetch))
           result = task.execute
           @logger.register result
         end

@@ -20,7 +20,7 @@ module Crawler
     def save
       if Crawler.config.robots_txt.use_cache
         data = Oj.dump({valid_until: @valid_until, rules: @rules}, {mode: :object})        
-        Database.cache_set("robotstxt:#{domain}", data)
+        Crawler::Database.cache_set("robotstxt:#{domain}", data)
       end
     end
     
@@ -39,7 +39,7 @@ module Crawler
         return RobotsTxtCacheItem.new(domain, [], :not_found, nil)
       end
       
-      data   = Database.cache_get("robotstxt:#{domain}")
+      data   = Crawler::Database.cache_get("robotstxt:#{domain}")
       rules  = []
       status = :not_found
       valid_until = nil

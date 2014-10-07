@@ -24,11 +24,11 @@ module Crawler
     end
 
     def save
-      Database.document_info_set(self.url, self.serialize)
+      Crawler::Database.document_info_set(self.url, self.serialize)
     end
 
     def self.load(url)
-      DocumentInfo.deserialize(Database.document_info_get(url))
+      DocumentInfo.deserialize(Crawler::Database.document_info_get(url))
     end
   end
 end

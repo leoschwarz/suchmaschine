@@ -17,8 +17,7 @@ module Indexer
       doc_hash   = Oj.load(LZ4.uncompress(File.read("/mnt/sdb/suchmaschine/docinfo:#{docinfo_id}")))[:document_hash]
       text       = Oj.load(LZ4.uncompress(File.read("db/keyval/doc:#{doc_hash}")))[:text]
       
-      ngrams     = Common::NGram.count_ngrams(text, 5)
-      puts ngrams.inspect
+      words = text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ").uniq
     end
   end
 end

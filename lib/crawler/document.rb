@@ -14,7 +14,7 @@ module Crawler
     attr_accessor :hash
 
     def self.load(hash)
-      raw = Database.document_get(hash)
+      raw = Crawler::Database.document_get(hash)
       return nil if raw.nil? or raw.empty?
       doc = Document.parse(raw[0])
       doc.hash = hash
@@ -24,7 +24,7 @@ module Crawler
     def save
       serialized = self.serialize
       @hash      = Digest::MD5.hexdigest(serialized)
-      Database.document_set(@hash, serialized)
+      Crawler::Database.document_set(@hash, serialized)
       @hash
     end
   end
