@@ -16,22 +16,20 @@ module Crawler
   class CrawlerMain
     def launch
       puts "#{Crawler.config.user_agent} wurde gestartet."
-      @logger = Crawler::Logger.new(true)
-      Crawler.config.parallel_tasks.times{ start_thread }
-      @timer = Thread.new{ loop{ sleep Crawler.config.log_interval; dump_log } }
       
-      loop do 
-        sleep 100
-      end
-    end
-    
-    def dump_log
-      @logger.write
+      @logger = Common::Logger.new({
+        variables: [:time, :success, :failure, :not_allowed],
+        labels: {time: :Zeit, success: :Erfolge, failure: :Fehler, not_allowed: :Verboten}})
+      @logger.set(:time, proc{|logger| Time.now.to_i - logger.started_at.to_i})
+      
+      Crawler.config.parallel_tasks.times{ start_thread }
+      @logger.start_display($stdout, false)
     end
     
     def start_thread
       Thread.new do
         loop do
+          sleep 10
           result = Task.fetch.execute
           @logger.register result
         end
