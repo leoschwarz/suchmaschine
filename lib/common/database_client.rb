@@ -38,12 +38,12 @@ module Common
         self.run("DOCUMENT_GET\t#{hash}")
       end
     
-      def self.document_info_set(url, docinfo)
-        self.run("DOCUMENT_INFO_SET\t#{url}\t#{docinfo}")
+      def self.document_info_set(hash, docinfo)
+        self.run("DOCUMENT_INFO_SET\t#{hash}\t#{docinfo}")
       end
     
-      def self.document_info_get(url)
-        self.run("DOCUMENT_INFO_GET\t#{url}")
+      def self.document_info_get(hash)
+        self.run("DOCUMENT_INFO_GET\t#{hash}")
       end
     
       # Führt ein 'query' auf dem Datenbankserver aus.

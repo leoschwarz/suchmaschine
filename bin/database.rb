@@ -18,10 +18,10 @@ Common::load_configuration(Database, "database.yml")
 # INDEX_QUEUE_FETCH
 # CACHE_SET\tKEY\tVALUE
 # CACHE_GET\tKEY
-# DOCUMENT_SET\tURL\tDOCUMENT
-# DOCUMENT_GET\tURL
-# DOCUMENT_INFO_SET\tURL\tDOCUMENT_INFO -> Dies speichert die Dokumentinfo UND gibt dieses in die INDEX Warteschlange auf.
-# DOCUMENT_INFO_GET\tURL
+# DOCUMENT_SET\tHASH\tDOCUMENT
+# DOCUMENT_GET\tHASH
+# DOCUMENT_INFO_SET\tHASH\tDOCUMENT_INFO -> Dies speichert die Dokumentinfo UND gibt dieses in die INDEX Warteschlange auf.
+# DOCUMENT_INFO_GET\tHASH
 
 
 module Database
@@ -73,9 +73,9 @@ module Database
         when "DOCUMENT_GET"
           handle_document_get(parameters)
         when "DOCUMENT_INFO_SET"
-          key, value = parameters.split("\t", 2)
-          doc_id = handle_document_info_set(key, value)
-          handle_queue_insert(:index, doc_id)
+          hash, data = parameters.split("\t", 2)
+          handle_document_info_set(hash, data)
+          handle_queue_insert(:index, hash)
         when "DOCUMENT_INFO_GET"
           handle_document_info_get(parameters)
       end
@@ -129,14 +129,13 @@ module Database
       StorageHDD.instance.get("doc:"+hash)
     end
     
-    def handle_document_info_set(url, docinfo)
-      doc_id = Digest::MD5.hexdigest(url)
-      StorageSSD.instance.set("docinfo:"+doc_id, docinfo)
-      doc_id
+    def handle_document_info_set(hash, docinfo)
+      StorageSSD.instance.set("docinfo:"+hash, docinfo)
+      nil
     end
     
-    def handle_document_info_get(url)
-      StorageSSD.instance.get("docinfo:"+Digest::MD5.hexdigest(url))
+    def handle_document_info_get(hash)
+      StorageSSD.instance.get("docinfo:"+hash)
     end
   end
 end

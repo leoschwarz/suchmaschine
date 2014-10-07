@@ -1,3 +1,5 @@
+require 'digest/md5'
+
 module Crawler
   # FELDER::
   # - url [String]
@@ -24,11 +26,11 @@ module Crawler
     end
 
     def save
-      Crawler::Database.document_info_set(self.url, self.serialize)
+      Crawler::Database.document_info_set(Digest::MD5.hexdigest(self.url), self.serialize)
     end
 
     def self.load(url)
-      DocumentInfo.deserialize(Crawler::Database.document_info_get(url))
+      DocumentInfo.deserialize(Crawler::Database.document_info_get(Digest::MD5.hexdigest(url)))
     end
   end
 end
