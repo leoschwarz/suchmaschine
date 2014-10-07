@@ -2,13 +2,13 @@
 
 module Crawler
   class HTMLParser
-    attr_reader :indexing_allowed, :following_allowed, :links, :text
+    attr_reader :indexing_allowed, :following_allowed, :links, :text, :html
     
     def initialize(base_url, html)
       @base_url = base_url
       # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
       # TODO: Dieses Problem eleganter lösen
-      @doc      = Nokogiri::HTML(html.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: ''), nil, "UTF-8")
+      @doc      = Nokogiri::HTML(html.encode('UTF-8', invalid: :replace, undef: :replace, replace: ''), nil, "UTF-8")
       
       parse()
     end
@@ -51,6 +51,8 @@ module Crawler
         @doc.search("style").each{|el| el.unlink}
         @doc.xpath("//comment()").remove
         @text = _clean_text(@doc.text)
+        body = @doc.xpath("//body")[0]
+        @html = body.to_html unless body.nil?
       end
     end
     

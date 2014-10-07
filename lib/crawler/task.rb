@@ -27,6 +27,7 @@ module Crawler
           document.url   = @url.stored
           document.links = links
           document.text  = parser.text
+          document.html  = parser.html
           document.save
           
           docinfo = Crawler::DocumentInfo.new
