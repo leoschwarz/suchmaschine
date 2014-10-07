@@ -8,15 +8,12 @@ production: &default
     timeout: 10 # Sekunden
     use_cache: YES
     cache_lifetime: 86400 # Sekunden, hier ein Tag.
-  database:
-    host: "127.0.0.1"
-    port: 2051
 
 development:
   <<: *default
-  database:
-    host: "192.168.10.50"
-    port: 2051
+
+laptop:
+  <<: *default
 
 test:
   <<: *default

@@ -1,11 +1,6 @@
 module Common
   module DatabaseClient
     class Database
-      def self.configure(host, port)
-        @@host = host
-        @@port = port
-      end
-    
       def self.download_queue_insert(urls)
         self.run("DOWNLOAD_QUEUE_INSERT\t#{urls.join("\t")}")
       end
@@ -55,7 +50,7 @@ module Common
         options[:response_required] = false if options[:response_required].nil?
         options[:retries_left]      = 3     if options[:retries_left].nil?
       
-        client   = Common::FastClient.new(@@host, @@port)
+        client   = Common::FastClient.new(Common.config.database.host, Common.config.database.port)
         response = client.request(query)
         if options[:response_required]
           if response.nil? or response.empty?
