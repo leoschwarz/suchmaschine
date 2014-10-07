@@ -21,8 +21,8 @@ module Common
         Database.document_info_set(Digest::MD5.hexdigest(self.url), self.serialize)
       end
 
-      def self.load(url)
-        DocumentInfo.deserialize(Database.document_info_get(Digest::MD5.hexdigest(url)))
+      def self.load(hash)
+        DocumentInfo.deserialize(Database.document_info_get(hash))
       end
     end
   end

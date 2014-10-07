@@ -12,7 +12,7 @@ module Common
       def self.load(hash)
         raw = Database.document_get(hash)
         return nil if raw.nil? or raw.empty?
-        doc = Document.parse(raw[0])
+        doc = Document.deserialize(raw)
         doc.hash = hash
         doc
       end
