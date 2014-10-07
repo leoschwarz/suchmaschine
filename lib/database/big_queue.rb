@@ -7,9 +7,7 @@ module Database
       @metadata = BigQueueMetadata.new(File.join(directory, "metadata.json")) if @metadata.nil?
       
       # Eine BigQueueBatch Instanz für einen vollen Stapel erzeugen, falls möglich.
-      if @metadata.full_batches.size > 0
-        load_random_full_batch
-      end
+      load_random_full_batch
       
       # Eine BigQueueBatch Instanz für den momentan zu befüllenden Stapel erzeugen.
       if @metadata.open_batch.nil?
@@ -70,9 +68,15 @@ module Database
       File.join(@directory, "batch:#{name}")
     end
     
+    # Eine BigQueueBatch Instanz für einen vollen Stapel erzeugen, falls möglich.
     def load_random_full_batch
-      @full_batch_index = rand(0...@metadata.full_batches.size)
-      @full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[@full_batch_index]))
+      if @metadata.full_batches.size > 0
+        @full_batch_index = rand(0...@metadata.full_batches.size)
+        @full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[@full_batch_index]))
+      else
+        @full_batch_index = nil
+        @full_batch = nil
+      end
     end
   end
 end
