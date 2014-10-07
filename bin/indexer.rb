@@ -9,30 +9,21 @@ Common::load_configuration(Indexer, "indexer.yml")
 Thread.abort_on_exception = true
 
 module Indexer
-  include Common::DatabaseClient
-  
   class Main
     def run
-      Indexer.config.threads.times{ start_thread }
-      
-      loop do
-        # Haupt-Thread "beschäftigen"
-        sleep 100
-      end
+      threads = Indexer.config.threads
+      (threads-1).times{ start_thread }
+      start_loop
     end
     
     def start_thread
       Thread.new do
-        loop do
-          docinfo_hash = Indexer::Database.index_queue_fetch
-          docinfo      = Indexer::DocumentInfo.load(docinfo_hash)
-          doc          = Indexer::Document.load(docinfo.document_hash)
-          text         = doc.text
-          words        = text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ").uniq
-      
-          Indexer::Database.index_append(words.map{|word| [word, doc.hash]})
-        end
+        start_loop
       end
+    end
+    
+    def start_loop
+      loop { Task.fetch.run }
     end
   end
 end
