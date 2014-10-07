@@ -5,12 +5,15 @@ require_relative '../lib/indexer/indexer.rb'
 
 Common::load_configuration(Indexer, "indexer.yml")
 
+# fürs Debuggen
+Thread.abort_on_exception = true
+
 module Indexer
   include Common::DatabaseClient
   
   class Main
     def run
-      10.times{ start_thread }
+      Indexer.config.threads.times{ start_thread }
       
       loop do
         # Haupt-Thread "beschäftigen"

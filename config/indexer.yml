@@ -1,13 +1,8 @@
 production: &default
-  database:
-    host: "127.0.0.1"
-    port: 2051
+  threads: 10
 
 development:
   <<: *default
-  database:
-    host: "192.168.10.50"
-    port: 2051
 
 test:
   <<: *default
