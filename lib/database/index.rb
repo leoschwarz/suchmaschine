@@ -13,7 +13,8 @@ module Database
     def self.append(word, doc_id)
       index_item = @cache[word]
       if index_item.nil?
-        index_item = @cache[word] = IndexItem.new(word)
+        index_item = IndexItem.new(word)
+        @cache[word] = index_item
       end
       index_item.add(doc_id)
     end
