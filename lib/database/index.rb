@@ -6,21 +6,17 @@ module Database
     
     def initialize
       # TODO LRU-Implementierung verwenden (FIFO macht hier wenig Sinn; Platzhalter)
-      @cache = Common::RAMCacheFIFO.new(1000)
+      @index_items = Common::RAMCacheFIFO.new(1000)
     end
     
     # Fügt docinfo_id zu einem existierendem Index File hinzu oder erstellt ein neues.
     def append(word, doc_id)
-      index_item = @cache[word]
-      if index_item.nil?
-        index_item = IndexItem.new(word)
-        @cache[word] = index_item
-      end
-      index_item.append(doc_id)
+      @index_items[word] ||= IndexItem.new(word)
+      @index_items[word].append(doc_id)
     end
     
     def save_everything
-      @cache.remove_all
+      @index_items.remove_all
     end
   end
   
