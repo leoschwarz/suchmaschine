@@ -10,13 +10,13 @@ module Database
     end
     
     # Fügt docinfo_id zu einem existierendem Index File hinzu oder erstellt ein neues.
-    def self.append(word, doc_id)
+    def append(word, doc_id)
       index_item = @cache[word]
       if index_item.nil?
         index_item = IndexItem.new(word)
         @cache[word] = index_item
       end
-      index_item.add(doc_id)
+      index_item.append(doc_id)
     end
     
     def save_everything
@@ -30,7 +30,7 @@ module Database
       @file = File.open(path, "a")
     end
     
-    def add(doc_id)
+    def append(doc_id)
       @file.puts doc_id
     end
     
