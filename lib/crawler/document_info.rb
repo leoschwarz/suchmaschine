@@ -10,7 +10,13 @@ module Crawler
   # - document_hash [String]
   # - redirect [String] (nur definiert wenn vorhanden)
 
-  class DocumentInfo < SerializableStruct
+  class DocumentInfo < SerializableObject
+    field :url
+    field :added_at
+    field :permissions, {index: nil, follow: nil}
+    field :document_hash
+    field :redirect
+    
     def document
       Document.load(self.document_hash)
     end
@@ -20,11 +26,11 @@ module Crawler
     end
 
     def save
-      Database.document_info_set(self.url, serialize)
+      Database.document_info_set(self.url, self.serialize)
     end
 
     def self.load(url)
-      DocumentInfo.parse(Database.document_info_get(url))
+      DocumentInfo.deserialize(Database.document_info_get(url))
     end
   end
 end

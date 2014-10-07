@@ -7,7 +7,11 @@ module Crawler
   # - links
   # - text
 
-  class Document < SerializableStruct
+  class Document < SerializableObject
+    field :url
+    field :links, []
+    field :text
+    
     attr_accessor :hash
 
     def self.load(hash)
