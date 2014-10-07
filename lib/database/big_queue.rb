@@ -7,13 +7,13 @@ module Database
       @metadata ||= BigQueueMetadata.new(File.join(directory, "metadata.json"))
     end
     
-    # Schreibt eine URL in das System.
-    def insert(url)
+    # Schreibt einen Eintrag in die Warteschlange.
+    def insert(item)
       load_open_batch
-      @open_batch.insert(url)
+      @open_batch.insert(item)
     end
     
-    # Nimmt eine URL aus dem System.
+    # Nimmt einen Eintrag aus der Warteschlange.
     def fetch
       load_full_batch
       return nil if @full_batch.nil?    
