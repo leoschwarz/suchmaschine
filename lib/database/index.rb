@@ -11,8 +11,10 @@ module Database
     
     # Fügt docinfo_id zu einem existierendem Index File hinzu oder erstellt ein neues.
     def self.append(word, doc_id)
-      index_item   = @cache[word]
-      index_item ||= IndexItem.new(word)
+      index_item = @cache[word]
+      if index_item.nil?
+        index_item = @cache[word] = IndexItem.new(word)
+      end
       index_item.add(doc_id)
     end
     
