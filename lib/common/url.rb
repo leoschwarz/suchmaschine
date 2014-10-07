@@ -1,12 +1,6 @@
 require 'uri'
 
-module Crawler
-  
-  # @stored_url -> URL die in der Datenbank gespeichert wird. Ohne HTTP/HTTPS Schema, mit kodierten Sonderzeichen
-  # @encoded_url -> URL mit kodierten Sonderzeichen (Beispiel: http://de.wikipedia.org/wiki/K%C3%A4se)
-  # @decoded_url -> URL mit dekodierten Sonderzeichen, also ein UTF-8 string (Beispiel: http://de.wikipedia.org/wiki/Käse)
-  
-  
+module Common
   class URL
     attr_reader :full_url
     
@@ -16,14 +10,20 @@ module Crawler
       @full_url    = full_url
     end
     
+    # URL mit kodierten Sonderzeichen
+    # Beispiel: http://de.wikipedia.org/wiki/K%C3%A4se
     def encoded_url
       @encoded_url
     end
     
+    # URL mit dekodierten Sonderzeichen, also ein UTF-8 String
+    # Beispiel: http://de.wikipedia.org/wiki/Käse
     def decoded_url
       @_decoded_url ||= URI.decode @encoded_url
     end
     
+    # URL die in der Datenbank gespeichert wird. Ohne URI-Schema, mit kodierten Sonderzeichen
+    # Beispiel: de.wikipedia.org/wiki/K%C3%A4se
     def stored_url
       @_stored_url ||= @encoded_url.gsub(%r{^https?://}, "")
     end
@@ -33,7 +33,12 @@ module Crawler
     alias :stored :stored_url
     
     def domain_name
-      Domain.domain_name_of(@encoded_url)
+      match = /https?:\/\/([a-zA-Z0-9\.-]+)/.match(url)
+      if not match.nil?
+        domain_name = match[1].downcase
+      else
+        nil
+      end
     end
     
     def self.encoded(url)

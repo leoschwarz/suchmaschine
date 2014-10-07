@@ -11,7 +11,7 @@ module Common
       end
     
       def self.download_queue_fetch()
-        self.run("DOWNLOAD_QUEUE_FETCH", {response_required: true})
+        URL.stored(self.run("DOWNLOAD_QUEUE_FETCH", {response_required: true}))
       end
     
       def self.index_queue_insert(docinfo_ids)

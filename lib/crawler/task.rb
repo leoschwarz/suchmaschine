@@ -23,13 +23,13 @@ module Crawler
           links  = parser.links.map{|link| [link[0], link[1].stored]}
           
           # Ergebniss speichern
-          document = Document.new
+          document = Crawler::Document.new
           document.url   = @url.stored
           document.links = links
           document.text  = parser.text
           document.save
           
-          docinfo = DocumentInfo.new
+          docinfo = Crawler::DocumentInfo.new
           docinfo.url = @url.stored
           docinfo.document = document
           docinfo.added_at = Time.now.to_i
