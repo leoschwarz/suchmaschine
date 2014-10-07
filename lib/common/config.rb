@@ -15,7 +15,7 @@ module Common
         environment = "development"
       end
     
-      module_ref.class_variable_set(:@@config, NeatHash.new(data[environment]))
+      module_ref.class_variable_set(:@@config, NeatHash.load(data[environment]))
       module_ref.send :define_singleton_method, :config do
         self.class_variable_get(:@@config)
       end
