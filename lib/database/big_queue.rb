@@ -6,9 +6,10 @@ module Database
       @metadata = BigQueueMetadata.open_directory(directory)
       @metadata = BigQueueMetadata.new(File.join(directory, "metadata.json")) if @metadata.nil?
       
-      # Eine BigQueueBatch Instanz für den ersten vollen Stapel erzeugen, falls möglich.
+      # Eine BigQueueBatch Instanz für einen vollen Stapel erzeugen, falls möglich.
       if @metadata.full_batches.size > 0
-        @current_full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[0]))
+        @current_full_batch_index = rand(0...@metadata.full_batches.size)
+        @current_full_batch       = BigQueueBatch.new(batch_path(@metadata.full_batches[@current_full_batch_index]))
       end
       
       # Eine BigQueueBatch Instanz für den momentan zu befüllenden Stapel erzeugen.
@@ -43,14 +44,16 @@ module Database
       if @current_full_batch.empty?
         # Den Stapel löschen und den Eintrag aus metadata.json löschen und versuchen einen neuen zu laden.
         @current_full_batch.delete
-        @metadata.full_batches.delete_at(0)
+        @metadata.full_batches.delete_at(@current_full_batch_index)
         @metadata.save
         if @metadata.full_batches.empty?
           # Es gibt keinen weiteren vollen Stapel
+          @current_full_batch_index = nil
           @current_full_batch = nil
           return nil
         else
-          @current_full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[0]))
+          @current_full_batch_index = rand(0...@metadata.full_batches.size)
+          @current_full_batch = BigQueueBatch.new(batch_path(@metadata.full_batches[@current_full_batch_index]))
         end
       end
       
