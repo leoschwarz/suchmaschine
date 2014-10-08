@@ -33,6 +33,8 @@ module Common
           else
             sleep 0.01
           end
+        rescue Errno::ECONNRESET
+          # TODO evtl. Fehlermeldung
         rescue SystemExit, Interrupt
           puts "Server wird heruntergefahren..."
           @on_stop.call
