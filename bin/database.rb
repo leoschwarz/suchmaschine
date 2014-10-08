@@ -106,7 +106,7 @@ module Database
     end
     
     def has_doc_info?(url)
-      StorageSSD.instance.include?("docinfo:"+Digest::MD5.hexdigest(url))
+      StorageSSD.instance.include?("docinfo/"+Digest::MD5.hexdigest(url))
     end
     
     def handle_queue_fetch(queue)
@@ -128,12 +128,12 @@ module Database
     end
     
     def handle_cache_set(key, value)
-      StorageSSD.instance.set("cache:"+key, value)
+      StorageSSD.instance.set("cache/"+key, value)
       nil
     end
     
     def handle_cache_get(key)
-      StorageSSD.instance.get("cache:"+key)
+      StorageSSD.instance.get("cache/"+key)
     end
     
     def handle_document_set(hash, document)
@@ -146,12 +146,12 @@ module Database
     end
     
     def handle_document_info_set(hash, docinfo)
-      StorageSSD.instance.set("docinfo:"+hash, docinfo)
+      StorageSSD.instance.set("docinfo/"+hash, docinfo)
       nil
     end
     
     def handle_document_info_get(hash)
-      StorageSSD.instance.get("docinfo:"+hash)
+      StorageSSD.instance.get("docinfo/"+hash)
     end
   end
 end
