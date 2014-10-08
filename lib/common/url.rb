@@ -78,8 +78,8 @@ module Common
         else
           URL.encoded url[0...hash_index]
         end
-      rescue Exception
-        return nil
+      rescue
+        nil
       end
     end
     
@@ -99,14 +99,14 @@ module Common
           # Falsches Schema
           return nil
         end
-      rescue Exception
+      rescue
       end
       
       # 2. Versuch: die URL enthält kodierbare Sonderzeichen...
       if second_try
         begin
           return self.from_unknown(URI.encode(string).to_s, false)
-        rescue Exception
+        rescue
           return nil
         end
       end
