@@ -9,7 +9,7 @@ module Crawler
     # Sucht nach einem robots.txt Cache-Eintrag für eine bestimmte Domain.
     def self.load(domain)
       item = self.deserialize(Crawler::Database.cache_get("robotstxt:#{domain}"))
-      item.domain = domain # Für den Fall, dass ein leeres Objekt zurückgegeben wurde.
+      item = self.deserialize(%({":domain": "#{domain}"})) if item.nil?
       item
     end
     

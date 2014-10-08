@@ -8,7 +8,7 @@ module Crawler
     end
     
     def load
-      @cache_item = RobotsTXTCacheItem.for_domain(@domain)
+      @cache_item = RobotsTXTCacheItem.load(@domain)
       if @cache_item.status != :ok
         begin
           # Download der robots.txt Datei
@@ -106,6 +106,7 @@ module Crawler
     end
     
     private
+    # TODO: Dies macht noch immer Probleme
     def _convert_to_regex_string(value)
       s = Regexp.quote(value)
       s.gsub!(/\*/, "(.*)")
