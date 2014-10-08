@@ -2,7 +2,7 @@ module Common
   module DatabaseClient
     class Database
       def self.download_queue_insert(urls)
-        self.run("DOWNLOAD_QUEUE_INSERT\t#{urls.join("\t")}")
+        self.run("DOWNLOAD_QUEUE_INSERT\t#{urls.join("\t")}") unless urls.size == 0
       end
     
       def self.download_queue_fetch()
@@ -10,7 +10,7 @@ module Common
       end
     
       def self.index_queue_insert(docinfo_ids)
-        self.run("INDEX_QUEUE_INSERT\t#{docinfo_ids.join("\t")}")
+        self.run("INDEX_QUEUE_INSERT\t#{docinfo_ids.join("\t")}") unless docinfo_ids.size == 0
       end
     
       def self.index_queue_fetch()
