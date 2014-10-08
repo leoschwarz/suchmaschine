@@ -2,7 +2,7 @@ module Crawler
   # Implementierung ähnlich der Google Spezifikation:
   # https://developers.google.com/webmasters/control-crawl-index/docs/robots_txt
   
-  class RobotsParser    
+  class RobotsTXT
     def initialize(robot_name)
       @robot_name = robot_name
       @parsers    = Common::RAMCacheFIFO.new(200)
@@ -10,7 +10,7 @@ module Crawler
     
     def self.instance(robot_name)
       @@instances ||= {}
-      @@instances[robot_name] ||= RobotsParser.new(robot_name)
+      @@instances[robot_name] ||= RobotsTXT.new(robot_name)
     end
     
     # Deferrable, callback wird mit Rückgabewert true/false aufgerufen
@@ -21,12 +21,12 @@ module Crawler
       path   = match[2]
       if path.empty? then path = "/" end
       
-      @parsers[domain] ||= RobotsTxtParser.new(domain, @robot_name)
+      @parsers[domain] ||= RobotsTXTParser.new(domain, @robot_name)
       @parsers[domain].allowed?(path)
     end
     
     def self.allowed?(url)
-      RobotsParser.instance(Crawler.config.user_agent).allowed?(url)
+      RobotsTXT.instance(Crawler.config.user_agent).allowed?(url)
     end
   end
 end

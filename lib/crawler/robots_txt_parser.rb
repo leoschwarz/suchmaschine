@@ -1,5 +1,5 @@
 module Crawler
-  class RobotsTxtParser
+  class RobotsTXTParser
     attr_accessor :domain, :cache_item
     def initialize(domain, robot_name)
       @domain     = domain
@@ -8,7 +8,7 @@ module Crawler
     end
     
     def load
-      @cache_item = RobotsTxtCacheItem.for_domain(@domain)
+      @cache_item = RobotsTXTCacheItem.for_domain(@domain)
       if @cache_item.status != :ok
         begin
           # Download der robots.txt Datei
@@ -108,8 +108,8 @@ module Crawler
     private
     def _convert_to_regex_string(value)
       s = Regexp.quote(value)
-      s.gsub!("\\*", "(.*)")
-      s.gsub!("\\$", "$")
+      s.gsub!(/\*/, "(.*)")
+      s.gsub!(/\$/, "$")
       s
     end
   end

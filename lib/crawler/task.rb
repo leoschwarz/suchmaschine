@@ -12,7 +12,7 @@ module Crawler
     # :not_allowed -> Die URL darf nicht heruntergeladen werden
     def execute
       # Überprüfen ob es erlaubt ist die Seite herunterzuladen
-      unless RobotsParser.allowed?(@url.encoded)
+      unless RobotsTXT.allowed?(@url.encoded)
         return :not_allowed
       end
       
