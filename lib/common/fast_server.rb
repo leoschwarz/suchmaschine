@@ -1,11 +1,13 @@
 require 'socket'
 
+# Wrapper für MulticlientTCPServer
+# TODO Dies noch überarbeiten...
+
 module Common
   class FastServer
     def initialize(host, port)
       @host = host
       @port = port
-      
       @on_request = proc{|request| }
       @on_start   = proc{}
       @on_stop    = proc{}
@@ -14,34 +16,29 @@ module Common
     def start
       # Callback aufrufen
       @on_start.call
-      puts "Server gestartet unter #{@host}:#{@port}."
       
       # Server richtig starten
-      @server = TCPServer.new(@host, @port)
+      @server = MulticlientTCPServer.new(@port, 5, false)
+      puts "Server gestartet unter #{@host}:#{@port}."
       loop do
         begin
-          # Auf einen Client warten
-          @conn = @server.accept
-          
-          # Die Antwort generieren
-          request  = @conn.gets.strip
-          response = @on_request.call(request)
-          
-          # Das Resultat schreiben und die Verbindung schliessen
-          @conn.puts response
-          @conn.close
-          @conn = nil
+          conn = @server.get_socket
+          unless conn.nil?
+            # Die Antwort generieren
+            request  = @conn.gets.strip
+            response = @on_request.call(request)
+            
+            # Das Resultat schreiben und die Verbindung schliessen
+            conn.puts response
+          else
+            sleep 0.01
+          end
         rescue SystemExit, Interrupt
           puts "Server wird heruntergefahren..."
           @on_stop.call
           raise SystemExit
-        rescue => exception
-          # TODO Fehlermanagment (Logfile etc.)
-          unless @conn.nil?
-            @conn.close
-            @conn = nil
-          end
-        end
+        rescue
+        # TODO Fehlermanagment (Logfile etc.)
       end
     end
     
