@@ -37,7 +37,7 @@ module Common
           puts "Server wird heruntergefahren..."
           @on_stop.call
           raise SystemExit
-        rescue
+        end
         # TODO Fehlermanagment (Logfile etc.)
       end
     end
