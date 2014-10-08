@@ -11,6 +11,7 @@ module Common
       @on_request = proc{|request| }
       @on_start   = proc{}
       @on_stop    = proc{}
+      @on_error   = proc{|error| raise error}
     end
     
     def start
@@ -33,14 +34,13 @@ module Common
           else
             sleep 0.01
           end
-        rescue Errno::ECONNRESET
-          # TODO evtl. Fehlermeldung
+        rescue SystemCallError => e
+          @on_error.call(e)
         rescue SystemExit, Interrupt
           puts "Server wird heruntergefahren..."
           @on_stop.call
           raise SystemExit
         end
-        # TODO Fehlermanagment (Logfile etc.)
       end
     end
     
@@ -54,6 +54,10 @@ module Common
     
     def on_stop(&block)
       @on_stop = block
+    end
+    
+    def on_error(&block)
+      @on_error = block
     end
   end
 end

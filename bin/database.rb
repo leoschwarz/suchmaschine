@@ -38,7 +38,14 @@ module Database
         @queues = {
           :download => BigQueue.new(Database.config.download_queue.directory),
           :index    => BigQueue.new(Database.config.index_queue.directory)
-        } 
+        }
+      end
+      
+      @logger = Common::Logger.new
+      @logger.add_output($stdout)
+      
+      @server.on_error do |error|
+        @logger.error(error.to_s)
       end
       
       @server.on_stop do
