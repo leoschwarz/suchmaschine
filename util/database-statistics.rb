@@ -7,8 +7,8 @@ require 'lz4-ruby'
 
 $data_dir = Database.config.ssd.path
 
-puts "CACHE EINTRÄGE   : #{Dir["#{$data_dir}cache:*"].size}"
-docinfo_paths = Dir["#{$data_dir}docinfo:*"]
+puts "CACHE EINTRÄGE   : #{Dir["#{$data_dir}/cache/*"].size}"
+docinfo_paths = Dir["#{$data_dir}/docinfo/*"]
 puts "DOCINFO EINTRÄGE : #{docinfo_paths.size}"
 
 domain_counts = {}
