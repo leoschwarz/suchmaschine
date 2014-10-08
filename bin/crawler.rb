@@ -20,18 +20,27 @@ module Crawler
       @logger = Common::Logger.new({
         variables: [:time, :success, :failure, :not_allowed],
         labels: {time: :Zeit, success: :Erfolge, failure: :Fehler, not_allowed: :Verboten}})
-      @logger.set(:time, proc{|logger| Time.now.to_i - logger.started_at.to_i})
+      @logger.set(:time, proc{|logger| logger.elapsed_time})
+      @logger.add_output($stdout)
+      @logger.display_header
       
       Crawler.config.parallel_tasks.times{ start_thread }
-      @logger.start_display($stdout, false)
+      
+      loop do
+        @logger.display_values
+        sleep 5
+      end
     end
     
     def start_thread
       Thread.new do
         loop do
-          sleep 10
-          result_type = Task.fetch.execute
-          @logger.increase result_type
+          begin
+            result_type = Task.fetch.execute
+            @logger.increase result_type
+          rescue => error
+            @logger.error error.to_s
+          end
         end
       end
     end
