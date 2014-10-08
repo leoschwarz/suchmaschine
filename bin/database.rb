@@ -85,7 +85,7 @@ module Database
         when "DOCUMENT_INFO_SET"
           hash, data = parameters.split("\t", 2)
           handle_document_info_set(hash, data)
-          handle_queue_insert(:index, hash)
+          handle_queue_insert(:index, [hash])
         when "DOCUMENT_INFO_GET"
           handle_document_info_get(parameters)
       end
