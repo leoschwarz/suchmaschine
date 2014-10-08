@@ -109,8 +109,8 @@ module Crawler
     # TODO: Dies macht noch immer Probleme
     def _convert_to_regex_string(value)
       s = Regexp.quote(value)
-      s.gsub!(/\*/, "(.*)")
-      s.gsub!(/\$/, "$")
+      s.gsub!(/\\\*/, "(.*)")
+      s.gsub!(/\\\$/, "$")
       s
     end
   end
