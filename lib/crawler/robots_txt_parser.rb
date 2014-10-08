@@ -12,7 +12,7 @@ module Crawler
       if @cache_item.status != :ok
         begin
           # Download der robots.txt Datei
-          url = URL.encoded "http://#{@domain}/robots.txt"
+          url = Common::URL.encoded "http://#{@domain}/robots.txt"
           download = Crawler::Download.new(url)
           c = download.status[0]
           
