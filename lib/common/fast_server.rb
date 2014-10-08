@@ -25,7 +25,7 @@ module Common
           conn = @server.get_socket
           unless conn.nil?
             # Die Antwort generieren
-            request  = @conn.gets.strip
+            request  = conn.gets.strip
             response = @on_request.call(request)
             
             # Das Resultat schreiben und die Verbindung schliessen
