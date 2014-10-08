@@ -33,7 +33,7 @@ module Common
     alias :stored :stored_url
     
     def domain_name
-      match = /https?:\/\/([a-zA-Z0-9\.-]+)/.match(url)
+      match = /https?:\/\/([a-zA-Z0-9\.-]+)/.match(self.encoded_url)
       if not match.nil?
         domain_name = match[1].downcase
       else
