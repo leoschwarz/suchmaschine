@@ -28,8 +28,9 @@ module Crawler
           end
         
           @cache_item.save
-        rescue Exception
-          # TODO: Hier nicht Exception fangen.
+        rescue => e
+          raise e
+          # TODO: Falls keine Probleme entstehen, einfach weglassen...
           @cache_item.rules = [[:disallow, "/"]]
           @cache_item.set_valid_for(30)
           @cache_item.save

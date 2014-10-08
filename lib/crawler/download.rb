@@ -43,30 +43,18 @@ module Crawler
           #        http://www.ruby-doc.org/core-2.0/String.html
           @response_body.encode!('UTF-8', invalid: :replace, undef: :replace, replace: '')
         end
-      rescue Exception => e
-        @success  = false
-        @status   = "500"
-        @redirect = nil
-        return
+      rescue
       end
       
-      # Die Library spuckt leider manchmal Fehler aus, wenn etwas nicht klappt...
-      begin
-        @success = curl.status[0] == "2" 
-      rescue Exception
-        @success = false
-      end
+      @status   = "500"
+      @success  = false
+      @redirect = nil
       
       begin
-        @status = curl.status
-      rescue Exception
-        @status = "500"
-      end
-      
-      begin
+        @status   = curl.status
+        @success  = @status[0] == "2"
         @redirect = curl.redirect_url unless curl.redirect_url == -1
-      rescue Exception
-        @redirect = nil
+      rescue
       end
     end
     
