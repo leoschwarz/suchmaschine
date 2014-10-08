@@ -21,7 +21,7 @@ module Common
     end
     
     # Wert für eine Anzeigevariable um Wert amount erhöhen.
-    def increase(name, amount)
+    def increase(name, amount=1)
       @values[name] += amount
     end
     

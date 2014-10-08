@@ -30,8 +30,8 @@ module Crawler
       Thread.new do
         loop do
           sleep 10
-          result = Task.fetch.execute
-          @logger.register result
+          result_type = Task.fetch.execute
+          @logger.increase result_type
         end
       end
     end
