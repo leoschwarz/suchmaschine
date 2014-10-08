@@ -42,7 +42,9 @@ module Crawler
           @response_body.encode!('UTF-8', invalid: :replace, undef: :replace, replace: '')
         end
       rescue Exception => e
-        @success = false
+        @success  = false
+        @status   = "500"
+        @redirect = nil
         return
       end
       
