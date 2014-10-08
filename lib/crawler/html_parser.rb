@@ -1,3 +1,4 @@
+require 'nokogiri'
 # TODO: Effizienzoptimierung + Tests
 
 module Crawler

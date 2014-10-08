@@ -1,3 +1,5 @@
+require 'curb'
+
 module Crawler
   class Download
     attr_reader :redirect_url, :response_body, :status
