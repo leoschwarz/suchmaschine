@@ -28,6 +28,11 @@ Common::load_configuration(Database, "database.yml")
 module Database
   class Server
     def initialize
+      ["docinfo/", "index/", "cache/"].each do |subdirectory|
+        path = File.join(Database.config.ssd.path, subdirectory)
+        Dir.mkdir path unless Dir.exists? path
+      end
+      
       @server = Common::FastServer.new(Database.config.server.host, Database.config.server.port)
       @server.on_start do
         @queues = {
