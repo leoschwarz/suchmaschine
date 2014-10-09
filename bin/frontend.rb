@@ -8,6 +8,7 @@ module Frontend
 
   class WebServer < Sinatra::Base
     set :views, File.join(File.dirname(__FILE__), "../ui/")
+    set :bind, "0.0.0.0"
 
     get '/' do
       render_page("index.erb", {title: "Das Internet"})
