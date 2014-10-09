@@ -3,7 +3,7 @@ require 'nokogiri'
 
 module Crawler
   class HTMLParser
-    attr_reader :indexing_allowed, :following_allowed, :links, :text, :html
+    attr_reader :indexing_allowed, :following_allowed, :links, :text, :html, :title
 
     def initialize(base_url, html)
       @base_url = base_url
@@ -18,6 +18,7 @@ module Crawler
       @following_allowed = true
       @links = []
       @text  = ""
+      @title = ""
 
       # 'robots' Meta-Tag
       # TODO: Varianten der Gross- und Kleinschreibung im XPath
@@ -52,6 +53,10 @@ module Crawler
         @text = _clean_text(@doc.text)
         @html = @doc.to_html
       end
+
+      # Titel
+      title_tag = @doc.xpath("//title")[0]
+      @title = title_tag.text unless title_tag.nil?
     end
 
     private

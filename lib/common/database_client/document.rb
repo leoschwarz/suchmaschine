@@ -3,11 +3,12 @@ require 'digest/md5'
 module Common
   module DatabaseClient
     class Document < Common::SerializableObject
-      field :url        # [String] URL des Dokumentes im Format Common::URL.stored 
+      field :url        # [String] URL des Dokumentes im Format Common::URL.stored
       field :links, []  # [Array]  Elemente im Format [Anker, URL]
+      field :title, ""  # [String] Titel des Dokumentes, falls vorhanden
       field :text       # [String] Extrahierter Text aus dem Ursprünglichen Dokument
       field :html       # [String] HTML des Body Elementes des ursprünglichen HTML
-    
+
       attr_accessor :hash
 
       def self.load(hash)
