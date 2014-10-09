@@ -52,7 +52,6 @@ module Database
       @server.on_stop do
         @queues[:download].save_everything
         @queues[:index].save_everything
-        Index.instance.save_everything
         puts "Daten erfolgreich gespeichert."
       end
 
