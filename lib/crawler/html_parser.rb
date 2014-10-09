@@ -4,21 +4,21 @@ require 'nokogiri'
 module Crawler
   class HTMLParser
     attr_reader :indexing_allowed, :following_allowed, :links, :text, :html
-    
+
     def initialize(base_url, html)
       @base_url = base_url
       @doc      = Nokogiri::HTML(html)
-      
+
       parse()
     end
-    
+
     def parse
       # Standardwerte
       @indexing_allowed  = true
       @following_allowed = true
       @links = []
       @text  = ""
-      
+
       # 'robots' Meta-Tag
       # TODO: Varianten der Gross- und Kleinschreibung im XPath
       meta_robots_tag = @doc.at_xpath("//meta[@name='robots']/@content")
@@ -31,7 +31,7 @@ module Crawler
           @following_allowed = false
         end
       end
-      
+
       # Links
       if @following_allowed
         @doc.xpath('//a[@href]').each do |link|
@@ -43,18 +43,17 @@ module Crawler
           end
         end
       end
-      
+
       # Text
       if @indexing_allowed
         @doc.search("script").each{|el| el.unlink}
         @doc.search("style").each{|el| el.unlink}
         @doc.xpath("//comment()").remove
         @text = _clean_text(@doc.text)
-        body = @doc.xpath("//body")[0]
-        @html = body.to_html unless body.nil?
+        @html = @doc.to_html
       end
     end
-    
+
     private
     def _clean_text(text)
       text.gsub(/\s+/, " ").strip
