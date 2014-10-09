@@ -17,6 +17,7 @@ Common::load_configuration(Database, "database.yml")
 # INDEX_QUEUE_INSERT\tDOCINFO1[...]
 # INDEX_QUEUE_FETCH
 # INDEX_APPEND\tWORD1\tDOC_HASH1[...] -> Fügt die jeweiligen DOC Einträge zu den Index Files hinzu.
+# INDEX_GET\tWORD
 # CACHE_SET\tKEY\tVALUE
 # CACHE_GET\tKEY
 # DOCUMENT_SET\tHASH\tDOCUMENT
@@ -79,6 +80,8 @@ module Database
         when "INDEX_APPEND"
           pairs = parameters.split("\t").each_slice(2)
           handle_index_append(pairs)
+        when "INDEX_GET"
+          handle_index_get(parameters)
         when "CACHE_SET"
           key, value = parameters.split("\t", 2)
           handle_cache_set(key, value)
@@ -132,6 +135,10 @@ module Database
       pairs.each do |word, doc_id|
         Index.append(word, doc_id)
       end
+    end
+
+    def handle_index_get(word)
+      Index.get(word).to_s
     end
 
     def handle_cache_set(key, value)
