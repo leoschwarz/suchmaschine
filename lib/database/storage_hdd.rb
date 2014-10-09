@@ -5,7 +5,7 @@ module Database
     def root_path
       Database.config.hdd.path
     end
-    
+
     def max_size
       Database.config.hdd.max_size
     end

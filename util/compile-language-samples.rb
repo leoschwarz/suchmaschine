@@ -34,12 +34,9 @@ if __FILE__ == $0
   languages.each do |language|
     puts "Start: #{language}"
     start_time = Time.now
-  
+
     compile_language(language, 500)
-  
+
     puts "Ende:  #{language} (Dauer: #{(Time.now-start_time).round(1)}s)\n"
   end
 end
-
-
-

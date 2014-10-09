@@ -5,12 +5,12 @@ module Database
     def initialize(path, data=nil)
       @path = path
       @data = data
-      
+
       if @data.nil?
         @data = {full_batches: [], open_batch: nil, batch_counter: 0}
       end
     end
-    
+
     def full_batches
       @data[:full_batches]
     end
@@ -26,27 +26,27 @@ module Database
     def batch_counter=(val)
       @data[:batch_counter] = val
     end
-    
+
     def next_batchname
       self.batch_counter += 1
       self.batch_counter.to_s(16)
     end
-    
+
     def serialize
       Oj.dump(@data)
     end
-    
+
     def save
       File.open(@path, "w") do |file|
         file.write(self.serialize)
       end
     end
-    
+
     def self.load(path)
       json = File.read(path)
       self.new(path, Oj.load(json))
     end
-    
+
     # Öffnet die metadata.json Datei in einem bestimmten Verzeichniss.
     # Bei Erfolg wird eine BigQueueMetadata Instanz zurückgegeben,
     # ansonsten wird nil zurückgegeben.

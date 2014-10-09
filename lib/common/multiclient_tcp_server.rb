@@ -19,7 +19,7 @@ module Common
       @timeout = timeout  # in seconds
       @verbose = verbose  # a boolean
       @connections = []
-      @server = 
+      @server =
         begin
           TCPServer.new( @port )
         rescue SystemCallError => ex
@@ -44,15 +44,15 @@ module Common
           raise "socket #{sock.peeraddr.join(':')} had error"
       end
       # accept new clients
-      ios[0].each do |s| 
+      ios[0].each do |s|
         # loop runs over server and connections; here we look for the former
-        s==@server or next 
+        s==@server or next
         client = @server.accept or
           raise "server: incoming connection, but no client"
         @connections << client
         @verbose and
           puts "server: incoming connection no. #{@connections.size} from #{client.peeraddr.join(':')}"
-        # give the new connection a chance to be immediately served 
+        # give the new connection a chance to be immediately served
         ios = select( @connections, nil, nil, @timeout )
       end
       # process input from existing client

@@ -23,12 +23,12 @@ module Common
             rb_hash_aset(counter, ngram, INT2FIX(1));
           }
         }
-      
+
         return counter;
       }
       C
     end
-    
+
     def self.count_ngrams(_text, ngram_size)
       separator = "_"*(ngram_size-1)
       text = _text.gsub(/[^a-zA-ZäöüÄÖÜ']+/, separator)

@@ -3,19 +3,19 @@ require 'curb'
 module Crawler
   class Download
     attr_reader :redirect_url, :response_body, :status
-    
+
     def initialize(url)
       @response_body = ""
       @response_body_size = 0
       @success = true
-      
+
       begin
         curl = Curl::Easy.new(url.encoded) do |curl|
           curl.headers["User-Agent"] = Crawler.config.user_agent
           curl.verbose = false
           curl.timeout = 10
           curl.encoding = "UTF-8"
-          
+
           curl.on_body {|chunk|
             size = chunk.bytesize
             if @response_body_size+size <= Crawler.config.max_response_length
@@ -28,7 +28,7 @@ module Crawler
           }
         end
         curl.perform
-        
+
         # UTF-8 Kodierung sicherstellen,
         # Der String @response_body ist normalerweise ASCII-8BIT:
         # 1. UTF-8 Kodierung annehmen, und auf Korrektheit überprüfen:
@@ -36,7 +36,7 @@ module Crawler
           @response_body = @response_body.force_encoding("UTF-8")
         else
           # 2. Falls dies nicht funktioniert hat, werden nun einfach alle falschen Bytes entfernt.
-          #    Das heisst, beispielsweise deutsche Umlaute könnten verschwinden, sollten sie in 
+          #    Das heisst, beispielsweise deutsche Umlaute könnten verschwinden, sollten sie in
           #    einer anderen Kodierung als UTF-8 vorlieren. (zBsp: ISO-LATIN-1)
           #
           # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
@@ -45,11 +45,11 @@ module Crawler
         end
       rescue
       end
-      
+
       @status   = "500"
       @success  = false
       @redirect = nil
-      
+
       begin
         @status   = curl.status
         @success  = @status[0] == "2"
@@ -57,7 +57,7 @@ module Crawler
       rescue
       end
     end
-    
+
     def success?
       @success
     end

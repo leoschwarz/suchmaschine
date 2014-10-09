@@ -6,7 +6,7 @@ module Crawler
       @robot_name = robot_name
       load
     end
-    
+
     def load
       @cache_item = RobotsTXTCacheItem.load(@domain)
       if @cache_item.status != :ok
@@ -15,7 +15,7 @@ module Crawler
           url = Common::URL.encoded "http://#{@domain}/robots.txt"
           download = Crawler::Download.new(url)
           c = download.status[0]
-          
+
           if c == "2"
             @cache_item.rules = parse(download.response_body)
             @cache_item.set_valid_for(:default)
@@ -26,7 +26,7 @@ module Crawler
             @cache_item.rules = []
             @cache_item.set_valid_for(:default)
           end
-        
+
           @cache_item.save
         rescue => e
           raise e
@@ -36,17 +36,17 @@ module Crawler
           @cache_item.save
         end
       end
-      
+
     end
-    
+
     def allowed?(path)
       allowed = true
       explicitely_allowed = false
-      
+
       if @cache_item.nil?
         raise "Cache Item was not loaded."
       end
-      
+
       @cache_item.rules.each do |rule|
         if not /^(#{rule[1]})/.match(path).nil?
           if rule[0] == :disallow
@@ -56,23 +56,23 @@ module Crawler
           end
         end
       end
-      
+
       explicitely_allowed || allowed
     end
-    
+
     def parse(txt)
       groups = [] # items of form: [["agent1", "agent2"], [[:allow, "http://bla.example.com"], [:disallow, "http://example.com"]]]
       group_open = nil
-      
+
       txt.lines.each do |line|
         line.gsub!(/#.*/, "")
         line.strip!
-        
+
         match = /([-a-zA-Z]+):[ ]?(.*)$/.match(line)
         if not match.nil?
           key = match[1].strip
           value = match[2].strip
-          
+
           if key.downcase == "user-agent"
             if group_open
               groups.last[0] << value
@@ -93,7 +93,7 @@ module Crawler
           end
         end
       end
-      
+
       group_unspecified = []
       groups.each do |group|
         if group[0].include? @robot_name
@@ -102,10 +102,10 @@ module Crawler
           group_unspecified = group[1]
         end
       end
-      
+
       return group_unspecified
     end
-    
+
     private
     # TODO: Dies macht noch immer Probleme
     def _convert_to_regex_string(value)

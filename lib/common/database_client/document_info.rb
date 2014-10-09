@@ -8,7 +8,7 @@ module Common
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
       field :document_hash                           # [String]  Hash des aktuellsten Dokumentes
       field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
-    
+
       def document
         Document.load(self.document_hash)
       end
