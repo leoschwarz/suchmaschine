@@ -3,7 +3,7 @@
 require './bin/indexer.rb'
 
 INDEX_DIRECTORY       = "/mnt/sdb/suchmaschine/index/"
-INDEX_QUEUE_DIRECTORY = File.join(__FILE__, "../db/index/")
+INDEX_QUEUE_DIRECTORY = File.join(File.dirname(__FILE__), "../db/index/")
 DOCINFO_DIRECTORY     = "/mnt/sdb/suchmaschine/docinfo/"
 raise "Dieses Programm muss mit Zugriff auf das INDEX-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_DIRECTORY
 raise "Dieses Programm muss mit Zugriff auf das INDEX_QUEUE-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_QUEUE_DIRECTORY
