@@ -4,47 +4,51 @@ module Common
       def self.download_queue_insert(urls)
         self.run("DOWNLOAD_QUEUE_INSERT\t#{urls.join("\t")}") unless urls.size == 0
       end
-    
+
       def self.download_queue_fetch()
         URL.stored(self.run("DOWNLOAD_QUEUE_FETCH", {response_required: true}))
       end
-    
+
       def self.index_queue_insert(docinfo_ids)
         self.run("INDEX_QUEUE_INSERT\t#{docinfo_ids.join("\t")}") unless docinfo_ids.size == 0
       end
-    
+
       def self.index_queue_fetch()
         self.run("INDEX_QUEUE_FETCH")
       end
-      
+
       def self.index_append(pairs)
         self.run("INDEX_APPEND\t#{pairs.flatten.join("\t")}")
       end
-    
+
+      def self.index_get(word)
+        self.run("INDEX_GET\t#{word}")
+      end
+
       def self.cache_set(key, value)
         self.run("CACHE_SET\t#{key}\t#{value}")
       end
-    
+
       def self.cache_get(key)
         self.run("CACHE_GET\t#{key}")
       end
-    
+
       def self.document_set(hash, document)
         self.run("DOCUMENT_SET\t#{hash}\t#{document}")
       end
-    
+
       def self.document_get(hash)
         self.run("DOCUMENT_GET\t#{hash}")
       end
-    
+
       def self.document_info_set(hash, docinfo)
         self.run("DOCUMENT_INFO_SET\t#{hash}\t#{docinfo}")
       end
-    
+
       def self.document_info_get(hash)
         self.run("DOCUMENT_INFO_GET\t#{hash}")
       end
-    
+
       # Führt ein 'query' auf dem Datenbankserver aus.
       # Optionen:
       # response_required: [Boolean] Muss eine Antwort erhalten werden?
@@ -53,7 +57,7 @@ module Common
       def self.run(query, options={})
         options[:response_required] = false if options[:response_required].nil?
         options[:retries_left]      = 3     if options[:retries_left].nil?
-      
+
         client   = Common::FastClient.new(Common.config.database.host, Common.config.database.port)
         response = client.request(query)
         if options[:response_required]
@@ -69,7 +73,7 @@ module Common
             end
           end
         end
-      
+
         response
       end
     end
