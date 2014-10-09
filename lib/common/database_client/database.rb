@@ -22,7 +22,12 @@ module Common
       end
 
       def self.index_get(word)
-        self.run("INDEX_GET\t#{word}").split("\t")
+        raw = self.run("INDEX_GET\t#{word}")
+        if raw.nil?
+          []
+        else
+          raw.split("\t")
+        end
       end
 
       def self.cache_set(key, value)
