@@ -17,14 +17,16 @@ module Indexer
     # Die Aufgabe bearbeiten.
     def run
       # Ein Array aller vorkommenden kleingeschriebenen Wörter erzeugen.
-      words = @text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ")
+      all_words = @text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ")
 
       # Wörter ab einer Länge von 20 Zeichen werden auf die ersten 20 Zeichen reduziert.
       # Duplikate werden entfernt.
-      words = words.map{|word| word[0...20]}.uniq
+      all_words = all_words.map{|word| word[0...20]}.uniq
 
       # Wörter in Datenbank registrieren.
-      Indexer::Database.index_append(words.map{|word| [word, @document_hash]})
+      all_words.each_slice(100) do |words|
+        Indexer::Database.index_append(words.map{|word| [word, @document_hash]})
+      end
     end
   end
 end
