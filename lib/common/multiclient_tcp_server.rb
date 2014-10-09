@@ -19,12 +19,11 @@ module Common
       @timeout = timeout  # in seconds
       @verbose = verbose  # a boolean
       @connections = []
-      @server =
-        begin
-          TCPServer.new( @port )
-        rescue SystemCallError => ex
-          raise "cannot initialize tcp server for port #{@port}: #{ex}"
-        end
+      begin
+        @server = TCPServer.new( @port )
+      rescue SystemCallError => ex
+        raise "Cannot initialize TCP server for port #{@port}: #{ex}"
+      end
     end
 
     def get_socket
@@ -35,44 +34,55 @@ module Common
       # and they can respond with write().
 
       # one select call for three different purposes -> saves timeouts
-      ios = select( [@server]+@connections, nil, @connections, @timeout ) or
-          return nil
+      ios = select( [@server]+@connections, nil, @connections, @timeout )
+      return nil unless ios
+
       # disconnect any clients with errors
       ios[2].each do |sock|
-          sock.close
-          @connections.delete( sock )
-          raise "socket #{sock.peeraddr.join(':')} had error"
+        sock.close
+        @connections.delete( sock )
+        raise "socket #{sock.peeraddr.join(':')} had error"
       end
+
       # accept new clients
       ios[0].each do |s|
         # loop runs over server and connections; here we look for the former
-        s==@server or next
-        client = @server.accept or
-          raise "server: incoming connection, but no client"
+        if s != @server
+          next
+        end
+
+        client = @server.accept
+        raise "server: incoming connection, but no client" unless client
+
         @connections << client
-        @verbose and
-          puts "server: incoming connection no. #{@connections.size} from #{client.peeraddr.join(':')}"
+        puts "server: incoming connection no. #{@connections.size} from #{client.peeraddr.join(':')}" if @verbose
+
         # give the new connection a chance to be immediately served
         ios = select( @connections, nil, nil, @timeout )
       end
+
       # process input from existing client
       ios[0].each do |s|
         # loop runs over server and connections; here we look for the latter
-        s==@server and next
+        if s == @server
+          next
+        end
+
         # since s is an element of @connections, it is a client created
         # by @server.accept, hence a TcpSocket < IPSocket < BaseSocket
         if s.eof?
           # client has closed connection
-          @verbose and
-            puts "server: client closed #{s.peeraddr.join(':')}"
+          puts "server: client closed #{s.peeraddr.join(':')}" if @verbose
+
           @connections.delete(s)
           next
         end
-        @verbose and
-          puts "server: incoming message from #{s.peeraddr.join(':')}"
+
+        puts "server: incoming message from #{s.peeraddr.join(':')}" if @verbose
+
         return s # message can be read from this
       end
       return nil # no message arrived
     end
-  end # class MulticlientTCPServer
+  end
 end
