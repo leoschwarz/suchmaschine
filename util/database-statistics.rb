@@ -26,3 +26,13 @@ docinfo_paths.each do |path|
 end
 puts "DOMAIN HÄUFIGKEIT (top 100):"
 puts domain_counts.sort_by{|url, c| c}.reverse[0...100].map{|row| row.join(" => ")}
+
+index_files = Dir["#{$data_dir}/index/word:*"]
+puts "INDEX EINTRÄGE   : #{index_files.size}"
+index_counts = {}
+index_files.each do |path|
+  word = path.split(":")[1]
+  index_counts[word] = File.read(path).lines.size
+end
+puts "TOP 100 INDEX:"
+puts index_counts.sort_by{|word, c| c}.reverse[0...100].map{|row| row.join(" =>")}
