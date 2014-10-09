@@ -138,7 +138,7 @@ module Database
     end
 
     def handle_index_get(word)
-      Index.get(word).to_s
+      Index.get(word).to_s.gsub(/\n/, "\t")
     end
 
     def handle_cache_set(key, value)
