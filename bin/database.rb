@@ -8,8 +8,8 @@ require_relative '../lib/database/database'
 
 Common::load_configuration(Database, "database.yml")
 
-# API Dokumentation :: 
-# 
+# API Dokumentation ::
+#
 # [...] = Weitere Tab-getrennte Werte(paare)
 #
 # DOWNLOAD_QUEUE_INSERT\tURL1[...]
@@ -32,7 +32,7 @@ module Database
         path = File.join(Database.config.ssd.path, subdirectory)
         Dir.mkdir path unless Dir.exists? path
       end
-      
+
       @server = Common::FastServer.new(Database.config.server.host, Database.config.server.port)
       @server.on_start do
         @queues = {
@@ -40,31 +40,31 @@ module Database
           :index    => BigQueue.new(Database.config.index_queue.directory)
         }
       end
-      
+
       @logger = Common::Logger.new
       @logger.add_output($stdout)
-      
+
       @server.on_error do |error|
         @logger.error(error.to_s)
       end
-      
+
       @server.on_stop do
         @queues[:download].save_everything
         @queues[:index].save_everything
         Index.instance.save_everything
         puts "Daten erfolgreich gespeichert."
       end
-      
+
       @server.on_request do |request|
         action, parameters = request.split("\t", 2)
         handle_action(action, parameters)
       end
     end
-    
+
     def start
       @server.start
     end
-    
+
     # Verschiedene Handler für verschiedene Aktionen
     def handle_action(action, parameters)
       case action
@@ -97,7 +97,7 @@ module Database
           handle_document_info_get(parameters)
       end
     end
-    
+
     def handle_queue_insert(queue, items)
       if queue == :download
         items.each do |url|
@@ -108,14 +108,14 @@ module Database
           @queues[:index].insert(docinfo_key)
         end
       end
-      
+
       nil
     end
-    
+
     def has_doc_info?(url)
       StorageSSD.instance.include?("docinfo/"+Digest::MD5.hexdigest(url))
     end
-    
+
     def handle_queue_fetch(queue)
       if queue == :download
         url = @queues[:download].fetch
@@ -127,36 +127,36 @@ module Database
         return @queues[:index].fetch
       end
     end
-    
+
     def handle_index_append(pairs)
       pairs.each do |word, doc_id|
-        Index.instance.append(word, doc_id)
+        Index.append(word, doc_id)
       end
     end
-    
+
     def handle_cache_set(key, value)
       StorageSSD.instance.set("cache/"+key, value)
       nil
     end
-    
+
     def handle_cache_get(key)
       StorageSSD.instance.get("cache/"+key)
     end
-    
+
     def handle_document_set(hash, document)
       StorageHDD.instance.set("doc:"+hash, document)
       nil
     end
-    
+
     def handle_document_get(hash)
       StorageHDD.instance.get("doc:"+hash)
     end
-    
+
     def handle_document_info_set(hash, docinfo)
       StorageSSD.instance.set("docinfo/"+hash, docinfo)
       nil
     end
-    
+
     def handle_document_info_get(hash)
       StorageSSD.instance.get("docinfo/"+hash)
     end
