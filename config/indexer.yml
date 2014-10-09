@@ -6,3 +6,6 @@ development:
 
 test:
   <<: *default
+
+laptop:
+  <<: *default

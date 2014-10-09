@@ -4,7 +4,8 @@ module Indexer
       @document_hash = document_hash
       @text          = text
     end
-    
+
+    # Eine neue Aufgabe laden.
     def self.fetch
       docinfo_hash = Indexer::Database.index_queue_fetch
       docinfo      = Indexer::DocumentInfo.load(docinfo_hash)
@@ -12,9 +13,17 @@ module Indexer
       text         = doc.text
       self.new(doc.hash, text)
     end
-    
+
+    # Die Aufgabe bearbeiten.
     def run
-      words = @text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ").uniq
+      # Ein Array aller vorkommenden kleingeschriebenen Wörter erzeugen.
+      words = @text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ")
+
+      # Wörter ab einer Länge von 20 Zeichen werden auf die ersten 20 Zeichen reduziert.
+      # Duplikate werden entfernt.
+      words = words.map{|word| word[0...20]}.uniq
+
+      # Wörter in Datenbank registrieren.
       Indexer::Database.index_append(words.map{|word| [word, @document_hash]})
     end
   end
