@@ -11,15 +11,10 @@ Thread.abort_on_exception = true
 module Indexer
   class Main
     def run
-      @logger = Common::Logger.new(
-        {
-          variables: [:time, :tasks, :tasks_per_second],
-          labels: {time: "Zeit", tasks: "Aufgaben", tasks_per_second: "Aufgaben/Sekunde"}
-        }
-      )
-      @logger.add_output($stdout)
-      @logger.set(:time, proc{|logger| logger.elapsed_time})
-      @logger.set(:tasks_per_second, proc{|logger| (logger.get(:tasks)*1.0 / (logger.elapsed_time+0.0001)).round(2)})
+      @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/Sekunde"}})
+      @logger.add_output($stdout, Common::Logger::NOTICE)
+      @logger.progress[:tasks] = 0
+      @logger.progress[:tasks_per_second] = proc{|logger| (logger.progress[:tasks]*1.0 / (logger.elapsed_time+0.0001)).round(2)}
 
       Indexer.config.threads.times{ start_thread }
 
@@ -40,9 +35,9 @@ module Indexer
       loop do
         begin
           Task.fetch.run
-          @logger.increase(:tasks)
+          @logger.progress[:tasks] += 1
         rescue => error
-          @logger.error(error.to_s)
+          @logger.log_exception(error)
         end
       end
     end

@@ -29,7 +29,7 @@ module Crawler
           result_type = Task.fetch.execute
           @logger.progress[result_type] += 1
         rescue => e
-          @logger.log_error([e.to_s] + e.backtrace)
+          @logger.log_exception(e)
         end
       end
     end

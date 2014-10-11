@@ -43,10 +43,10 @@ module Database
       end
 
       @logger = Common::Logger.new
-      @logger.add_output($stdout)
+      @logger.add_output($stdout, Common::Logger::INFO)
 
       @server.on_error do |error|
-        @logger.error(error.to_s)
+        @logger.log_exception(error)
       end
 
       @server.on_stop do

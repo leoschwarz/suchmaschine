@@ -99,6 +99,10 @@ module Common
     def log_info(info)
       self.log_message(info, INFO)
     end
+    
+    def log_exception(exception)
+      self.log_lines(exception.backtrace.insert(0, exception.to_s), ERROR)
+    end
 
     # Gibt die Anzahl Sekunden zurück die seit dem ersten Aufruf dieser Methode verstrichen sind.
     def elapsed_time
