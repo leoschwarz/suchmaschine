@@ -18,9 +18,9 @@ module Indexer
 
       Indexer.config.threads.times{ start_thread }
 
-      @logger.display_header
+      @logger.log_progress_labels
       loop do
-        @logger.display_values
+        @logger.log_progress
         sleep 5
       end
     end
