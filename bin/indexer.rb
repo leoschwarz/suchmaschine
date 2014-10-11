@@ -12,7 +12,7 @@ module Indexer
   class Main
     def run
       @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/Sekunde"}})
-      @logger.add_output($stdout, Common::Logger::NOTICE)
+      @logger.add_output($stdout, Common::Logger::INFO)
       @logger.progress[:tasks] = 0
       @logger.progress[:tasks_per_second] = proc{|logger| (logger.progress[:tasks]*1.0 / (logger.elapsed_time+0.0001)).round(2)}
 
