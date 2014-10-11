@@ -10,8 +10,13 @@ module Indexer
       docinfo_hash = Indexer::Database.index_queue_fetch
       docinfo      = Indexer::DocumentInfo.load(docinfo_hash)
       doc          = Indexer::Document.load(docinfo.document_hash)
-      text         = doc.text
-      self.new(doc.hash, text)
+      
+      if doc.nil?
+        # Dies kommt vor wenn nur DOCUMENT_INFO aber kein DOCUMENT gespeichert wurde.
+        self.fetch
+      else
+        self.new(doc.hash, doc.text)
+      end
     end
 
     # Die Aufgabe bearbeiten.
