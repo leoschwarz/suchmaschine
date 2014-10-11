@@ -1,71 +1,103 @@
+# TODO : Noch nicht richtig Threadsicher.
+#        Wahrscheinlich wird es nötig sein, eine Queue einzuführen um auf die Streams zu schreiben.
+
 module Common
+  class LoggerLevel
+    include Comparable
+    attr_accessor :name, :value
+
+    def initialize(name, value)
+      @name = name
+      @value = value # Wert für Vergleiche. Der kleinste Wert = Tiefste Priorität
+    end
+
+    def <=>(other)
+      self.value <=> other.value
+    end
+  end
+  
   class Logger
-    attr_accessor :started_at
+    ERROR   = LoggerLevel.new("FEHL", 0).freeze
+    WARNING = LoggerLevel.new("WARN", 0).freeze
+    INFO    = LoggerLevel.new("INFO", 0).freeze
 
-    # variables: Array mit Namen der Werte die angezeigt werden sollen.
-    # labels:    Ein Hash mit Ersatznamen für die Variabeln.
-    # outputs:   Array mit IO Objekten auf die die Ausgabe geschrieben werden soll.
-    #            Diese Objekte können auch mittels add_output hinzugefügt werden.
-    def initialize(options={})
-      default_options = {variables: [], labels: {}, outputs: []}
-      options = default_options.merge(options)
-
-      @labels    = {notice: "info", error: "fehl"}.merge(options[:labels])
-      @variables = options[:variables]
-      @values    = @variables.map{|var| [var, 0]}.to_h
-      @outputs   = options[:outputs]
+    def initialize(options={labels: {}})
+      @outputs  = []
+      @labels   = options[:labels]
+      @progress = OrderedHash.new
     end
 
-    # Wert für eine Anzeigevariable direkt setzen.
-    # Falls der Wert eine Proc-Instanz ist, wird diese beim Anzeigen aufgerufen.
-    def set(name, value)
-      @values[name] = value
+    # Ermöglicht das setzen und lesen der Fortschrittszähler.
+    attr_accessor :progress
+
+    # Fügt einen neuen Ausgabe-Stream hinzu der alle Nachrichten ab min_level aufzeichnet.
+    def add_output(stream, min_level)
+      @outputs << {stream: stream, min_level: min_level}
     end
 
-    # Wert für eine Anzeigevariable lesen.
-    # Falls es sich um ein Proc handelt, wird diese ausgeführt.
-    def get(name)
-      if @values[name].class == Proc
-        @values[name].call(self)
+    # Zeigt die Beschriftungen für die Fortschrittszähler an.
+    def log_progress_labels(level=INFO)
+      self.log_line(@progress.keys.map{|name| _label(name)}.join("\t"), level)
+    end
+
+    # Zeigt den Fortschritt an.
+    def log_progress(level=INFO)
+      # Eventuelle Procs ausführen
+      evaluated_values = @progress.values.map do |value|
+        if value.class == Proc
+          value.call(self)
+        else
+          value
+        end
+      end
+
+      # Ausgeben
+      self.log_line(evaluated_values.join("\t"), level)
+    end
+
+    # Gibt eine Zeile aus.
+    def log_line(text, level)
+      line = "[#{level.name}][#{Time.now.strftime "%d-%m-%y %H:%M:%S.%L"}] #{text}"
+      @outputs.each do |output|
+        if output[:min_level] <= level
+          output[:stream].puts line
+        end
+      end
+    end
+    
+    # Gibt mehrere Zeilen aus.
+    def log_lines(lines, level)
+      label       = "[#{level.name}][#{Time.now.strftime "%d-%m-%y %H:%M:%S.%L"}] "
+      first_line  = label + lines.first
+      other_lines = lines[1...-1].map{|line| " "*label.size + line}
+      text = other_lines.insert(0, first_line).join("\n")
+      @outputs.each do |output|
+        if output[:min_level] <= level
+          output[:stream].puts text
+        end
+      end
+    end
+    
+    def log_message(msg, level)
+      if msg.class == Array
+        log_lines(msg, level)
+      elsif msg.include?("\n")
+        log_lines(msg.split("\n"), level)
       else
-        @values[name]
+        log_line(msg)
       end
     end
 
-    # Wert für eine Anzeigevariable um Wert amount erhöhen.
-    def increase(name, amount=1)
-      @values[name] += amount
+    def log_error(error)
+      self.log_message(error, ERROR)
     end
 
-    # Eine Nachricht loggen.
-    # Severity bezeichnet den schweregrad der Nachricht (:notice oder :error)
-    def message(msg, severity=:notice)
-      self.puts "[#{_label(severity).upcase}][#{Time.now.strftime "%d.%m.%y %H:%M:%S.%L"}] #{msg}"
+    def log_warning(warning)
+      self.log_message(warning, WARNING)
     end
 
-    # Hilfsmethode um eine "notice" zu loggen.
-    def notice(msg)
-      self.message(msg, :notice)
-    end
-
-    # Hilfsmethode um einen "error" zu loggen.
-    def error(msg)
-      self.message(msg, :error)
-    end
-
-    # Hilfsmethode um einen weiteren Ausgabe-Stream hinzuzufügen.
-    def add_output(output)
-      @outputs << output
-    end
-
-    # Zeigt einen Header für die Werte an.
-    def display_header
-      self.puts @variables.map{|name| _label(name)}.join("\t")
-    end
-
-    # Zeigt die Werte an
-    def display_values
-      self.puts @variables.map{|name| self.get(name)}.join("\t")
+    def log_info(info)
+      self.log_message(info, INFO)
     end
 
     # Gibt die Anzahl Sekunden zurück die seit dem ersten Aufruf dieser Methode verstrichen sind.
@@ -74,23 +106,10 @@ module Common
       Time.now.to_i - @started_at
     end
 
-    # Schreibt eine Zeile auf alle Ausgabe-Streams
-    def puts(line)
-      @outputs.each{|output| output.puts line}
-    end
-
-    # Schreibt einen String auf alle Ausgabe-Streams
-    def print(str)
-      @outputs.each{|output| output.print str}
-    end
-
-    # Gibt falls es ein Label für str gibt dieses zurück, ansonsten str.
+    private
     def _label(str)
-      if @labels.has_key?(str)
-        @labels[str]
-      else
-        str
-      end
+      return @labels[str] if @labels.has_key?(str)
+      str
     end
   end
 end

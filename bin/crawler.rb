@@ -6,17 +6,18 @@ module Crawler
   def self.launch
     puts "#{Crawler.config.user_agent} wurde gestartet."
 
-    @logger = Common::Logger.new({
-      variables: [:time, :success, :failure, :not_allowed],
-      labels: {time: :Zeit, success: :Erfolge, failure: :Fehler, not_allowed: :Verboten}})
-    @logger.set(:time, proc{|logger| logger.elapsed_time})
-    @logger.add_output($stdout)
-    @logger.display_header
+    @logger = Common::Logger.new({labels: {success: :Erfolge, failure: :Fehler, not_allowed: :Verboten}})
+    @logger.progress[:success] = 0
+    @logger.progress[:failure] = 0
+    @logger.progress[:not_allowed] = 0
+    
+    @logger.add_output($stdout, Common::Logger::INFO)
 
     Crawler.config.parallel_tasks.times{ self.launch_thread }
 
+    @logger.log_progress_labels
     loop do
-      @logger.display_values
+      @logger.log_progress
       sleep 5
     end
   end
@@ -26,9 +27,9 @@ module Crawler
       loop do
         begin
           result_type = Task.fetch.execute
-          @logger.increase result_type
-        rescue => error
-          @logger.error error.to_s
+          @logger.progress[result_type] += 1
+        rescue => e
+          @logger.log_error([e.to_s] + e.backtrace)
         end
       end
     end
