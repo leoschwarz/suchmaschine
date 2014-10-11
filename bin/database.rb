@@ -16,7 +16,7 @@ Common::load_configuration(Database, "database.yml")
 # DOWNLOAD_QUEUE_FETCH
 # INDEX_QUEUE_INSERT\tDOCINFO1[...]
 # INDEX_QUEUE_FETCH
-# INDEX_APPEND\tWORD1\tDOC_HASH1[...] -> Fügt die jeweiligen DOC Einträge zu den Index Files hinzu.
+# INDEX_APPEND\tWORD1\tPOS1:DOC_HASH1[...] -> Fügt die jeweiligen DOC Einträge zu den Index Files hinzu.
 # INDEX_GET\tWORD
 # CACHE_SET\tKEY\tVALUE
 # CACHE_GET\tKEY
