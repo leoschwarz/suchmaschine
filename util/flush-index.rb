@@ -33,8 +33,7 @@ index_files.each do |index_file|
   counter += 1
   print "\r[#{counter}/#{index_files_count}] gelöscht." if counter % 1000 == 0
 end
-print "\n"
-puts "Löschen aller Dateien im INDEX-Verzeichniss erfolgreich."
+puts "\rLöschen aller Dateien im INDEX-Verzeichniss erfolgreich."
 
 puts "Löschen der alten INDEX_QUEUE begonnen..."
 index_queue_files.each do |file|
@@ -54,6 +53,4 @@ docinfo_ids.each_slice(200) do |ids|
   counter += 200
   print "\r[#{counter}/#{docinfo_ids_count}] eingefügt." if counter % 1000 == 0
 end
-print "\n"
-
-puts "Befüllen beendet. Jetzt können Clients wie gewohnt verbunden werden..."
+puts "\rBefüllen beendet. Jetzt können Clients wie gewohnt verbunden werden..."
