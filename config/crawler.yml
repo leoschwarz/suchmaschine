@@ -1,5 +1,5 @@
 production: &default
-  parallel_tasks: 100    # Anzahl paralleler Downloads
+  threads: 100           # Anzahl paralleler Downloads
   user_agent: lightblaze # Name des USER_AGENT Felds für HTTP Requests
   max_response_length: 512000 # 1024 * 500 Bytes, also 500kB
   crawl_delay: 1.0       # Anzahl Sekunden die gewartet werden muss bevor von der gleichen Domain wieder etwas geladen werden darf.
