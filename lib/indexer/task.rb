@@ -7,15 +7,15 @@ module Indexer
 
     # Eine neue Aufgabe laden.
     def self.fetch
-      docinfo_hash = Indexer::Database.index_queue_fetch
-      docinfo      = Indexer::DocumentInfo.load(docinfo_hash)
-      doc          = Indexer::Document.load(docinfo.document_hash)
+      metadata_id = Indexer::Database.index_queue_fetch
+      metadata    = Indexer::Metadata.load(metadata_id)
+      document    = metadata.document
       
-      if doc.nil?
+      if document.nil?
         # Dies kommt vor wenn nur DOCUMENT_INFO aber kein DOCUMENT gespeichert wurde.
         self.fetch
       else
-        self.new(doc.hash, doc.text)
+        self.new(document.hash, document.text)
       end
     end
 

@@ -2,7 +2,7 @@ require 'digest/md5'
 
 module Common
   module DatabaseClient
-    class DocumentInfo < Common::SerializableObject
+    class Metadata < Common::SerializableObject
       field :url                                     # [String]  URL, im Format Common::URL.stored, des Dokumentes
       field :added_at                                # [Integer] Timestamp der Erstellung
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
@@ -18,11 +18,11 @@ module Common
       end
 
       def save
-        Database.document_info_set(Digest::MD5.hexdigest(self.url), self.serialize)
+        Database.metadata_set(Digest::MD5.hexdigest(self.url), self.serialize)
       end
 
       def self.load(hash)
-        DocumentInfo.deserialize(Database.document_info_get(hash))
+        DocumentInfo.deserialize(Database.metadata_get(hash))
       end
     end
   end

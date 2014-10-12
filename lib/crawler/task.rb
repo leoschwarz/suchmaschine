@@ -31,12 +31,12 @@ module Crawler
           document.html  = parser.html
           document.save
 
-          docinfo = Crawler::DocumentInfo.new
-          docinfo.url = @url.stored
-          docinfo.document = document
-          docinfo.added_at = Time.now.to_i
-          docinfo.permissions = {index: parser.indexing_allowed, follow: parser.following_allowed}
-          docinfo.save
+          metadata = Crawler::Metadata.new
+          metadata.url = @url.stored
+          metadata.document = document
+          metadata.added_at = Time.now.to_i
+          metadata.permissions = {index: parser.indexing_allowed, follow: parser.following_allowed}
+          metadata.save
 
           if parser.following_allowed
             Task.insert(links.map{|pairs| pairs[1]})
@@ -45,11 +45,11 @@ module Crawler
           destination_url = @url.join_with(download.redirect_url)
           Task.insert([destination_url.stored]) unless destination_url.nil?
 
-          docinfo          = DocumentInfo.new
-          docinfo.url      = @url.stored
-          docinfo.redirect = destination_url.stored unless destination_url.nil?
-          docinfo.added_at = Time.now.to_i
-          docinfo.save
+          metadata          = Metadata.new
+          metadata.url      = @url.stored
+          metadata.redirect = destination_url.stored unless destination_url.nil?
+          metadata.added_at = Time.now.to_i
+          metadata.save
         end
 
         return :success

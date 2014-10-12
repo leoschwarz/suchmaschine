@@ -22,8 +22,8 @@ Common::load_configuration(Database, "database.yml")
 # CACHE_GET\tKEY
 # DOCUMENT_SET\tHASH\tDOCUMENT
 # DOCUMENT_GET\tHASH
-# DOCUMENT_INFO_SET\tHASH\tDOCUMENT_INFO -> Dies speichert die Dokumentinfo UND gibt dieses in die INDEX Warteschlange auf.
-# DOCUMENT_INFO_GET\tHASH
+# METADATA_SET\tHASH\tDOCUMENT_INFO -> Dies speichert die Dokumentinfo UND gibt dieses in die INDEX Warteschlange auf.
+# METADATA_GET\tHASH
 
 
 module Database
@@ -91,12 +91,12 @@ module Database
           handle_document_set(key, value)
         when "DOCUMENT_GET"
           handle_document_get(parameters)
-        when "DOCUMENT_INFO_SET"
+        when "METADATA_SET"
           hash, data = parameters.split("\t", 2)
-          handle_document_info_set(hash, data)
+          handle_metadata_set(hash, data)
           handle_queue_insert(:index, [hash])
-        when "DOCUMENT_INFO_GET"
-          handle_document_info_get(parameters)
+        when "METADATA_GET"
+          handle_metadata_get(parameters)
       end
     end
 
@@ -158,12 +158,12 @@ module Database
       StorageHDD.instance.get("doc:"+hash)
     end
 
-    def handle_document_info_set(hash, docinfo)
+    def handle_metadata_set(hash, docinfo)
       StorageSSD.instance.set("docinfo/"+hash, docinfo)
       nil
     end
 
-    def handle_document_info_get(hash)
+    def handle_metadata_get(hash)
       StorageSSD.instance.get("docinfo/"+hash)
     end
   end
