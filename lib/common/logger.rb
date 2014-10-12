@@ -84,7 +84,7 @@ module Common
       elsif msg.include?("\n")
         log_lines(msg.split("\n"), level)
       else
-        log_line(msg)
+        log_line(msg, level)
       end
     end
 
