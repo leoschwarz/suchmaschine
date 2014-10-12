@@ -22,7 +22,7 @@ module Common
       end
 
       def self.load(hash)
-        DocumentInfo.deserialize(Database.metadata_get(hash))
+        self.deserialize(Database.metadata_get(hash))
       end
     end
   end
