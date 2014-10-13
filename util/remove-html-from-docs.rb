@@ -13,7 +13,7 @@ files = nil
 threads = 10.times.map do
   Thread.new do
     begin
-      while file,index = queue.pop(true)
+      while file,counter = queue.pop(true)
         puts counter if counter % 1000 == 0
   
         data = Oj.load(LZ4.uncompress(File.read(path)))
