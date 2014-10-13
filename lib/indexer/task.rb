@@ -12,7 +12,7 @@ module Indexer
 #      metadata_id = Indexer::Database.index_queue_fetch
 #      metadata    = Indexer::Metadata.load(metadata_id)
 #      document    = metadata.document
-      document = Indexer::Database::Document.deserialize(LZ4.uncompress(File.read(path)))
+      document = Indexer::Document.deserialize(LZ4.uncompress(File.read(path)))
       document.hash = path.split(":")[-1]
       
       #if document.nil?
@@ -33,10 +33,10 @@ module Indexer
 
       # Wörter in temporäre Dateien schreiben.
       # Jeder Eintrag wird auch noch mit dem Index im Text gespeichert.
-      all_words.each_with_index.group_by{|hit| hit[0]} do |_words|
-        File.open("/mnt/sdb/suchmaschine/indextemp/word:#{_words[0]}") do |file|
+      all_words.each_with_index.group_by{|hit| hit[0]}.each do |_words|
+        File.open("/mnt/sdb/suchmaschine/indextmp/word:#{_words[0]}", "a") do |file|
           _words[1].each do |word, line|
-            file.puts "#{word}:#{line}"
+            file.puts "#{@document_hash}:#{line}"
           end
         end
       end
