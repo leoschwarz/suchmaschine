@@ -4,12 +4,6 @@ require 'digest/md5'
 module Database
   class Server
     def initialize
-      # TODO
-#      ["docinfo/", "index/", "cache/"].each do |subdirectory|
-#        path = File.join(Database.config.ssd.path, subdirectory)
-#        Dir.mkdir path unless Dir.exists? path
-#      end
-
       @server = Common::FastServer.new(Config.database_connection.host, Config.database_connection.port)
       @server.on_start do
         @queues = {
@@ -44,35 +38,26 @@ module Database
     # Verschiedene Handler für verschiedene Aktionen
     def handle_action(action, parameters)
       case action
-        when "DOWNLOAD_QUEUE_INSERT"
+        when "DOWNLOAD_QUEUE_INSERT" # URL1\tURL2...
           handle_queue_insert(:download, parameters.split("\t"))
-        when "DOWNLOAD_QUEUE_FETCH"
+        when "DOWNLOAD_QUEUE_FETCH" # 
           handle_queue_fetch(:download)
-        when "INDEX_QUEUE_INSERT"
-          handle_queue_insert(:index, parameters.split("\t"))
-        when "INDEX_QUEUE_FETCH"
-          handle_queue_fetch(:index)
-        when "INDEX_APPEND"
-          pairs = parameters.split("\t").each_slice(2)
-          handle_index_append(pairs)
-        when "INDEX_GET"
-          handle_index_get(parameters)
-        when "CACHE_SET"
+        when "CACHE_SET" # KEY VALUE
           key, value = parameters.split("\t", 2)
-          handle_cache_set(key, value)
-        when "CACHE_GET"
-          handle_cache_get(parameters)
-        when "DOCUMENT_SET"
-          key, value = parameters.split("\t", 2)
-          handle_document_set(key, value)
-        when "DOCUMENT_GET"
-          handle_document_get(parameters)
-        when "METADATA_SET"
-          hash, data = parameters.split("\t", 2)
-          handle_metadata_set(hash, data)
-          handle_queue_insert(:index, [hash])
-        when "METADATA_GET"
-          handle_metadata_get(parameters)
+          write_file(Config.paths.cache+key, value)
+        when "CACHE_GET" # KEY
+          read_file(Config.paths.cache + parameters)
+        when "DOCUMENT_SET" # ID VALUE
+          id, value = parameters.split("\t", 2)
+          write_file(Config.paths.document + id, value)
+        when "DOCUMENT_GET" # ID
+          read_file(Config.paths.document + parameters)
+        when "METADATA_SET" # ID DATA
+          id, data = parameters.split("\t", 2)
+          handle_queue_insert(:index, [id])
+          write_file(Config.paths.metadata+id, data)
+        when "METADATA_GET" # ID
+          read_file(Config.paths.metadata + parameters)
       end
     end
 
@@ -105,43 +90,6 @@ module Database
         return @queues[:index].fetch
       end
     end
-
-    def handle_index_append(pairs)
-      pairs.each do |word, doc_id|
-        Index.append(word, doc_id)
-      end
-    end
-
-    def handle_index_get(word)
-      Index.get(word).to_s.gsub(/\n/, "\t")
-    end
-
-    def handle_cache_set(key, value)
-      write_file(Config.paths.cache+key, value)
-      nil
-    end
-
-    def handle_cache_get(key)
-      read_file(Config.paths.cache+key)
-    end
-
-    def handle_document_set(hash, document)
-      write_file(Config.paths.document + hash, document)
-      nil
-    end
-
-    def handle_document_get(hash)
-      read_file(Config.paths.document + hash)
-    end
-
-    def handle_metadata_set(hash, metadata)
-      write_file(Config.paths.metadata+hash, metadata)
-      nil
-    end
-
-    def handle_metadata_get(hash)
-      read_file(Config.paths.metadata+hash)
-    end
     
     # Datei-Inhalt oder leerer String
     def read_file(path)
@@ -156,6 +104,7 @@ module Database
       File.open(path, "w") do |file|
         file.write(LZ4.compress data)
       end
+      nil
     end
   end
 end

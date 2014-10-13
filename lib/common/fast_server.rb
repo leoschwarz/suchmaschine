@@ -1,5 +1,3 @@
-require 'socket'
-
 # Wrapper für MulticlientTCPServer
 # TODO Dies noch überarbeiten...
 
