@@ -8,19 +8,10 @@ module Indexer
     end
 
     # Eine neue Aufgabe laden.
-    def self.load(path)
-#      metadata_id = Indexer::Database.index_queue_fetch
-#      metadata    = Indexer::Metadata.load(metadata_id)
-#      document    = metadata.document
+    def self.load(path
       document = Indexer::Document.deserialize(LZ4.uncompress(File.read(path)))
       document.hash = path.split(":")[-1]
-      
-      #if document.nil?
-      #  # Dies kommt vor wenn nur DOCUMENT_INFO aber kein DOCUMENT gespeichert wurde.
-      #  self.fetch
-      #else
       self.new(document.hash, document.text)
-      #end
     end
 
     # Die Aufgabe bearbeiten.
@@ -33,12 +24,8 @@ module Indexer
 
       # Wörter in temporäre Dateien schreiben.
       # Jeder Eintrag wird auch noch mit dem Index im Text gespeichert.
-      all_words.each_with_index.group_by{|hit| hit[0]}.each do |_words|
-        File.open("/mnt/sdb/suchmaschine/indextmp/word:#{_words[0]}", "a") do |file|
-          _words[1].each do |word, line|
-            file.puts "#{@document_hash}:#{line}"
-          end
-        end
+      all_words.each_with_index.group_by{|word,index| word}.each do |word, occurences|
+        IndexTmpFile.new(word).insert(occurences.map{|word,line| [@document_hash, line]})
       end
     end
   end
