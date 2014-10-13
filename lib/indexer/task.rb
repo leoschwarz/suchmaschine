@@ -1,3 +1,5 @@
+require 'lz4-ruby'
+
 module Indexer
   class Task
     def initialize(document_hash, text)
@@ -6,17 +8,19 @@ module Indexer
     end
 
     # Eine neue Aufgabe laden.
-    def self.fetch
-      metadata_id = Indexer::Database.index_queue_fetch
-      metadata    = Indexer::Metadata.load(metadata_id)
-      document    = metadata.document
+    def self.load(path)
+#      metadata_id = Indexer::Database.index_queue_fetch
+#      metadata    = Indexer::Metadata.load(metadata_id)
+#      document    = metadata.document
+      document = Indexer::Database::Document.deserialize(LZ4.uncompress(File.read(path)))
+      document.hash = path.split(":")[-1]
       
-      if document.nil?
-        # Dies kommt vor wenn nur DOCUMENT_INFO aber kein DOCUMENT gespeichert wurde.
-        self.fetch
-      else
-        self.new(document.hash, document.text)
-      end
+      #if document.nil?
+      #  # Dies kommt vor wenn nur DOCUMENT_INFO aber kein DOCUMENT gespeichert wurde.
+      #  self.fetch
+      #else
+      self.new(document.hash, document.text)
+      #end
     end
 
     # Die Aufgabe bearbeiten.
@@ -27,10 +31,14 @@ module Indexer
       # Wörter ab einer Länge von 20 Zeichen werden auf die ersten 20 Zeichen reduziert.
       all_words = all_words.map{|word| word[0...20]}
 
-      # Wörter in Datenbank registrieren.
+      # Wörter in temporäre Dateien schreiben.
       # Jeder Eintrag wird auch noch mit dem Index im Text gespeichert.
-      all_words.each_with_index.each_slice(100) do |words|
-        Indexer::Database.index_append(words.map{|word, index| [word, "#{index}:#{@document_hash}"]})
+      all_words.each_with_index.group_by{|hit| hit[0]} do |_words|
+        File.open("/mnt/sdb/suchmaschine/indextemp/word:#{_words[0]}") do |file|
+          _words[1].each do |word, line|
+            file.puts "#{word}:#{line}"
+          end
+        end
       end
     end
   end

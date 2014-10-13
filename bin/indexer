@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby
+require_relative '../lib/common/common.rb'
+require_relative '../lib/indexer/indexer.rb'
+
+Common::load_configuration(Indexer, "indexer.yml")
+
+# TODO : Momenatan kann dieses Programm nur neue Indexe erzeugen, es wäre allerdings wünschenswert eine Update-Funktionalität zu haben...
+
+module Indexer
+  class Main
+    def run
+      raise "Dieses Programm muss auf dem Server auf welchem der Index gespeichert wird ausgeführt werden." unless Dir.exist?("/mnt/sdb/suchmaschine/metadata/")
+      Dir.mkdir("/mnt/sdb/suchmaschine/indextmp/") unless Dir.exist? "/mnt/sdb/suchmaschine/indextmp"
+      @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/Sekunde"}})
+      @logger.add_output($stdout, Common::Logger::INFO)
+      @logger.log_info "Das generieren des Indexes könnte eine Weile in Anspruch nehmen..."
+      all_files = Dir["db/keyval/doc:*"]
+      @logger.log_info "Anzahl unindexierter Seiten: #{all_files.size}"
+      @logger.progress[:tasks] = 0
+      @logger.progress[:tasks_per_second] = proc{|logger| (logger.progress[:tasks]*1.0 / (logger.elapsed_time+0.0001)).round(2)}
+      
+      @queue = Queue.new
+      all_files.each{|file| @queue << file}
+      all_files = nil
+      
+      threads = 10.times.map do
+        Thread.new do
+          begin
+            while file = @queue.pop(true)
+              task = Task.load(file)
+              task.run
+              @logger.progress[:tasks] += 1
+            end
+          rescue ThreadError
+          end
+        end
+      end
+      
+      @logger.log_progress_labels
+      loop do
+        @logger.log_progress
+        sleep 5
+      end
+    end
+  end
+end
+
+
+if __FILE__ == $0
+  indexer = Indexer::Main.new
+  indexer.run
+end
