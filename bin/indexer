@@ -2,8 +2,6 @@
 require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
 
-Common::load_configuration(Indexer, "indexer.yml")
-
 # TODO : Momenatan kann dieses Programm nur neue Indexe erzeugen, es wäre allerdings wünschenswert eine Update-Funktionalität zu haben...
 
 module Indexer
@@ -24,7 +22,7 @@ module Indexer
     all_files.each{|file| @queue << file}
     all_files = nil
     
-    threads = 10.times.map do
+    threads = Config.indexer.threads.times.map do
       Thread.new do
         begin
           while file = @queue.pop(true)

@@ -54,7 +54,7 @@ module Database
     end
 
     def full?
-      @size >= Database.config.batch_size
+      @size >= Config.database.batch_size
     end
 
     def empty?

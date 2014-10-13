@@ -11,14 +11,14 @@ module Crawler
 
       begin
         curl = Curl::Easy.new(url.encoded) do |curl|
-          curl.headers["User-Agent"] = Crawler.config.user_agent
+          curl.headers["User-Agent"] = Config.crawler.agent
           curl.verbose = false
-          curl.timeout = 10
+          curl.timeout = Config.crawler.timeout
           curl.encoding = "UTF-8"
 
           curl.on_body {|chunk|
             size = chunk.bytesize
-            if @response_body_size+size <= Crawler.config.max_response_length
+            if @response_body_size+size <= Config.crawler.maxsize
               @response_body += chunk
               @response_body_size + size
               size

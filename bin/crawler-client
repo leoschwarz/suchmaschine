@@ -12,8 +12,8 @@ module Crawler
       @logger.add_output($stdout, Common::Logger::INFO)
 
       @logger.log_info("Crawler-Client wurde gestartet.")
-      @logger.log_info("Threads: #{Crawler.config.threads}")
-      @logger.log_info("Server:  #{Common.config.database.host}:#{Common.config.database.port}")
+      @logger.log_info("Threads: #{Config.crawler.threads}")
+      @logger.log_info("Server:  #{Config.database.host}:#{Config.database.port}")
       Crawler.config.threads.times{ self.launch_thread }
 
       @logger.log_progress_labels

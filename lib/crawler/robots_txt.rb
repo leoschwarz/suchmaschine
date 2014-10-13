@@ -26,7 +26,7 @@ module Crawler
     end
 
     def self.allowed?(url)
-      RobotsTXT.instance(Crawler.config.user_agent).allowed?(url)
+      RobotsTXT.instance(Config.crawler.agent).allowed?(url)
     end
   end
 end

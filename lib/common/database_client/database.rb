@@ -63,7 +63,7 @@ module Common
         options[:response_required] = false if options[:response_required].nil?
         options[:retries_left]      = 3     if options[:retries_left].nil?
 
-        client   = Common::FastClient.new(Common.config.database.host, Common.config.database.port)
+        client   = Common::FastClient.new(Config.database.host, Config.database.port)
         response = client.request(query)
         if options[:response_required]
           if response.nil? or response.empty?

@@ -16,7 +16,7 @@ module Database
 
     private
     def self.index_path(word)
-      File.join(Database.config.index.directory, "word:#{word}")
+      File.join(Config.paths.index + "word:#{word}")
     end
   end
 end

@@ -1,0 +1,39 @@
+local: &default
+  database_connection:
+    host: "0.0.0.0"
+    port: 2051
+  database:
+    batch_size: 100_000
+  crawler:
+    agent: "lightblaze"
+    threads: 100
+    timeout: 10
+    maxsize: 500_000
+  robotstxt: # TODO Diesen Abschnitt eventuelln nochmals überarbeiten
+    use_cache: YES
+    cache_lifetime: 86400
+  indexer:
+    threads: 10
+  paths:
+    ssd_base: "/mnt/sdb/suchmaschine/"
+    hdd_base: "/home/lightblaze/suchmaschine/"
+    
+    cache: "/mnt/sdb/suchmaschine/cache/"
+    document: "/home/lightblaze/suchmaschine/keyval/doc:"
+    download_queue: "/home/lightblaze/suchmaschine/db/urls/"
+    index_queue: "/home/lightblaze/suchmaschine/db/index/"
+    index: "/mnt/sdb/suchmaschine/index/"
+    index_tmp: "/mnt/sdb/suchmaschine/index_tmp/"
+    metadata: "/mnt/sdb/suchmaschine/metadata/"
+
+wired:
+  <<: *default
+  database_connection:
+    host: "192.168.10.50"
+    port: 2051
+
+wireless:
+  <<: *default
+  database_connection:
+    host: "192.168.1.106"
+    port: 2051

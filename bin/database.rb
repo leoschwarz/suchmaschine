@@ -6,7 +6,6 @@ require 'digest/md5'
 require_relative '../lib/common/common.rb'
 require_relative '../lib/database/database'
 
-Common::load_configuration(Database, "database.yml")
 
 # API Dokumentation ::
 #
@@ -29,16 +28,17 @@ Common::load_configuration(Database, "database.yml")
 module Database
   class Server
     def initialize
-      ["docinfo/", "index/", "cache/"].each do |subdirectory|
-        path = File.join(Database.config.ssd.path, subdirectory)
-        Dir.mkdir path unless Dir.exists? path
-      end
+      # TODO
+#      ["docinfo/", "index/", "cache/"].each do |subdirectory|
+#        path = File.join(Database.config.ssd.path, subdirectory)
+#        Dir.mkdir path unless Dir.exists? path
+#      end
 
-      @server = Common::FastServer.new(Database.config.server.host, Database.config.server.port)
+      @server = Common::FastServer.new(Config.database_connection.host, Config.database_connection.port)
       @server.on_start do
         @queues = {
-          :download => BigQueue.new(Database.config.download_queue.directory),
-          :index    => BigQueue.new(Database.config.index_queue.directory)
+          :download => BigQueue.new(Config.paths.download_queue),
+          :index    => BigQueue.new(Config.paths.index_queue)
         }
       end
 
@@ -115,7 +115,7 @@ module Database
     end
 
     def has_doc_info?(url)
-      StorageSSD.instance.include?("docinfo/"+Digest::MD5.hexdigest(url))
+      File.exist?(Config.paths.metadata + Digest::MD5.hexdigest(url))
     end
 
     def handle_queue_fetch(queue)
@@ -141,30 +141,45 @@ module Database
     end
 
     def handle_cache_set(key, value)
-      StorageSSD.instance.set("cache/"+key, value)
+      write_file(Config.paths.cache+key, value)
       nil
     end
 
     def handle_cache_get(key)
-      StorageSSD.instance.get("cache/"+key)
+      read_file(Config.paths.cache+key)
     end
 
     def handle_document_set(hash, document)
-      StorageHDD.instance.set("doc:"+hash, document)
+      write_file(Config.paths.document + hash, document)
       nil
     end
 
     def handle_document_get(hash)
-      StorageHDD.instance.get("doc:"+hash)
+      read_file(Config.paths.document + hash)
     end
 
-    def handle_metadata_set(hash, docinfo)
-      StorageSSD.instance.set("docinfo/"+hash, docinfo)
+    def handle_metadata_set(hash, metadata)
+      write_file(Config.paths.metadata+hash, metadata)
       nil
     end
 
     def handle_metadata_get(hash)
-      StorageSSD.instance.get("docinfo/"+hash)
+      read_file(Config.paths.metadata+hash)
+    end
+    
+    # Datei-Inhalt oder leerer String
+    def read_file(path)
+      if File.exist? path
+        File.read(path)
+      else
+        ""
+      end
+    end
+    
+    def write_file(path, data)
+      File.open(path, "w") do |file|
+        file.write(data)
+      end
     end
   end
 end

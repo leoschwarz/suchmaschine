@@ -15,7 +15,7 @@ module Crawler
 
     def set_valid_for(seconds)
       if seconds == :default
-        self.valid_until = Time.now.to_i + Crawler.config.robots_txt.cache_lifetime
+        self.valid_until = Time.now.to_i + Config.robotstxt.cache_lifetime
       else
         self.valid_until = Time.now.to_i + seconds
       end
