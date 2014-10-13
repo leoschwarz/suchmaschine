@@ -28,7 +28,6 @@ module Crawler
           document.links = links
           document.title = parser.title
           document.text  = parser.text
-          document.html  = parser.html
           document.save
 
           metadata = Crawler::Metadata.new

@@ -3,7 +3,7 @@ require 'nokogiri'
 
 module Crawler
   class HTMLParser
-    attr_reader :indexing_allowed, :following_allowed, :links, :text, :html, :title
+    attr_reader :indexing_allowed, :following_allowed, :links, :text, :title
 
     def initialize(base_url, html)
       @base_url = base_url
@@ -51,7 +51,6 @@ module Crawler
         @doc.search("style").each{|el| el.unlink}
         @doc.xpath("//comment()").remove
         @text = _clean_text(@doc.text)
-        @html = @doc.to_html
       end
 
       # Titel

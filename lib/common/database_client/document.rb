@@ -7,7 +7,6 @@ module Common
       field :links, []  # [Array]  Elemente im Format [Anker, URL]
       field :title, ""  # [String] Titel des Dokumentes, falls vorhanden
       field :text       # [String] Extrahierter Text aus dem Ursprünglichen Dokument
-      field :html       # [String] HTML des Body Elementes des ursprünglichen HTML
 
       attr_accessor :hash
 
