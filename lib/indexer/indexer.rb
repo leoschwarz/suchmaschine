@@ -1,6 +1,5 @@
 module Indexer
   include Common::DatabaseClient
-  include Common::Configuration
 end
 
 # Alle Dateien im Verzeichnis laden

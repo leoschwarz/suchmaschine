@@ -1,5 +1,4 @@
 module Database
-  include Common::Configuration
 end
 
 # Alle Dateien im Verzeichnis laden
