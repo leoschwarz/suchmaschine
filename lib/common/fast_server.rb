@@ -3,9 +3,10 @@
 
 module Common
   class FastServer
-    def initialize(host, port)
+    def initialize(host, port, logger=Logger.new)
       @host = host
       @port = port
+      @logger = logger
       @on_request = proc{|request| }
       @on_start   = proc{}
       @on_stop    = proc{}
@@ -18,7 +19,7 @@ module Common
 
       # Server richtig starten
       @server = MulticlientTCPServer.new(@port, 5, false)
-      puts "Server gestartet unter #{@host}:#{@port}."
+      @logger.log_info "Server gestartet unter #{@host}:#{@port}."
       loop do
         begin
           conn = @server.get_socket
@@ -35,7 +36,7 @@ module Common
         rescue => e
           @on_error.call(e)
         rescue SystemExit, Interrupt
-          puts "Server wird heruntergefahren..."
+          @logger.log_info "Server wird heruntergefahren..."
           @on_stop.call
           raise SystemExit
         end

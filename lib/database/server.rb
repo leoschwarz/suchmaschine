@@ -4,16 +4,16 @@ require 'digest/md5'
 module Database
   class Server
     def initialize
-      @server = Common::FastServer.new(Config.database_connection.host, Config.database_connection.port)
+      @logger = Common::Logger.new
+      @logger.add_output($stdout, Common::Logger::INFO)
+      
+      @server = Common::FastServer.new(Config.database_connection.host, Config.database_connection.port, @logger)
       @server.on_start do
         @queues = {
           :download => BigQueue.new(Config.paths.download_queue),
           :index    => BigQueue.new(Config.paths.index_queue)
         }
       end
-
-      @logger = Common::Logger.new
-      @logger.add_output($stdout, Common::Logger::INFO)
 
       @server.on_error do |error|
         @logger.log_exception(error)
@@ -22,7 +22,7 @@ module Database
       @server.on_stop do
         @queues[:download].save_everything
         @queues[:index].save_everything
-        puts "Daten erfolgreich gespeichert."
+        @logger.log_info "Daten erfolgreich gespeichert."
       end
 
       @server.on_request do |request|
@@ -64,7 +64,7 @@ module Database
     def handle_queue_insert(queue, items)
       if queue == :download
         items.each do |url|
-          @queues[:download].insert(url) unless has_doc_info?(url)
+          @queues[:download].insert(url) unless has_metadata?(url)
         end
       elsif queue == :index
         items.each do |docinfo_key|
@@ -75,14 +75,14 @@ module Database
       nil
     end
 
-    def has_doc_info?(url)
+    def has_metadata?(url)
       File.exist?(Config.paths.metadata + Digest::MD5.hexdigest(url))
     end
 
     def handle_queue_fetch(queue)
       if queue == :download
         url = @queues[:download].fetch
-        while has_doc_info? url
+        while has_metadata? url
           url = @queues[:download].fetch
         end
         return url
