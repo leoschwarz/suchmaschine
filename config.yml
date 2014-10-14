@@ -15,11 +15,10 @@ local: &default
   indexer:
     threads: 10
   paths:
-    ssd_base: "/mnt/sdb/suchmaschine/"
-    hdd_base: "/home/lightblaze/suchmaschine/"
-    
+    #ssd_base: "/mnt/sdb/suchmaschine/"
+    #hdd_base: "/home/lightblaze/suchmaschine/"
     cache: "/mnt/sdb/suchmaschine/cache/"
-    document: "/home/lightblaze/suchmaschine/keyval/doc:"
+    document: "/home/lightblaze/suchmaschine/db/keyval/doc:"
     download_queue: "/home/lightblaze/suchmaschine/db/urls/"
     index_queue: "/home/lightblaze/suchmaschine/db/index/"
     index: "/mnt/sdb/suchmaschine/index/"
