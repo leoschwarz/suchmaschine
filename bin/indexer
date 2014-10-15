@@ -3,19 +3,24 @@ require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
 
 # TODO : Momenatan kann dieses Programm nur neue Indexe erzeugen, es wäre allerdings wünschenswert eine Update-Funktionalität zu haben...
+# TODO: Eine persistene Queue verwenden. BigQueue müsste so umgebaut werden, dass von einer Datei gleichzeitig gelesen und geschrieben werden kann.
+#       Eventuell wäre es auch interessant BigQueue um eine Bestätigungsfunktion zu erweitern, bzw. eine andere Warteschlange mit solcher Funktionalität
+#       zu implementieren. So wäre es sichergestellt, dass einzelne Einträge am Ende nicht ohne Indexeinträge bleiben.
 
 module Indexer
   def self.run
-    raise "Dieses Programm muss auf dem Server auf welchem der Index gespeichert wird ausgeführt werden." unless Dir.exist?("/mnt/sdb/suchmaschine/metadata/")
-    Dir.mkdir("/mnt/sdb/suchmaschine/indextmp/") unless Dir.exist? "/mnt/sdb/suchmaschine/indextmp"
+    # TODO entfernen oder besser lösen!
+    #raise "Dieses Programm muss auf dem Server auf welchem der Index gespeichert wird ausgeführt werden." unless Dir.exist?("/mnt/sdb/suchmaschine/metadata/")
+    #Dir.mkdir("/mnt/sdb/suchmaschine/indextmp/") unless Dir.exist? "/mnt/sdb/suchmaschine/indextmp"
     
     @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/Sekunde"}})
     @logger.progress[:tasks] = 0
     @logger.progress[:tasks_per_second] = proc{|logger| (logger.progress[:tasks]*1.0 / (logger.elapsed_time+0.0001)).round(2)}
     @logger.add_output($stdout, Common::Logger::INFO)
     @logger.log_info "Das generieren des Indexes könnte eine Weile in Anspruch nehmen..."
+    @logger.log_warning "Es werden nur 100 Einträge berücksichtigt!"
     
-    all_files = Dir["db/keyval/doc:*"]
+    all_files = Dir["db/keyval/doc:*"].sample(100)
     @logger.log_info "Anzahl unindexierter Seiten: #{all_files.size}"
     
     @queue = Queue.new
@@ -34,6 +39,11 @@ module Indexer
         end
       end
     end
+    
+    # TODO: Auf das beenden der Threads warten (dh. Fortschritt in eigenem Thread + Thread.join zum warten)
+    # TODO: Die IndexTmp Dateien sollen auch das Binärformat verwenden (einfach Common::IndexFile)
+    # TODO: Sobald alles hier fertig ist, mit dem sortieren starten.
+    # TODO: Ende markieren.
     
     @logger.log_progress_labels
     loop do

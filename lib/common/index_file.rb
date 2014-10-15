@@ -1,81 +1,65 @@
 module Common
   # Der Index verwendet ein eigenes binäres Datenformat,
-  # die einzelnen Werte folgen direkt aufeinander, deshalb ist die Einhaltung der Längen der einzelnen Werte essenziel.
+  # es gibt kein Trennzeichen, deshalb ist die Einhaltung der Längen der einzelnen Werte essenziel.
   #
-  # Die Einträge müssen nach DOCUMENT_ID sortiert sein, ausserdem darf ein Dokument jeweils nur in einem
-  # DATA_INDEX Abschnit vorkommen (damit nacher einfacher danach gesucht werden kann.. Siehe find_*)
+  # Um nacher einfach Vergleichen zu können werden die Zahlen jeweils in Bigendian Reihenfolge gespeichert.
+  # Dies entspricht den pack/unpack Parametern: I>, h*, usw.
   #
-  # Positionen bezeichnen die Anzahl Bytes die übersprungen werden muss.
+  # Die Einträge müssen nach DOCUMENT_ID sortiert sein.
+  # Informationen zu einer IndexFile-Datei findet man in einer IndexFileMetadata-Datei.
   #
-  # DATA_OFFSET(4B, Start der Auflistung der einzelnen Vorkommen des Begriffes)
-  # DATA_INDEX: (Interner Index über die Datei. Ermöglicht das schnelle Finden von Einträgen in grossen Dateien.)
-  #             (Reihen folgender Struktur:)
-  # - FIRST_DOCUMENT_ID (16B)
-  # - POSITION    (4B, Position des ersten Begriffes im Dokument)
-  # - LENGTH      (4B, Länge des Abschnittes (der letzte kann kürzer sein, etc.))
-  # DATA: (Reihen folgender Struktur:)
+  # Reihen folgender Struktur:
   # - DOCUMENT_ID: (16B)
   # - POSITION: (4B, Position in der Liste der Wörter des Dokumentes.)
   class IndexFile
-    # Anzahl Einträge in einem normalen Abschnitt
-    # Dieser Wert kann überschritten werden, wenn mehrere Einträge des selben Dokumentes ansonsten auf verschiedene
-    # Abschnitte fallen würden.
-    DEFAULT_SECTION_LENGTH = 5000 # 100KB
+    ROW_SIZE = 20
     
     def initialize(path)
       @path = path
     end
     
-    # Liest die Metdaten des Dokumentes ein,
-    # das sind: DATA_OFFSET und DATA_INDEX aber nicht: DATA
-    def read_metadata
-      @data_offset = IO.binread(@path, 4).unpack("I")[0]
-      index_length = @data_offset - 4
-      index_raw    = IO.binread(@path, index_length, 4)
-      
-      # Index einlesen
-      @index = []
-      count  = index_raw.bytesize / 24 # Jeder Eintrag besteht aus 24B
-      (0...count).each do |i|
-        first_document_id_str = raw.byteslice(24*i, 16)
-        # Das konvertieren zu einem Binärstring und das erst anschliessende Umwandeln in eine Integer ist
-        # deshalb notwendig, da die Zahl 16Bytes lang ist und unter umständen die Bigint Klasse verwenden
-        # kann, für die es keinen pack/unpack Befehl gibt.
-        first_document_id_int = document_id_str.unpack("B*")[0].to_i(2)
-        position_int          = raw.byteslice(24*i+16, 4).unpack("I")[0]
-        length_int            = raw.byteslice(24*i+20, 4).unpack("I")[0]
-        @index << [first_document_id_int, position_int, length_int]
-      end
+    def rows
+      File.size(@path)/ROW_SIZE
     end
     
-    # Liest Einträge aus der Datei.
+    # Liest Einträge aus der Datei, Reihen als Array mit umgewandelten Typen.
     # data_offset: Position ab der gelesen werden soll
     # data_length: Bytes die gelesen werden sollen (muss durch 20 dividierbar sein)
-    def read_data(data_offset, data_length)
-      # Binärdaten lesen
-      raw = IO.binread(@path, data_length, data_offset)
-      
-      # Verarbeiten, dh. immer 20B lange Stücke nehmen
-      entries = []
-      count   = raw.bytesize / 20
-      (0...count).each do |i|
-        document_id_str = raw.byteslice(20*i, 16)
-        document_id_int = document_id_str.unpack("B*")[0].to_i(2)
-        position_int    = raw.byteslice(20*i+16, 4).unpack("I")[0]
-        entries << [document_id_int, position_int]
+    def read_entries(data_offset=0, data_length=nil)
+      read_bin_entries(data_offset, data_length).map do |raw|
+        # Gespeichert wird ein Binärstring der aus dem Hexstring entnommen wurde.
+        # Deshalb kann dieser mithilfe 'h*' auch wieder als ursprünglicher gelesen werden.
+        document_id_str = raw.byteslice(20*i, 16).unpack("h*")[0]
+        position_int    = raw.byteslice(20*i+16, 4).unpack("I>")[0]
+        [document_id_str, position_int]
       end
-      
-      # Die Einträge zurückgeben
-      entries
     end
     
-    # Gibt ein Array mit den Indexen der Wörter im Dokument zurück (kann auch leer sein)
-    def find_document_occurences(document_id)
-      candidate_index_section = @index.reverse.bsearch{|item| item[0] <= document_id}
-      return [] if candidate_index_section.nil? # Das kommt vor wenn der erste Index-Abschnitt mit einer höheren ID als die hiesiege beginnt.
+    # Liest Einträge aus der Datei, Reihen als Binär-String.
+    def read_bin_entries(offset=0, length=nil)
+      # Binärdaten lesen
+      raw = IO.binread(@path, length, offset)
       
-      data = read_data(candidate_index_section[1], candidate_index_section[2])
-      data.select{|item| item[0] == document_id}.map{|item| item[1]}
+      # Immer 20B lange Stücke nehmen
+      count = raw.bytesize / 20
+      (0...count).map{|i| raw.byteslice(20*i, 20)}
+    end
+    
+    # Liest einen Teil der Datei als Binären String
+    def read_bin_raw(offset=0, length=nil)
+      IO.binread(@path, length, offset)
+    end
+    
+    # Schreibt Einträge in die Datei, Reihen als Array mit umgewandelten Typen.
+    def write_entries(entries)
+      write_bin_entries entries.map{|row| row.pack("h*I>")}
+    end
+    
+    # Schreibt Einträge in die Datei, Reihen als Binär-String.
+    def write_bin_entries(entries)
+      File.open(@path, "ab") do |file|
+        file.write(entries.join(""))
+      end
     end
   end
 end
