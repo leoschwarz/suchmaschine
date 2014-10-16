@@ -22,7 +22,7 @@ local: &default
     download_queue: "/home/lightblaze/suchmaschine/db/urls/"
     index_queue: "/home/lightblaze/suchmaschine/db/index/"
     index: "/mnt/sdb/suchmaschine/index/"
-    index_tmp: "/mnt/sdb/suchmaschine/index_tmp/"
+    index_tmp: "/mnt/sdb/suchmaschine/indextmp/"
     metadata: "/mnt/sdb/suchmaschine/metadata/"
 
 wired:

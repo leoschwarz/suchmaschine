@@ -86,7 +86,7 @@ module Indexer
     
     # Beide Parameter sollen Common::IndexFile Objekte sein.
     def self.sort(unsorted_file, destination_file)
-      chunks = (unsorted_file.rows_count *1.0 / MAX_ROWS).ceil
+      chunks = (unsorted_file.rows_count() *1.0 / MAX_ROWS).ceil
       
       # Da es wahrscheinlich öfters vorkommt, dass weniger Einträge als die Maximalzahl
       # vorhanden sind, gibt es hier eine spezielle, einfachere, Prozedur für diese:

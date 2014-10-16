@@ -8,7 +8,7 @@ module Indexer
     end
 
     # Eine neue Aufgabe laden.
-    def self.load(path
+    def self.load(path)
       document = Indexer::Document.deserialize(LZ4.uncompress(File.read(path)))
       document.hash = path.split(":")[-1]
       self.new(document.hash, document.text)
@@ -31,7 +31,7 @@ module Indexer
     
     private
     def index_tmp_file(word)
-      IndexFile.new(File.join(Config.paths.index_tmp, "word:#{word}"))
+      Common::IndexFile.new(File.join(Config.paths.index_tmp, "word:#{word}"))
     end
   end
 end

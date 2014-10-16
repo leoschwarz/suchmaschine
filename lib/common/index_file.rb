@@ -31,8 +31,8 @@ module Common
       read_bin_entries(data_offset, data_length).map do |raw|
         # Gespeichert wird ein Binärstring der aus dem Hexstring entnommen wurde.
         # Deshalb kann dieser mithilfe 'h*' auch wieder als ursprünglicher gelesen werden.
-        document_id_str = raw.byteslice(20*i, 16).unpack("h*")[0]
-        position_int    = raw.byteslice(20*i+16, 4).unpack("I>")[0]
+        document_id_str = raw.byteslice(0, 16).unpack("h*")[0]
+        position_int    = raw.byteslice(16, 4).unpack("I>")[0]
         [document_id_str, position_int]
       end
     end
