@@ -40,16 +40,43 @@ module Indexer
       end
     end
     
-    # TODO: Auf das beenden der Threads warten (dh. Fortschritt in eigenem Thread + Thread.join zum warten)
-    # TODO: Die IndexTmp Dateien sollen auch das Binärformat verwenden (einfach Common::IndexFile)
-    # TODO: Sobald alles hier fertig ist, mit dem sortieren starten.
-    # TODO: Ende markieren.
-    
-    @logger.log_progress_labels
-    loop do
-      @logger.log_progress
-      sleep 5
+    updater = Thread.new do
+      @logger.log_progress_labels
+      loop do
+        @logger.log_progress
+        sleep 5
+      end
     end
+    
+    # Warten bis alle Workerthreads beendet sind.
+    threads.map{|t| t.join}
+    updater.kill
+    
+    # Sortieren beginnen
+    @logger.log_info "Temporäre Indexdateien für alle fälligen Dokumente erzeugt."
+    @logger.log_info "Beginne nun mit dem sortieren."
+    tempfiles = Dir[File.join(Config.paths.index_tmp, "word:*")]
+    @logger.log_info "#{tempfiles.size} zu sortierende Dateien gefunden. Na das kann lustig werden."
+    
+    @logger.progress[:tasks] = 0
+    
+    updater = Thread.new do
+      @logger.log_progress_labels
+      loop do
+        @logger.log_progress
+        sleep 5
+      end
+    end
+    
+    tempfiles.each do |tempfile|
+      word = tempfile.split(":")[1]
+      IndexSorter.sort(Common::IndexFile.new(tempfile), Common::IndexFile.new(File.join(Config.paths.index, "word:#{word}")))
+      @logger.progress[:tasks] += 1
+      File.unlink tempfile
+    end
+    updater.kill
+    
+    @logger.log_info "Herzlichen Glückwunsch. Der Index sollte fertig zubereitet sein."
   end
 end
 

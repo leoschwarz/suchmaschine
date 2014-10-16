@@ -25,8 +25,13 @@ module Indexer
       # Wörter in temporäre Dateien schreiben.
       # Jeder Eintrag wird auch noch mit dem Index im Text gespeichert.
       all_words.each_with_index.group_by{|word,index| word}.each do |word, occurences|
-        IndexTmpFile.new(word).insert(occurences.map{|word,line| [@document_hash, line]})
+        index_tmp_file(word).write_entries(occurences.map{|word,line| [@document_hash, line]})
       end
+    end
+    
+    private
+    def index_tmp_file(word)
+      IndexFile.new(File.join(Config.paths.index_tmp, "word:#{word}"))
     end
   end
 end
