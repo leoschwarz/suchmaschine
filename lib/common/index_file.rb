@@ -14,11 +14,13 @@ module Common
   class IndexFile
     ROW_SIZE = 20
     
+    attr_reader :path
+    
     def initialize(path)
       @path = path
     end
     
-    def rows
+    def rows_count
       File.size(@path)/ROW_SIZE
     end
     
