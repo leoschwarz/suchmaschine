@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # Dieses Skript löscht den Index der Suchmaschine und befüllt die INDEX_QUEUE erneut.
-require './bin/indexer.rb'
+load './bin/indexer'
 
 INDEX_DIRECTORY       = "/mnt/sdb/suchmaschine/index/"
 INDEX_QUEUE_DIRECTORY = File.join(File.dirname(__FILE__), "../db/index/")
