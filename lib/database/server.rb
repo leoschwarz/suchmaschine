@@ -46,6 +46,13 @@ module Database
           handle_queue_insert(:index, parameters.split("\t"))
         when "INDEX_QUEUE_FETCH" #
           handle_queue_fetch(:index)
+        when "INDEX_GET" # WORD
+          index_file = Common::IndexFile.new(Config.paths.index+"word:#{parameters}")
+          if File.exist? index_file.path
+            index_file.read_entries.join("\t")
+          else
+            nil
+          end
         when "CACHE_SET" # KEY VALUE
           key, value = parameters.split("\t", 2)
           write_file(Config.paths.cache+key, value)

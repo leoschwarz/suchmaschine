@@ -10,8 +10,7 @@ require_relative '../lib/database/database'
 # DOWNLOAD_QUEUE_FETCH
 # INDEX_QUEUE_INSERT\tDOC_HASH1[...]
 # INDEX_QUEUE_FETCH
-## INDEX_APPEND\tWORD1\tPOS1:DOC_HASH1[...] -> Fügt die jeweiligen DOC Einträge zu den Index Files hinzu.
-## INDEX_GET\tWORD
+# INDEX_GET\tWORD               -> Tab getrennte Liste von Dokumenten.
 # CACHE_SET\tKEY\tVALUE
 # CACHE_GET\tKEY
 # DOCUMENT_SET\tHASH\tDOCUMENT
