@@ -18,7 +18,7 @@ module Common
       end
       
       def self.index_get(word)
-        r = self.run("INDEX_BIN_GET\tword")
+        r = self.run("INDEX_GET\tword")
         return [] if r.nil?
         r.split("\t")
       end
