@@ -42,6 +42,10 @@ module Database
           handle_queue_insert(:download, parameters.split("\t"))
         when "DOWNLOAD_QUEUE_FETCH" # 
           handle_queue_fetch(:download)
+        when "DOWNLOAD_QUEUE_INSERT" # DOC_HASH1\tDOC_HASH2...
+          handle_queue_insert(:index, parameters.split("\t"))
+        when "DOWNLOAD_QUEUE_FETCH" #
+          handle_queue_fetch(:index)
         when "CACHE_SET" # KEY VALUE
           key, value = parameters.split("\t", 2)
           write_file(Config.paths.cache+key, value)
