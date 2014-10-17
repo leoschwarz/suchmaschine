@@ -4,7 +4,7 @@ require './bin/indexer.rb'
 
 INDEX_DIRECTORY       = "/mnt/sdb/suchmaschine/index/"
 INDEX_QUEUE_DIRECTORY = File.join(File.dirname(__FILE__), "../db/index/")
-DOCINFO_DIRECTORY     = "/mnt/sdb/suchmaschine/docinfo/"
+DOCINFO_DIRECTORY     = "db/keyval/"
 raise "Dieses Programm muss mit Zugriff auf das INDEX-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_DIRECTORY
 raise "Dieses Programm muss mit Zugriff auf das INDEX_QUEUE-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_QUEUE_DIRECTORY
 raise "Dieses Programm muss mit Zugriff auf das DOCINFO-Verzeichniss ausgeführt werden" unless Dir.exist? DOCINFO_DIRECTORY
@@ -41,7 +41,7 @@ index_queue_files.each do |file|
 end
 puts "Löschen der alten INDEX_QUEUE erfolgreich."
 
-docinfo_ids = Dir["#{DOCINFO_DIRECTORY}/*"].map{|path| path.split("/")[-1]}
+docinfo_ids = Dir["#{DOCINFO_DIRECTORY}/doc:*"].map{|path| path.split(":")[-1]}
 docinfo_ids_count = docinfo_ids.size
 puts "Bitte Datenbank jetzt starten und dann Enter drücken..."
 gets
