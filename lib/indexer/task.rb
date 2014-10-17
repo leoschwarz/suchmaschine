@@ -20,12 +20,12 @@ module Indexer
       all_words = @text.gsub(/[^a-zA-ZäöüÄÖÜ]+/, " ").downcase.split(" ")
 
       # Wörter ab einer Länge von 20 Zeichen werden auf die ersten 20 Zeichen reduziert.
-      all_words = all_words.map{|word| word[0...20]}
+      # Alle Duplikate entfernen...
+      all_words = all_words.map{|word| word[0...20]}.uniq
 
       # Wörter in temporäre Dateien schreiben.
-      # Jeder Eintrag wird auch noch mit dem Index im Text gespeichert.
-      all_words.each_with_index.group_by{|word,index| word}.each do |word, occurences|
-        index_tmp_file(word).write_entries(occurences.map{|word,line| [@document_hash, line]})
+      all_words.each do |word|
+        index_tmp_file(word).write_entries([@document_hash])
       end
     end
     
