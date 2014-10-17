@@ -34,7 +34,7 @@ module Indexer
       start_progress_display
       threads = Config.indexer.threads.times.map do
         Thread.new do
-          while file = Database.index_queue_fetch and @logger.progress[:tasks] < 10_000
+          while file = Indexer::Database.index_queue_fetch and @logger.progress[:tasks] < 10_000
             Task.load(file).run
             @logger.progress[:tasks] += 1
           end
