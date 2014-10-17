@@ -69,6 +69,8 @@ module Database
           write_file(Config.paths.metadata+id, data)
         when "METADATA_GET" # ID
           read_file(Config.paths.metadata + parameters)
+        else
+          @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
       end
     end
 
