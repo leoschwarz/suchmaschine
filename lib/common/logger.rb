@@ -109,6 +109,11 @@ module Common
       @started_at = Time.now.to_i if @started_at.nil?
       Time.now.to_i - @started_at
     end
+    
+    # Setzt den Zähler für die verstrichenen Sekunden zurück.
+    def reset_elapsed_time
+      @started_at = nil
+    end
 
     private
     def _label(str)

@@ -2,85 +2,93 @@
 require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
 
-# TODO : Momenatan kann dieses Programm nur neue Indexe erzeugen, es wäre allerdings wünschenswert eine Update-Funktionalität zu haben...
-# TODO: Eine persistene Queue verwenden. BigQueue müsste so umgebaut werden, dass von einer Datei gleichzeitig gelesen und geschrieben werden kann.
-#       Eventuell wäre es auch interessant BigQueue um eine Bestätigungsfunktion zu erweitern, bzw. eine andere Warteschlange mit solcher Funktionalität
+# TODO: Eventuell wäre es auch interessant BigQueue um eine Bestätigungsfunktion zu erweitern, bzw. eine andere Warteschlange mit solcher Funktionalität
 #       zu implementieren. So wäre es sichergestellt, dass einzelne Einträge am Ende nicht ohne Indexeinträge bleiben.
 
 module Indexer
-  def self.run
-    # TODO entfernen oder besser lösen!
-    #raise "Dieses Programm muss auf dem Server auf welchem der Index gespeichert wird ausgeführt werden." unless Dir.exist?("/mnt/sdb/suchmaschine/metadata/")
-    #Dir.mkdir("/mnt/sdb/suchmaschine/indextmp/") unless Dir.exist? "/mnt/sdb/suchmaschine/indextmp"
-    
-    @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/Sekunde"}})
-    @logger.progress[:tasks] = 0
-    @logger.progress[:tasks_per_second] = proc{|logger| (logger.progress[:tasks]*1.0 / (logger.elapsed_time+0.0001)).round(2)}
-    @logger.add_output($stdout, Common::Logger::INFO)
-    @logger.log_info "Das generieren des Indexes könnte eine Weile in Anspruch nehmen..."
-    @logger.log_warning "Es werden nur 100 Einträge berücksichtigt!"
-    
-    all_files = Dir["db/keyval/doc:*"].sample(100)
-    @logger.log_info "Anzahl unindexierter Seiten: #{all_files.size}"
-    
-    @queue = Queue.new
-    all_files.each{|file| @queue << file}
-    all_files = nil
-    
-    threads = Config.indexer.threads.times.map do
+  class Main
+    def initialize
+      @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/s"}})
+      @logger.progress[:tasks] = 0
+      @logger.progress[:tasks_per_second] = proc do |logger|
+        if logger.elapsed_time.round == 0
+          "N/A"
+        else
+          (logger.progress[:tasks]*1.0/logger.elapsed_time).round(1)
+        end
+      end
+      @logger.add_output($stdout, Common::Logger::INFO)
+      
+      # Thread, um den Fortschrittszähler kontinuierlich auszugeben, starten.
       Thread.new do
-        begin
-          while file = @queue.pop(true)
-            task = Task.load(file)
-            task.run
-            @logger.progress[:tasks] += 1
-          end
-        rescue ThreadError
+        loop do
+          @logger.log_progress if @show_progress
+          sleep 5
         end
       end
     end
     
-    updater = Thread.new do
-      @logger.log_progress_labels
-      loop do
-        @logger.log_progress
-        sleep 5
+    def run
+      # In Threads einzelne Dokumente indexieren.
+      @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."    
+      start_progress_display
+      threads = Config.indexer.threads.times.map do
+        Thread.new do
+          while file = Database.index_queue_fetch and @logger.progress[:tasks] < 10_000
+            Task.load(file).run
+            @logger.progress[:tasks] += 1
+          end
+        end
       end
-    end
     
-    # Warten bis alle Workerthreads beendet sind.
-    threads.map{|t| t.join}
-    updater.kill
+      # Warten bis alle Workerthreads fertig sind.
+      threads.map{|t| t.join}
+      stop_progress_display
     
-    # Sortieren beginnen
-    @logger.log_info "Temporäre Indexdateien für alle fälligen Dokumente erzeugt."
-    @logger.log_info "Beginne nun mit dem sortieren."
-    tempfiles = Dir[File.join(Config.paths.index_tmp, "word:*")]
-    @logger.log_info "#{tempfiles.size} zu sortierende Dateien gefunden. Na das kann lustig werden."
+      # Sortieren beginnen
+      @logger.log_info "Sortieren der Zwischenergebnisse gestartet."
+      tempfiles = Dir[File.join(Config.paths.index_tmp, "word:*")]
+      @logger.log_info "Anzahl zu sortierender Dateien: #{tempfiles.size}"
+      start_progress_display
     
-    @logger.progress[:tasks] = 0
-    
-    updater = Thread.new do
-      @logger.log_progress_labels
-      loop do
-        @logger.log_progress
-        sleep 5
+      tempfiles.each do |tempfile|
+        word = tempfile.split(":")[1]
+      
+        # Überprüfen ob bereits eine gesicherte Indexdatei existiert, falls ja wird diese ans Ende des tempfile gehängt
+        # und die originale gelöscht...
+        destination_path = File.join(Config.paths.index, "word:#{word}")
+        if File.exist? destination_path
+          File.open(tempfile, "a") do |file|
+            file.write(File.binread(destination_path))
+          end
+          File.unlink destination_path
+        end
+      
+        # Die temporäre Datei in die Zieldatei hineinsortieren und die temporäre Datei anschliessend löschen.
+        IndexSorter.sort(Common::IndexFile.new(tempfile), Common::IndexFile.new(destination_path))
+        @logger.progress[:tasks] += 1
+        File.unlink tempfile
       end
+      
+      stop_progress_display
+    
+      @logger.log_info "10'000 Dokumente erfolgreich indexiert und in Hauptindex eingegliedert."
     end
     
-    tempfiles.each do |tempfile|
-      word = tempfile.split(":")[1]
-      IndexSorter.sort(Common::IndexFile.new(tempfile), Common::IndexFile.new(File.join(Config.paths.index, "word:#{word}")))
-      @logger.progress[:tasks] += 1
-      File.unlink tempfile
+    def start_progress_display
+      @logger.progress[:tasks] = 0
+      @logger.reset_elapsed_time
+      @logger.log_progress_labels
+      @show_progress = true
     end
-    updater.kill
     
-    @logger.log_info "Herzlichen Glückwunsch. Der Index sollte fertig zubereitet sein."
+    def stop_progress_display
+      @show_progress = false
+    end
   end
 end
 
 
 if __FILE__ == $0
-  Indexer::run()
+  Indexer::Main.new.run()
 end
