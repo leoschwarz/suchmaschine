@@ -42,20 +42,13 @@ module Database
       end
     end
 
+    # Erzeugt eine Instanz für eine Datei.
+    # Falls die Datei nicht existiert wird eine neue, leere erzeugt.
     def self.load(path)
-      json = File.read(path)
-      self.new(path, Oj.load(json))
-    end
-
-    # Öffnet die metadata.json Datei in einem bestimmten Verzeichniss.
-    # Bei Erfolg wird eine BigQueueMetadata Instanz zurückgegeben,
-    # ansonsten wird nil zurückgegeben.
-    def self.open_directory(dir)
-      path = File.join(dir, "metadata.json")
-      if File.exists? path
-        self.load(path)
+      if File.exists?(path)
+        self.new(path, Oj.load(File.read(path)))
       else
-        nil
+        self.new(path)
       end
     end
   end

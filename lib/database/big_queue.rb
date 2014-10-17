@@ -1,10 +1,8 @@
 module Database
   class BigQueue
     def initialize(directory)
-      # Metainformation laden.
       @directory = directory
-      @metadata   = BigQueueMetadata.open_directory(directory)
-      @metadata ||= BigQueueMetadata.new(File.join(directory, "metadata.json"))
+      @metadata = BigQueueMetadata.load(File.join(directory, "metadata.json"))
     end
 
     # Schreibt einen Eintrag in die Warteschlange.
