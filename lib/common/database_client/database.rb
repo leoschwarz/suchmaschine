@@ -9,25 +9,12 @@ module Common
         URL.stored(self.run("DOWNLOAD_QUEUE_FETCH", {response_required: true}))
       end
 
-      def self.index_queue_insert(docinfo_ids)
-        self.run("INDEX_QUEUE_INSERT\t#{docinfo_ids.join("\t")}") unless docinfo_ids.size == 0
+      def self.index_queue_insert(doc_ids)
+        self.run("INDEX_QUEUE_INSERT\t#{doc_ids.join("\t")}") unless doc_ids.size == 0
       end
 
       def self.index_queue_fetch()
         self.run("INDEX_QUEUE_FETCH")
-      end
-
-      def self.index_append(pairs)
-        self.run("INDEX_APPEND\t#{pairs.flatten.join("\t")}")
-      end
-
-      def self.index_get(word)
-        raw = self.run("INDEX_GET\t#{word}")
-        if raw.nil?
-          []
-        else
-          raw.split("\t")
-        end
       end
 
       def self.cache_set(key, value)
