@@ -18,7 +18,7 @@ module Frontend
     get '/search' do
       query = params[:query]
       results = Frontend::SearchRunner.get_results(query)
-      render_page("results.erb", {title: "#{docinfos.size} Resultate gefunden:", results: results})
+      render_page("results.erb", {title: "#{results.size} Resultate gefunden:", results: results})
     end
 
     def render_page(page, vars={})
