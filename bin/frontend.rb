@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require_relative '../lib/common/common.rb'
+require_relative '../lib/frontend/frontend.rb'
 require 'sinatra/base'
 require 'erubis'
 
@@ -16,9 +17,7 @@ module Frontend
 
     get '/search' do
       query = params[:query]
-      docinfos = Frontend::Database.index_get(query)
-      results  = docinfos[0...10].map{|docinfo| Common::URL.stored(Frontend::Document.load(docinfo).url).encoded}
-
+      results = Frontend::SearchRunner.get_results(query)
       render_page("results.erb", {title: "#{docinfos.size} Resultate gefunden:", results: results})
     end
 
