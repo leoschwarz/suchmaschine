@@ -3,6 +3,7 @@
 # dh. konkret:
 # Hinzufügen von: 
 # - downloaded Attribut
+# - title Attribut (falls vorhanden)
 # Entfernen von:
 # - document_hash Attribut
 
@@ -39,12 +40,13 @@ metadata_downloaded.each do |hash|
   modify("#{metadata_dir}#{hash}") do |data|
     data.delete(:document_hash)
     data[:downloaded] = true
+    data[:title]      = Oj.load(LZ4.uncompress(File.read("#{document_dir}#{hash}")))[:title]
     data
   end
 end
 
 metadata_not_downloaded.each do |hash|
-  modify("#{document_dir}#{hash}") do |data|
+  modify("#{metadata_dir}#{hash}") do |data|
     data.delete(:document_hash)
     data[:downloaded] = false
     data
