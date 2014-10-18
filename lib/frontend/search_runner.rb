@@ -19,7 +19,10 @@ module Frontend
         results = results & set
       end
       
-      results
+      # Dokumentinformation laden...
+      results.map do |hash|
+        Metadata.load(hash)
+      end
     end
   end
 end

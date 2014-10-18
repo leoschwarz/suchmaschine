@@ -4,6 +4,7 @@ module Common
   module DatabaseClient
     class Metadata < Common::SerializableObject
       field :url                                     # [String]  URL, im Format Common::URL.stored, des Dokumentes
+      field :title, ""                               # [String]  Titel des Dokumentes.
       field :added_at                                # [Integer] Timestamp der Erstellung
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
       field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
