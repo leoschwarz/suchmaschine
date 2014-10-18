@@ -8,21 +8,18 @@ module Common
       field :title, ""  # [String] Titel des Dokumentes, falls vorhanden
       field :text       # [String] Extrahierter Text aus dem Ursprünglichen Dokument
 
-      attr_accessor :hash
+      def hash
+        Digest::MD5.hexdigest(self.url)
+      end
 
-      def self.load(hash)
-        raw = Database.document_get(hash)
+      def self.load(_hash)
+        raw = Database.document_get(_hash)
         return nil if raw.nil? or raw.empty?
-        doc = Document.deserialize(raw)
-        doc.hash = hash
-        doc
+        self.deserialize(raw)
       end
 
       def save
-        serialized = self.serialize
-        @hash      = Digest::MD5.hexdigest(serialized)
-        Database.document_set(@hash, serialized)
-        @hash
+        Database.document_set(self.hash, self.serialize)
       end
     end
   end

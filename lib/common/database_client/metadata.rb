@@ -6,23 +6,23 @@ module Common
       field :url                                     # [String]  URL, im Format Common::URL.stored, des Dokumentes
       field :added_at                                # [Integer] Timestamp der Erstellung
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
-      field :document_hash                           # [String]  Hash des aktuellsten Dokumentes
       field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
+      field :downloaded, false                       # [Boolean] Gibt es ein heruntergeladenes Dokument?
 
-      def document
-        Document.load(self.document_hash)
+      def hash
+        Digest::MD5.hexdigest(self.url)
       end
 
-      def document=(doc)
-        self.document_hash = doc.hash
+      def document
+        Document.load(self.hash)
       end
 
       def save
-        Database.metadata_set(Digest::MD5.hexdigest(self.url), self.serialize)
+        Database.metadata_set(self.hash, self.serialize)
       end
 
-      def self.load(hash)
-        self.deserialize(Database.metadata_get(hash))
+      def self.load(_hash)
+        self.deserialize(_hash)
       end
     end
   end
