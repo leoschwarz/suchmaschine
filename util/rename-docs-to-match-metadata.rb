@@ -15,19 +15,17 @@ threads = 10.times.map do
   Thread.new do
     begin
       while (item = queue.pop(true))
-        path,counter = item
-	puts counter if counter % 1000 == 0
+        begin
+          path,counter = item
+          puts counter if counter % 1000 == 0
   	
-        raw = File.read(path)
-        data = Oj.load(LZ4.uncompress(raw))
-#	  File.unlink(path)
-        metadata = Digest::MD5.hexdigest(data[:url])
+          raw = File.read(path)
+          data = Oj.load(LZ4.uncompress(raw))
+          metadata = Digest::MD5.hexdigest(data[:url])
   
-	FileUtils.mv(path, "db/doc/#{metadata}")
-
-#        File.open("db/doc/#{metadata}", "w") do |f|
-#          f.write(raw)
-#        end
+          FileUtils.mv(path, "db/doc/#{metadata}")
+        rescue
+        end
       end
     rescue ThreadError
     end
