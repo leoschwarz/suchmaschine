@@ -20,7 +20,7 @@ module Frontend
       end
       
       # Dokumentinformation laden...
-      results.map do |hash|
+      results[0..20].map do |hash|
         Frontend::Metadata.load(hash)
       end
     end
