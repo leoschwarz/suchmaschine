@@ -89,6 +89,7 @@ threads = 10.times.map do
     end
   end
 end
+threads.map(&:join)
 
 
 puts "\nFertig."
