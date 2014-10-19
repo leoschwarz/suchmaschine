@@ -8,7 +8,7 @@ module Common
       field :added_at                                # [Integer] Timestamp der Erstellung
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
       field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
-      field :downloaded, false                       # [Boolean] Gibt es ein heruntergeladenes Dokument?
+      field :downloaded, true                        # [Boolean] Gibt es ein heruntergeladenes Dokument?
 
       def hash
         Digest::MD5.hexdigest(self.url)
