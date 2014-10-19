@@ -34,7 +34,7 @@ require 'oj'
 def modify(path)
   data = Oj.load(LZ4.uncompress(File.read path))
   data = yield data
-  File.open(path) do |file|
+  File.open(path, "w") do |file|
     file.write(LZ4.compress(Oj.dump(data)))
   end
   update_counter
