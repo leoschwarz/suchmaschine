@@ -10,7 +10,6 @@ module Indexer
     # Eine neue Aufgabe laden.
     def self.load(path)
       document = Indexer::Document.deserialize(LZ4.uncompress(File.read(path)))
-      document.hash = path.split(":")[-1]
       self.new(document.hash, document.text)
     end
 
