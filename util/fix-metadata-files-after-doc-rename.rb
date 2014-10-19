@@ -32,29 +32,63 @@ end
 require 'lz4-ruby'
 require 'oj'
 def modify(path)
-  data = Oj.load(LZ4.uncompress(File.read path))
-  data = yield data
-  File.open(path, "w") do |file|
-    file.write(LZ4.compress(Oj.dump(data)))
+  begin
+    data = Oj.load(LZ4.uncompress(File.read path))
+    data = yield data
+    File.open(path, "w") do |file|
+      file.write(LZ4.compress(Oj.dump(data)))
+    end
+  rescue
+    puts "E: Datei nicht gefunden: #{path}"
   end
   update_counter
 end
 
-metadata_downloaded.each do |hash|
-  modify("#{metadata_dir}#{hash}") do |data|
-    data.delete(:document_hash)
-    data[:downloaded] = true
-    data[:title]      = Oj.load(LZ4.uncompress(File.read("#{document_dir}#{hash}")))[:title]
-    data
+queue = Queue.new
+metadata_downloaded.each do |hash| 
+  queue << hash
+end
+metadata_downloaded = nil
+
+threads = 10.times.map do
+  Thread.new do
+    begin
+      while (hash = queue.pop(true))
+        modify("#{metadata_dir}#{hash}") do |data|
+          data.delete(:document_hash)
+          data[:downloaded] = true
+          data[:title]      = Oj.load(LZ4.uncompress(File.read("#{document_dir}#{hash}")))[:title]
+          data
+        end
+      end
+    rescue ThreadError
+    end
   end
 end
 
+threads.map(&:join)
+
+queue = Queue.new
+
 metadata_not_downloaded.each do |hash|
-  modify("#{metadata_dir}#{hash}") do |data|
-    data.delete(:document_hash)
-    data[:downloaded] = false
-    data
+  queue << hash
+end
+queue = nil
+
+threads = 10.times.map do
+  Thread.new do
+    begin
+      while (hash = queue.pop(true))
+        modify("#{metadata_dir}#{hash}") do |data|
+          data.delete(:document_hash)
+          data[:downloaded] = false
+          data
+        end
+      end
+    rescue ThreadError
+    end
   end
 end
+
 
 puts "\nFertig."
