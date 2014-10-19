@@ -20,7 +20,9 @@ $counter = 0
 $total   = metadata_hashes.size
 
 puts "Dateien umschreiben."
-puts "Totale Anzahl Dateien: #{metadata_hashes.size}\n"
+puts "Totale Anzahl Dateien: #{metadata_hashes.size}"
+puts "Anzahl heruntergeladen: #{metadata_downloaded.size}"
+puts "Anzahl nicht heruntergeladen: #{metadata_not_downloaded.size}\n"
 
 def update_counter
   print "\r[#{$counter}/#{$total}]"
@@ -32,7 +34,9 @@ require 'oj'
 def modify(path)
   data = Oj.load(LZ4.uncompress(File.read path))
   data = yield data
-  File.write(LZ4.compress(Oj.dump(data)))
+  File.open(path) do |file|
+    file.write(LZ4.compress(Oj.dump(data)))
+  end
   update_counter
 end
 
