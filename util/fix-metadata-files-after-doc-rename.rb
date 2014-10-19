@@ -73,7 +73,6 @@ queue = Queue.new
 metadata_not_downloaded.each do |hash|
   queue << hash
 end
-queue = nil
 
 threads = 10.times.map do
   Thread.new do
