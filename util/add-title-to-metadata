@@ -1,0 +1,43 @@
+#!/usr/bin/env ruby
+require './util.rb'
+require 'oj'
+
+CACHE_FILE = "./add-title-to-metadata-cache.json"
+if File.exist? CACHE_FILE
+  files_to_do = Oj.load File.read(CACHE_FILE)
+else
+  files_to_do = Dir["#{Config.paths.metadata}*"]
+end
+
+total = files_to_do.size
+puts "Anzahl zu verarbeitender Dateien: #{total}\n"
+
+begin
+  counter = 0
+  while path = files_to_do.pop
+    rewrite_json(path) do |json|
+      docpath = "#{Config.paths.document}#{File.basename(path)}"
+    
+      if File.exist?(docpath)
+        title = Oj.load(LZ4.uncompress(File.read(docpath)))[:title]
+        if title.nil?
+          json[:title] = "(Kein Titel gespeichert)"
+        else
+          json[:title] = title
+        end
+        json
+      else
+        false
+      end
+    end
+    
+    counter += 1
+    update_line "[#{counter}/#{total}] bearbeitet."
+  end
+  
+rescue Exception
+  puts "Cache wird geschrieben..."
+  File.open(CACHE_FILE, "w") do |file|
+    file.write(Oj.dump files_to_do)
+  end
+end
