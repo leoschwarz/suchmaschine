@@ -21,7 +21,7 @@ module Frontend
       
       # Dokumentinformation laden...
       results.map do |hash|
-        Metadata.load(hash)
+        Frontend::Metadata.load(hash)
       end
     end
   end

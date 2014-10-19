@@ -1,5 +1,8 @@
 <ul>
 <% results.each do |result| %>
-  <li><%= result %></li>
+  <li>
+    <a href="<%= result.url %>"><%= result.title %></a><br>
+    <%= result.url %>
+  </li>
 <% end %>
 </ul>
