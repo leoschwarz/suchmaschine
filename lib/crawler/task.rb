@@ -31,7 +31,7 @@ module Crawler
           document.save
 
           metadata = Crawler::Metadata.new
-          metadata.url = @url.stored
+          metadata.url = @url
           metadata.downloaded = true
           metadata.added_at = Time.now.to_i
           metadata.permissions = {index: parser.indexing_allowed, follow: parser.following_allowed}
@@ -45,7 +45,7 @@ module Crawler
           Task.insert([destination_url.stored]) unless destination_url.nil?
 
           metadata            = Metadata.new
-          metadata.url        = @url.stored
+          metadata.url        = @url
           metadata.downloaded = false
           metadata.redirect   = destination_url.stored unless destination_url.nil?
           metadata.added_at   = Time.now.to_i

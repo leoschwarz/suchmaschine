@@ -1,8 +1,8 @@
 <ul>
 <% results.each do |result| %>
   <li>
-    <a href="<%= result.url %>"><%= result.title %></a><br>
-    <%= result.url %>
+    <a href="<%= result.url.encoded %>"><%= result.title %></a><br>
+    <%= result.url.decoded %>
   </li>
 <% end %>
 </ul>
