@@ -23,7 +23,7 @@ module Common
       end
 
       def self.load(_hash)
-        self.deserialize(_hash)
+        self.deserialize(Database.metadata_get(_hash))
       end
     end
   end
