@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require './util.rb'
+require_relative './util.rb'
 require 'oj'
 
 CACHE_FILE = "./add-title-to-metadata-cache.json"
