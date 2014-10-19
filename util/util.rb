@@ -6,7 +6,7 @@ require 'lz4-ruby'
 require 'oj'
 
 def update_line(x, width=80)
-  print "\r#{x.lpad(width)}"
+  print "\r#{x.ljust(width)}"
 end
 
 def rewrite_file(path)
