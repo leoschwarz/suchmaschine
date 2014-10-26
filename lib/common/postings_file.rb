@@ -10,11 +10,11 @@ module Common
   #
   # Reihen folgender Struktur:
   # - DOCUMENT_ID: (16B)
-  class IndexFile
-    ROW_SIZE = 16
+  # - OCCURENCES:  (4B)
+  class PostingsFile
+    ROW_SIZE = 20
     
     attr_reader :path
-    
     def initialize(path)
       @path = path
     end
@@ -30,18 +30,18 @@ module Common
       read_bin_entries(data_offset, data_length).map do |raw|
         # Gespeichert wird ein Binärstring der aus dem Hexstring entnommen wurde.
         # Deshalb kann dieser mithilfe 'h*' auch wieder als ursprünglicher gelesen werden.
-        raw.byteslice(0, 16).unpack("h*")[0]
+        raw.unpack("h32 I>")
       end
     end
     
     # Liest Einträge aus der Datei, Reihen als Binär-String.
     def read_bin_entries(offset=0, length=nil)
       # Binärdaten lesen
-      raw = IO.binread(@path, length, offset)
+      raw = read_bin_raw(offset, length)
       
-      # Immer 16B lange Stücke nehmen
-      count = raw.bytesize / 16
-      (0...count).map{|i| raw.byteslice(16*i, 16)}
+      # Immer ROW_SIZE lange Stücke nehmen.
+      count = raw.bytesize / ROW_SIZE
+      (0...count).map{|i| raw.byteslice(ROW_SIZE*i, ROW_SIZE)}
     end
     
     # Liest einen Teil der Datei als Binären String
@@ -51,7 +51,7 @@ module Common
     
     # Schreibt Einträge in die Datei, Reihen als Array mit umgewandelten Typen.
     def write_entries(entries)
-      write_bin_entries entries.map{|hash| [hash].pack("h*")}
+      write_bin_entries entries.map{|row| row.pack("h32 I>")}
     end
     
     # Schreibt Einträge in die Datei, Reihen als Binär-String.
