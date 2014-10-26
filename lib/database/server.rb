@@ -10,8 +10,8 @@ module Database
       @server = Common::FastServer.new(Config.database_connection.host, Config.database_connection.port, @logger)
       @server.on_start do
         @queues = {
-          :download => BigQueue.new(Config.paths.download_queue),
-          :index    => BigQueue.new(Config.paths.index_queue)
+          :download => BetterQueue.new(Config.paths.download_queue),
+          :index    => BetterQueue.new(Config.paths.index_queue)
         }
       end
 
@@ -20,8 +20,8 @@ module Database
       end
 
       @server.on_stop do
-        @queues[:download].save_everything
-        @queues[:index].save_everything
+        @queues[:download].save
+        @queues[:index].save
         @logger.log_info "Daten erfolgreich gespeichert."
       end
 

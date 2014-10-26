@@ -1,0 +1,59 @@
+# Ziele:
+# - Auch mit Gigabytes grossen Warteschlangen umgehen können.
+# - Möglichst zufällige Reihenfolge der Einträge.
+# - Zuverlässig (keine Einträge verlieren)
+# - Trotzdem schnell sein.
+
+module Database
+  class BetterQueue
+    MAX_BUFFER = 20_000
+    
+    def initialize(directory)
+      @directory     = directory
+      @insert_buffer = []
+      @fetch_buffer  = []
+      @metadata      = BetterQueueMetadata.load(File.join(directory, "metadata"))
+    end
+  
+    def insert(line)
+      @insert_buffer << line
+      if @insert_buffer.size > MAX_BUFFER
+        write_inserts
+      end
+    end
+  
+    def fetch
+      if @fetch_buffer.size == 0
+        fetch_items
+      end
+      
+      @fetch_buffer.pop
+    end
+    
+    def save
+      @insert_buffer.concat(@fetch_buffer)
+      write_items
+      @metadata.save
+    end
+    
+    private
+    def write_inserts
+      # Auf verschiedene Stapel verteilen, falls einer nicht genug Platz bietet.
+      while @insert_buffer.size > 0
+        batch = @metadata.get_random_fillable_batch
+        if @insert_buffer.size - batch.empty_slots > 0
+          appendable = batch.empty_slots
+        else
+          appendable = @insert_buffer.size
+        end
+        batch.insert(@insert_buffer.pop(appendable))
+      end
+    end
+    
+    def fetch_items
+      batch = @metadata.get_random_readable_batch
+      @read_buffer = batch.read_all
+      batch.delete
+    end
+  end
+end
