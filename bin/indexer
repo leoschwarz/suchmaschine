@@ -34,8 +34,8 @@ module Indexer
       start_progress_display
       threads = Config.indexer.threads.times.map do
         Thread.new do
-          while doc_id = Indexer::Database.index_queue_fetch and @logger.progress[:tasks] < 10_000
-            Task.load(Config.paths.document + doc_id).run
+          while @logger.progress[:tasks] < 10_000 and (doc_id = Indexer::Database.index_queue_fetch)
+            Task.load(doc_id).run
             @logger.progress[:tasks] += 1
           end
         end
