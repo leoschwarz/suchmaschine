@@ -7,6 +7,7 @@ module Common
       field :title, ""                               # [String]  Titel des Dokumentes.
       field :added_at                                # [Integer] Timestamp der Erstellung
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
+      field :word_counts, {}                         # [Hash]    Wort => Anzahl, Wie oft kommen die Worte im Dokument vor?
       field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
       field :downloaded, true                        # [Boolean] Gibt es ein heruntergeladenes Dokument?
 

@@ -35,6 +35,7 @@ module Crawler
           metadata.downloaded = true
           metadata.added_at = Time.now.to_i
           metadata.permissions = {index: parser.indexing_allowed, follow: parser.following_allowed}
+          metadata.word_counts = WordCounter.new(parser.text).counts
           metadata.save
 
           if parser.following_allowed
