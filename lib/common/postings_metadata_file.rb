@@ -6,7 +6,7 @@ module Common
   # Es handelt sich um ein binäres Datenformat folgender Struktur:
   # - TOTAL_OCCURENCES (8B uint64)
   # danach: Reihen folgender Struktur:
-  # - FIRST_ROW (16B, Erste Reihe des Datensatzes)
+  # - FIRST_ROW (20B, Erste Reihe des Datensatzes)
   # - POSITION (4B, Position des ersten Begriffes im Dokument)
   # - LENGTH   (4B, Länge des Abschnittes (der letzte kann kürzer sein, etc.))
   class PostingsMetadataFile
@@ -21,12 +21,12 @@ module Common
       index_raw = File.read(@path)
       @total_occurences = raw.byteslice(0, 8).unpack("L_>")[0]
       
-      count  = (index_raw.bytesize-8) / 24 # Jeder Eintrag besteht aus 24B
+      count  = (index_raw.bytesize-8) / 28 # Jeder Eintrag besteht aus 28B
       @index = (0...count).map do |i|
         raw.byteslice()
-        first_row_str = raw.byteslice(8+24*i, 16)
-        position_int  = raw.byteslice(8+24*i+16, 4).unpack("I>")[0]
-        length_int    = raw.byteslice(8+24*i+20, 4).unpack("I>")[0]
+        first_row_str = raw.byteslice(8+28*i, 20)
+        position_int  = raw.byteslice(8+28*i+20, 4).unpack("I>")[0]
+        length_int    = raw.byteslice(8+28*i+24, 4).unpack("I>")[0]
         @index << [first_row_str, position_int, length_int]
       end
     end
