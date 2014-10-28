@@ -19,7 +19,7 @@ module Common
       if full_path
         @path = path
       else
-        @path = Config.paths.index + path
+        @path = Config.paths.postings + path
       end
     end
     

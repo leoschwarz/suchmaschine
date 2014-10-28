@@ -4,6 +4,7 @@ require_relative '../lib/indexer/indexer.rb'
 
 # TODO: Eventuell wäre es auch interessant BigQueue um eine Bestätigungsfunktion zu erweitern, bzw. eine andere Warteschlange mit solcher Funktionalität
 #       zu implementieren. So wäre es sichergestellt, dass einzelne Einträge am Ende nicht ohne Indexeinträge bleiben.
+# TODO: Den Code übersichtlicher machen.
 
 module Indexer
   class Main
@@ -56,7 +57,7 @@ module Indexer
       
         # Überprüfen ob bereits eine gesicherte Indexdatei existiert, falls ja wird diese ans Ende des tempfile gehängt
         # und die originale gelöscht...
-        destination_path = File.join(Config.paths.index, "word:#{word}")
+        destination_path = File.join(Config.paths.postings, word)
         if File.exist? destination_path
           File.open(tempfile, "a") do |file|
             file.write(File.binread(destination_path))
@@ -71,7 +72,7 @@ module Indexer
         File.unlink tempfile
         
         # PostingsMetadata-File generieren
-        Common::PostingsMetadataFile.new(destination_path + ".meta", true).generate_for(destination_file)
+        Common::PostingsMetadataFile.new(word).generate_for(destination_file)
       end
       
       stop_progress_display

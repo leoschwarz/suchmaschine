@@ -16,10 +16,11 @@ local: &default
     threads: 10
   paths:
     cache: "/mnt/sdb/suchmaschine/cache/"
-    document: "/home/lightblaze/suchmaschine/db/doc/"
-    download_queue: "/home/lightblaze/suchmaschine/db/urls/"
-    index_queue: "/home/lightblaze/suchmaschine/db/index/"
-    index: "/mnt/sdb/suchmaschine/index/"
+    document: "/home/lightblaze/suchmaschine/db/document/"
+    download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
+    index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
+    postings: "/mnt/sdb/suchmaschine/postings/"
+    postings_metadata: "/mnt/sdb/suchmaschine/postings_metadata/"
     index_tmp: "/mnt/sdb/suchmaschine/indextmp/"
     metadata: "/mnt/sdb/suchmaschine/metadata/"
 

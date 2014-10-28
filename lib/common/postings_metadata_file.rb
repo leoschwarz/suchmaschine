@@ -14,7 +14,7 @@ module Common
       if full_path
         @path = path
       else
-        @path = Config.paths.index + path + ".meta"
+        @path = Config.paths.postings_metadata + path
       end
     end
     
