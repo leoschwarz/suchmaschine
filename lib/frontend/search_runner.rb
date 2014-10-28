@@ -7,22 +7,21 @@ module Frontend
       # Kleinschreiben
       query.downcase!
       
-      # Für jedes Wort den Reverse Index laden:
-      sets = []
+      # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
+      results = Hash.new(0)
       query.split(" ").uniq.each do |word|
-        sets << Frontend::Database.index_get(word)
+        postings = Common::PostingsFile.new(word)
+        postings_metadata = Common::PostingsMetadataFile.new(word)
+        
+        postings_metadata.read
+        corpus_count = postings_metadata.total_occurences
+        
+        postings.read_entries().each do |docid, count|
+          results[docid] += Math.log( count*1.0 / corpus_count )
+        end
       end
       
-      # Schnittmenge bilden
-      results = sets.pop
-      sets.each do |set|
-        results = results & set
-      end
-      
-      # Dokumentinformation laden...
-      results[0..20].map do |hash|
-        Frontend::Metadata.load(hash)
-      end
+      results.sort_by{|doc, score|}.first(10)
     end
   end
 end

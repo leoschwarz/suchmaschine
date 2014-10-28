@@ -1,8 +1,9 @@
 <ul>
-<% results.each do |result| %>
+<% results.each do |result, score| %>
   <li>
     <a href="<%= result.url.encoded %>"><%= result.title %></a><br>
-    <%= result.url.decoded %>
+    <%= result.url.decoded %><br>
+    Score: <%= score %>
   </li>
 <% end %>
 </ul>

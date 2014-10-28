@@ -15,8 +15,16 @@ module Common
     ROW_SIZE = 20
     
     attr_reader :path
-    def initialize(path)
-      @path = path
+    def initialize(path, full_path=false)
+      if full_path
+        @path = path
+      else
+        @path = Config.paths.index + path
+      end
+    end
+    
+    def exist?
+      File.exist? @path
     end
     
     def rows_count

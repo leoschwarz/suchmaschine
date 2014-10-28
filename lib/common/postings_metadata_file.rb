@@ -10,8 +10,16 @@ module Common
   # - POSITION (4B, Position des ersten Begriffes im Dokument)
   # - LENGTH   (4B, Länge des Abschnittes (der letzte kann kürzer sein, etc.))
   class PostingsMetadataFile
-    def initialize(path)
-      @path = path
+    def initialize(path, full_path=false)
+      if full_path
+        @path = path
+      else
+        @path = Config.paths.index + path + ".meta"
+      end
+    end
+    
+    def exist?
+      File.exist? @path
     end
     
     attr_reader :total_occurences

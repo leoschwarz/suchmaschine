@@ -22,7 +22,7 @@ module Indexer
     
     private
     def postings_tmp(word)
-      Common::PostingsFile.new(File.join(Config.paths.index_tmp, "word:#{word}"))
+      Common::PostingsFile.new(File.join(Config.paths.index_tmp, "word:#{word}"), true)
     end
   end
 end

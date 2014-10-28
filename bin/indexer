@@ -65,13 +65,13 @@ module Indexer
         end
       
         # Die temporäre Datei in die Zieldatei hineinsortieren und die temporäre Datei anschliessend löschen.
-        destination_file = Common::PostingsFile.new(destination_path)
-        IndexSorter.sort(Common::PostingsFile.new(tempfile), destination_file)
+        destination_file = Common::PostingsFile.new(destination_path, true)
+        IndexSorter.sort(Common::PostingsFile.new(tempfile, true), destination_file)
         @logger.progress[:tasks] += 1
         File.unlink tempfile
         
         # PostingsMetadata-File generieren
-        Common::PostingsMetadataFile.new(destination_path + ".meta").generate_for(destination_file)
+        Common::PostingsMetadataFile.new(destination_path + ".meta", true).generate_for(destination_file)
       end
       
       stop_progress_display
