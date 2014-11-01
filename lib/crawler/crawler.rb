@@ -1,3 +1,5 @@
+require_relative '../common/common.rb'
+
 module Crawler
   include Common::DatabaseClient
 end

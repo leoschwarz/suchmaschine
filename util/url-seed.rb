@@ -1,35 +1,34 @@
 #!/usr/bin/env ruby
-require_relative '../bin/crawler.rb'
+require_relative '../lib/crawler/crawler'
 
 # Dieses Skript lädt einige Startpunkte für die Websuche
 # Deutschsprachige Seiten:
-domains  = %w[de.wikipedia.org tagesanzeiger.ch srf.ch 20min.ch nzz.ch spiegel.de chip.de heise.de]
-domains += %w[focus.de blick.ch bluewin.ch blogspot.ch sbb.ch local.ch comparis.ch]
-domains += %w[gutefrage.net mozilla.org yahoo.de]
+$domains  = %w[de.wikipedia.org tagesanzeiger.ch srf.ch 20min.ch nzz.ch spiegel.de chip.de heise.de]
+$domains += %w[focus.de blick.ch bluewin.ch blogspot.ch sbb.ch local.ch comparis.ch]
+$domains += %w[gutefrage.net mozilla.org yahoo.de]
 
 # Englischsprachige Seiten:
-domains += %w[en.wikipedia.org stackoverflow.com imdb.com forbes.com cnn.com bbc.com theguardian.com]
+$domains += %w[en.wikipedia.org stackoverflow.com imdb.com forbes.com cnn.com bbc.com theguardian.com]
 
 
 # URLs für jede Seite laden
-all_urls = []
-domains.each do |domain|
-  url = Common::URL.encoded "http://#{domain}/"
+def fetch_urls(url, retries=3)
   download = Crawler::Download.new(url)
-  
   if download.success?
+    puts "[✓] #{url.decoded}"   
     parser = Crawler::HTMLParser.new(url, download.response_body)
-    parser.links.each do |anchor, link_url|
-      unless link_url.nil?
-        # URL hinzufügen, falls der Domain Name aufgelistet wurde
-        all_urls << link_url.stored if domains.include? link_url.domain_name
-      end
-    end
-    puts "[✓] #{url.decoded}"
+    parser.links.map{|anchor,url| url}.select{|url| $domains.include?(url)}
   else
-    puts "[✕] #{url.decoded}"
+    if retries > 0 and not download.redirect_url.nil?
+      fetch_urls(download.redirect_url, retries-1)
+    else
+      puts "[✕] #{url.decoded}"
+      []
+    end
   end
 end
+
+all_urls = $domains.map{|domain| fetch_urls(Common::URL.encoded("http://#{domain}/"))}.flatten
 
 # URLs in Datenbank eintragen
 all_urls.uniq.each_slice(50) do |urls|

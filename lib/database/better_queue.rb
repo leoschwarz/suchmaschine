@@ -18,7 +18,7 @@ module Database
     def insert(line)
       @insert_buffer << line
       if @insert_buffer.size > MAX_BUFFER
-        write_inserts
+        write_items
       end
     end
   
@@ -37,7 +37,7 @@ module Database
     end
     
     private
-    def write_inserts
+    def write_items
       # Auf verschiedene Stapel verteilen, falls einer nicht genug Platz bietet.
       while @insert_buffer.size > 0
         batch = @metadata.get_random_fillable_batch

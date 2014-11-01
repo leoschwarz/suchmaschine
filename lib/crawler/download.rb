@@ -46,14 +46,14 @@ module Crawler
       rescue
       end
 
-      @status   = "500"
-      @success  = false
-      @redirect = nil
+      @status       = "500"
+      @success      = false
+      @redirect_url = nil
 
       begin
-        @status   = curl.status
-        @success  = @status[0] == "2"
-        @redirect = curl.redirect_url unless curl.redirect_url == -1
+        @status       = curl.status
+        @success      = @status[0] == "2"
+        @redirect_url = url.join_with(curl.redirect_url) unless curl.redirect_url == -1
       rescue
       end
     end
