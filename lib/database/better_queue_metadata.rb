@@ -41,7 +41,7 @@ module Database
     
     def self.load(path)
       if File.exist?(path)
-        metadata = self.deserialize(path)
+        metadata = self.deserialize(File.read(path))
       else
         metadata = self.new({batches: {}})
       end
