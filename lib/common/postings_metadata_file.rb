@@ -27,14 +27,13 @@ module Common
     def read
       # Index einlesen
       index_raw = File.read(@path)
-      @total_occurences = raw.byteslice(0, 8).unpack("L_>")[0]
+      @total_occurences = index_raw.byteslice(0, 8).unpack("L_>")[0]
       
       count  = (index_raw.bytesize-8) / 28 # Jeder Eintrag besteht aus 28B
       @index = (0...count).map do |i|
-        raw.byteslice()
-        first_row_str = raw.byteslice(8+28*i, 20)
-        position_int  = raw.byteslice(8+28*i+20, 4).unpack("I>")[0]
-        length_int    = raw.byteslice(8+28*i+24, 4).unpack("I>")[0]
+        first_row_str = index_raw.byteslice(8+28*i, 20)
+        position_int  = index_raw.byteslice(8+28*i+20, 4).unpack("I>")[0]
+        length_int    = index_raw.byteslice(8+28*i+24, 4).unpack("I>")[0]
         @index << [first_row_str, position_int, length_int]
       end
     end
