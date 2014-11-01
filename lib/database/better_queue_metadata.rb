@@ -16,7 +16,7 @@ module Database
       end
       
       # Alle Stapel durchsuchen
-      batches.shuffle.each do |name|
+      batches.keys.shuffle.each do |name|
         batch = BetterQueueBatch.new(name, self)
         unless batch.full?
           return batch
@@ -29,6 +29,7 @@ module Database
     
     def get_random_readable_batch
       name = batches.keys.sample
+      return nil if name.nil?
       BetterQueueBatch.new(name, self)
     end
     

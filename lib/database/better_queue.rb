@@ -26,7 +26,9 @@ module Database
   
     def fetch
       if @fetch_buffer.size == 0
-        fetch_items
+        unless fetch_items
+          return nil
+        end
       end
       
       @fetch_buffer.pop
@@ -54,8 +56,13 @@ module Database
     
     def fetch_items
       batch = @metadata.get_random_readable_batch
-      @fetch_buffer = batch.read_all
-      batch.delete
+      if batch.nil?
+        false
+      else
+        @fetch_buffer = batch.read_all
+        batch.delete
+        true
+      end
     end
   end
 end
