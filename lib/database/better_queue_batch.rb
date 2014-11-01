@@ -23,7 +23,7 @@ module Database
       File.open(@path, "a") do |file|
         file.puts _rows.join("\n")
       end
-      rows += _rows.size
+      self.rows += _rows.size
     end
     
     def read_all
