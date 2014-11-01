@@ -21,7 +21,7 @@ module Frontend
         end
       end
       
-      results.sort_by{|doc, score|}.first(10).map{|doc, score| [Common::DatabaseClient::Metadata.open(doc, false), score]}
+      results.sort_by{|doc, score| score}.first(10).map{|doc, score| [Common::DatabaseClient::Metadata.open(doc, false), score]}
     end
   end
 end
