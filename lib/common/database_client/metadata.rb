@@ -1,4 +1,5 @@
 require 'digest/md5'
+require 'lz4-ruby' # TODO wieder entfern falls hier nicht gebraucht
 
 module Common
   module DatabaseClient
