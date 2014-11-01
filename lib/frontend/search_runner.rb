@@ -21,7 +21,7 @@ module Frontend
         end
       end
       
-      results.sort_by{|doc, score|}.first(10)
+      results.sort_by{|doc, score|}.first(10).map{|doc, score| [Database::Metadata.load(doc), score]}
     end
   end
 end
