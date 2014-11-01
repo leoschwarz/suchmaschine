@@ -12,13 +12,14 @@ module Frontend
     set :bind, "0.0.0.0"
 
     get '/' do
-      render_page("index.erb", {title: "Das Internet"})
+      render_page("index.erb", {title: "Durchsuche das Internet"})
     end
 
     get '/search' do
       query = params[:query]
-      results = Frontend::SearchRunner.get_results(query)
-      render_page("results.erb", {title: "#{results.size} Resultate gefunden:", results: results})
+      search = Frontend::SearchRunner.new(query)
+      search.run
+      render_page("results.erb", {title: "#{search.results_count} Resultate gefunden:", results: search.results})
     end
 
     def render_page(page, vars={})

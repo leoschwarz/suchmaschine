@@ -1,6 +1,12 @@
 module Frontend
   class SearchRunner
-    def self.get_results(query)
+    attr_accessor :results, :results_count
+    
+    def initialize(query)
+      @query = query
+    end
+    
+    def run
       # Alle Sonderzeichen entfernen
       query.gsub!(/[^a-zA-ZäöüÄÖÜ]+/, " ")
       
@@ -21,7 +27,8 @@ module Frontend
         end
       end
       
-      results.sort_by{|doc, score| score}.reverse.first(10).map{|doc, score| [Common::DatabaseClient::Metadata.open(doc, false), score]}
+      @results_count = results.size
+      @results = results.sort_by{|doc, score| score}.reverse.first(10).map{|doc, score| [Common::DatabaseClient::Metadata.open(doc, false), score]}
     end
   end
 end
