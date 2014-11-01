@@ -4,10 +4,7 @@ module Database
       @name = name
       @path = File.join(metadata.directory, name)
       @metadata = metadata
-      
-      unless @metadata.batches.has_key? name
-        @metadata.batches[name] = 0
-      end
+      @metadata.batches[name] ||= 0
     end
     
     def rows
