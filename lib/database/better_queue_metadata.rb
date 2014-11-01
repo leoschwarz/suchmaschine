@@ -33,7 +33,7 @@ module Database
     
     # Erzeugt einen neuen leeren Stapel und gibt diesen zurück.
     def create_new_batch
-      batch_counter += 1
+      self.batch_counter += 1
       batch = BetterQueueBatch.new(batch_counter.to_s, self)
       batch.rows = 0
       batch
