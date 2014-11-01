@@ -4,6 +4,10 @@ module Database
       @name = name
       @path = File.join(metadata.directory, name)
       @metadata = metadata
+      
+      unless @metadata.batches.has_key? name
+        @metadata.batches[name] = 0
+      end
     end
     
     def rows
@@ -22,6 +26,7 @@ module Database
       File.open(@path, "a") do |file|
         file.puts _rows.join("\n")
       end
+      rows += _rows.size
     end
     
     def read_all
