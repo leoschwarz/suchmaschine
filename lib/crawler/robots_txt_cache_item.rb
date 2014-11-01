@@ -1,5 +1,7 @@
 module Crawler
-  class RobotsTXTCacheItem < Common::SerializableObject
+  class RobotsTXTCacheItem
+    include Common::Serializable
+    
     fields :domain, :rules, :valid_until
 
     def save

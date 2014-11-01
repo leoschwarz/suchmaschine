@@ -2,7 +2,9 @@ require 'digest/md5'
 
 module Common
   module DatabaseClient
-    class Metadata < Common::SerializableObject
+    class Metadata
+      include Common::Serializable
+      
       field :url                                     # [URL]  URL des Dokumentes (URL.stored wird gespeichert)
       field :title, ""                               # [String]  Titel des Dokumentes.
       field :added_at                                # [Integer] Timestamp der Erstellung

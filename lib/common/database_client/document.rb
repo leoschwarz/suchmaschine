@@ -2,7 +2,9 @@ require 'digest/md5'
 
 module Common
   module DatabaseClient
-    class Document < Common::SerializableObject
+    class Document
+      include Common::Serializable
+      
       field :url        # [String] URL des Dokumentes im Format Common::URL.stored
       field :links, []  # [Array]  Elemente im Format [Anker, URL]
       field :title, ""  # [String] Titel des Dokumentes, falls vorhanden
