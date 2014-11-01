@@ -17,7 +17,7 @@ def fetch_urls(url, retries=3)
   if download.success?
     puts "[✓] #{url.decoded}"   
     parser = Crawler::HTMLParser.new(url, download.response_body)
-    parser.links.map{|anchor,url| url}.select{|url| $domains.include?(url)}
+    parser.links.map{|anchor,link| link.stored}
   else
     if retries > 0 and not download.redirect_url.nil?
       fetch_urls(download.redirect_url, retries-1)
