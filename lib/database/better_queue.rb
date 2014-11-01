@@ -4,6 +4,8 @@
 # - Zuverlässig (keine Einträge verlieren)
 # - Trotzdem schnell sein.
 
+# TODO: Eventuell das Verhalten auch in Randsituationen testen.
+
 module Database
   class BetterQueue
     MAX_BUFFER = 20_000
@@ -52,7 +54,7 @@ module Database
     
     def fetch_items
       batch = @metadata.get_random_readable_batch
-      @read_buffer = batch.read_all
+      @fetch_buffer = batch.read_all
       batch.delete
     end
   end
