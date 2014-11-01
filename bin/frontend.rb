@@ -22,7 +22,7 @@ module Frontend
       search.run
       
       duration  = Time.now - start_time
-      render_page("results.erb", {title: "#{search.results_count} Resultate gefunden:", query: query, duration: duration, results: search.results})
+      render_page("results.erb", {query: query, duration: duration, results: search.results, results_count: search.results_count})
     end
 
     def render_page(page, vars={})

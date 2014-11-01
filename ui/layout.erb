@@ -3,18 +3,67 @@
 <head>
   <title><%= title %></title>
   <style>
-  body {
-    font-family: sans-serif;
-    text-align: center;
+  /* TODO: Dies noch überarbeiten! */
+  :focus {outline:0px none transparent;}
+  ::-moz-focus-inner {border:0;}
+
+  * {
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
   }
 
-  input[type=text] {
-    width: 300px;
+    body {
+      font-family: Arial;
+      padding: 20px;
+    }
+
+    input[type=text] {
+      width: 600px;
+      height: 24px;
+      font-size: 11pt;
+      padding: 2px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border: 1px solid #888;
+    }
+
+  input[type=button], input[type=submit] {
+    border: 1px solid #888;
+    height: 30px;
+    padding: 2px; 
+    font-size: 11pt;
+    background-color: #eee;
+  }
+
+  input[type=button]:hover, input[type=submit]:hover {
+    background-color: #e2e2e2;
+  }
+  
+  /* das ist noch immer hässlich umrandet im FF */
+  input[type=text]:focus {
+    outline: none;
+    outline-color: transparent;
+    outline-style: none;
+    box-shadow: 0 0 10px rgba(0,0,255,0.1)
+  }
+
+  ul {
+    border-top: 1px dotted #888;
+    margin-top: 10px;
+    padding-top: 20px;
+    list-style: none;
+  }
+
+  ul > li {
+    margin-bottom: 10px;
   }
   </style>
 </head>
 <body>
+  <% if defined? title %>
   <h1><%= title %></h1>
+  <% end %>
+  
   <%= content %>
 </body>
 </html>
