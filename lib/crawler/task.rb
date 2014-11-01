@@ -32,6 +32,7 @@ module Crawler
 
           metadata = Crawler::Metadata.new
           metadata.url = @url
+          metadata.title = parser.title
           metadata.downloaded = true
           metadata.added_at = Time.now.to_i
           metadata.permissions = {index: parser.indexing_allowed, follow: parser.following_allowed}
