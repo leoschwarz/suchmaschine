@@ -33,6 +33,18 @@ module Common
         metadata.url = Common::URL.stored(metadata.url)
         metadata
       end
+      
+      def self.open(path_or_hash, full_path)
+        if full_path
+          path = path_or_hash
+        else
+          path = Config.paths.metadata + path_or_hash
+        end
+        
+        metadata = self.deserialize(File.read(path))
+        metadata.url = Common::URL.stored(metadata.url)
+        metadata
+      end
     end
   end
 end
