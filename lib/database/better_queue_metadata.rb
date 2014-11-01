@@ -28,7 +28,8 @@ module Database
     end
     
     def get_random_readable_batch
-      batches.sample
+      name = batches.keys.sample
+      BetterQueueBatch.new(name, self)
     end
     
     # Erzeugt einen neuen leeren Stapel und gibt diesen zurück.
