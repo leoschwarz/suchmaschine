@@ -1,3 +1,10 @@
+<% # TODO: Alle XSS Angriffsstellen-Stellen schliessen... %>
+<form action="/search" method="GET">
+  <input type="text" name="query" value="<%= query %>">
+  <input type="submit" value="Suchen">
+</form>
+<br>
+
 <ul>
 <% results.each do |result, score| %>
   <li>
