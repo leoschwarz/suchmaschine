@@ -16,7 +16,7 @@ module Indexer
     # Die Aufgabe bearbeiten.
     def run
       @metadata.word_counts.each_pair do |word, count|
-        postings_tmp(word).write_entries([@hash, count])
+        postings_tmp(word).write_entries([[@hash, count]])
       end
     end
     
