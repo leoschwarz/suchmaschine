@@ -16,10 +16,13 @@ module Frontend
     end
 
     get '/search' do
+      start_time = Time.now
       query = params[:query]
       search = Frontend::SearchRunner.new(query)
       search.run
-      render_page("results.erb", {title: "#{search.results_count} Resultate gefunden:", query: query, results: search.results})
+      
+      duration  = Time.now - start_time
+      render_page("results.erb", {title: "#{search.results_count} Resultate gefunden:", query: query, duration: duration, results: search.results})
     end
 
     def render_page(page, vars={})
