@@ -8,14 +8,14 @@ module Frontend
     
     def run
       # Alle Sonderzeichen entfernen
-      query.gsub!(/[^a-zA-ZäöüÄÖÜ]+/, " ")
+      @query.gsub!(/[^a-zA-ZäöüÄÖÜ]+/, " ")
       
       # Kleinschreiben
-      query.downcase!
+      @query.downcase!
       
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
-      query.split(" ").uniq.each do |word|
+      @query.split(" ").uniq.each do |word|
         postings = Common::PostingsFile.new(word)
         postings_metadata = Common::PostingsMetadataFile.new(word)
         
