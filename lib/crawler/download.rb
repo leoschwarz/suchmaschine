@@ -30,17 +30,22 @@ module Crawler
         curl.perform
 
         # UTF-8 Kodierung sicherstellen,
-        # Der String @response_body ist normalerweise ASCII-8BIT:
-        # 1. UTF-8 Kodierung annehmen, und auf Korrektheit überprüfen:
-        if @response_body.force_encoding("UTF-8").valid_encoding?
-          @response_body = @response_body.force_encoding("UTF-8")
+        # Der String @response_body ist normalerweise ASCII-8BIT.
+        # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
+        if not (match = /charset=([\w\d-]+)/.match(curl.content_type.downcase)).nil?
+          encoding = match[1]
+          @response_body.force_encoding!(encoding)
+          @response_body.encode!('utf-8', invalid: :replace, undef: :replace, replace: '')
+        # 2. Falls der String mit UTF-8 Kodierung korrekt ist, nehmen wir einfach an es
+        #    handle sich um UTF-8 (das einfach von der Library als ASCII angegeben wurde).
+        elsif @response_body.force_encoding('utf-8').valid_encoding?
+          @response_body = @response_body.force_encoding("utf-8")
+        # 3. Falls gar nichts funktioniert, werden einfach alle falschen Bytes entfernt.
+        #    Das heisst alle Zeichen die es in ASCII nicht gibt aber falsch kodiert wurden
+        #    werden entfernt, auch wenn es diese Zeichen eigentlich in der UTF-8 Kodierung gäbe.
+        # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+        #        http://www.ruby-doc.org/core-2.0/String.html
         else
-          # 2. Falls dies nicht funktioniert hat, werden nun einfach alle falschen Bytes entfernt.
-          #    Das heisst, beispielsweise deutsche Umlaute könnten verschwinden, sollten sie in
-          #    einer anderen Kodierung als UTF-8 vorlieren. (zBsp: ISO-LATIN-1)
-          #
-          # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
-          #        http://www.ruby-doc.org/core-2.0/String.html
           @response_body.encode!('UTF-8', invalid: :replace, undef: :replace, replace: '')
         end
       rescue
