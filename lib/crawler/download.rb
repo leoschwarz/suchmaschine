@@ -48,7 +48,7 @@ module Crawler
       # Download durchführen.
       begin
         type_checked = false
-        curl = Curl::Easy.new(url.encoded) do |curl|
+        dl = Curl::Easy.new(url.encoded) do |curl|
           curl.headers["User-Agent"] = Config.crawler.agent
           curl.verbose = false
           curl.timeout = Config.crawler.timeout
@@ -73,7 +73,7 @@ module Crawler
             end
           }
         end
-        curl.perform
+        dl.perform
         
         @status       = curl.status
         @success      = @status[0] == "2"
