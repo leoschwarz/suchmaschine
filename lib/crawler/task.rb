@@ -16,7 +16,7 @@ module Crawler
         return :not_allowed
       end
 
-      download = Crawler::Download.new(@url)
+      download = Crawler::Download.new(@url, "text/html")
       if not download.success?
         # Der Download war nicht erfolgreich.
         :failure
