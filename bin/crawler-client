@@ -5,21 +5,15 @@ module Crawler
   class Client
     def launch
       @logger = Common::Logger.new({labels: {success: :Erfolge, failure: :Fehler, not_allowed: :Verboten}})
-      @logger.progress[:success] = 0
-      @logger.progress[:failure] = 0
-      @logger.progress[:not_allowed] = 0
       @logger.add_output($stdout, Common::Logger::INFO)
-
+      @progress = @logger.progress_logger(Common::OrderedHash.new([[:success, 0], [:failure, 0], [:not_allowed, 0]]))
+      
       @logger.log_info("Crawler-Client wurde gestartet.")
       @logger.log_info("Threads: #{Config.crawler.threads}")
       @logger.log_info("Server:  #{Config.database_connection.host}:#{Config.database_connection.port}")
       Config.crawler.threads.times{ self.launch_thread }
-
-      @logger.log_progress_labels
-      loop do
-        @logger.log_progress
-        sleep 5
-      end
+      
+      @progress.start_display(5.0, false)
     end
     
     def launch_thread
@@ -27,7 +21,7 @@ module Crawler
         loop do
           begin
             result_type = Crawler::Task.fetch.execute
-            @logger.progress[result_type] += 1
+            @progress[result_type] += 1
           rescue => e
             @logger.log_exception(e)
           end
