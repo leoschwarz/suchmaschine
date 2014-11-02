@@ -13,9 +13,9 @@ module Crawler
         # UTF-8 Kodierung sicherstellen,
         # Der String @response_body ist normalerweise ASCII-8BIT.
         # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
-        if not (match = /charset=([\w\d-]+)/.match(curl.content_type.downcase)).nil?
+        if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil?
           encoding = match[1]
-          @response_body.force_encoding!(encoding)
+          @response_body.force_encoding(encoding)
           @response_body.encode!('utf-8', invalid: :replace, undef: :replace, replace: '')
         # 2. Falls der String mit UTF-8 Kodierung korrekt ist, nehmen wir einfach an es
         #    handle sich um UTF-8 (das einfach von der Library als ASCII angegeben wurde).
@@ -44,6 +44,7 @@ module Crawler
       @redirect_url = nil
       @status = "500"
       @success = false
+      @content_type = ""
       
       # Download durchführen.
       begin
@@ -55,8 +56,9 @@ module Crawler
           curl.encoding = "UTF-8"
 
           curl.on_body {|chunk|
+            @content_type = curl.content_type.downcase
             if force_type && !type_checked
-              if curl.content_type.downcase.include?(force_type)
+              if @content_type.include?(force_type)
                 type_checked = true
               else
                 return false
@@ -75,9 +77,9 @@ module Crawler
         end
         dl.perform
         
-        @status       = curl.status
+        @status       = dl.status
         @success      = @status[0] == "2"
-        @redirect_url = url.join_with(curl.redirect_url) unless curl.redirect_url == -1
+        @redirect_url = url.join_with(dl.redirect_url) unless dl.redirect_url == -1
         
         return true
       rescue
