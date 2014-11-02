@@ -2,9 +2,9 @@
 # Dieses Skript löscht den Index der Suchmaschine und befüllt die INDEX_QUEUE erneut.
 load './bin/indexer'
 
-INDEX_DIRECTORY       = "/mnt/sdb/suchmaschine/index/"
-INDEX_QUEUE_DIRECTORY = File.join(File.dirname(__FILE__), "../db/index/")
-DOCINFO_DIRECTORY     = "db/doc/"
+INDEX_DIRECTORY       = "/mnt/sdb/suchmaschine/postings/"
+INDEX_QUEUE_DIRECTORY = File.join(File.dirname(__FILE__), "../db/index_q/")
+DOCINFO_DIRECTORY     = "/mnt/sdb/suchmaschine/metadata/"
 raise "Dieses Programm muss mit Zugriff auf das INDEX-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_DIRECTORY
 raise "Dieses Programm muss mit Zugriff auf das INDEX_QUEUE-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_QUEUE_DIRECTORY
 raise "Dieses Programm muss mit Zugriff auf das DOCINFO-Verzeichniss ausgeführt werden" unless Dir.exist? DOCINFO_DIRECTORY
