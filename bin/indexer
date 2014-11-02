@@ -22,10 +22,12 @@ module Indexer
       @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."    
       threads = Config.indexer.threads.times.map do
         Thread.new do
+          postings_tmps = Common::RAMCacheLRU.new(1000)
           while @progress[:tasks] < 10_000 and (doc_id = Indexer::Database.index_queue_fetch)
-            Task.load(doc_id).run
+            Task.load(doc_id, postings_tmps).run
             @progress[:tasks] += 1
           end
+          postings_tmps.remove_all
         end
       end
       
