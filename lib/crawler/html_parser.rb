@@ -3,13 +3,17 @@ require 'nokogiri'
 
 module Crawler
   class HTMLParser
-    attr_reader :indexing_allowed, :following_allowed, :links, :text, :title
+    attr_reader :links, :text, :title
 
     def initialize(base_url, html)
       @base_url = base_url
       @doc      = Nokogiri::HTML(html)
 
       parse()
+    end
+    
+    def permissions
+      {index: @indexing_allowed, follow: @following_allowed}
     end
 
     def parse
