@@ -2,6 +2,7 @@ module Common
   class ProgressLogger
     def initialize(variables=OrderedHash.new, logger=nil)
       @default = variables
+      @variables = @default.clone
       
       @logger = logger
       if @logger.nil?
