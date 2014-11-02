@@ -34,7 +34,7 @@ module Crawler
         metadata.word_counts = WordCounter.new(parser.text).counts
         
         links = parser.links.map{|link| [link[0], link[1].stored]}
-        if parser.following_allowed
+        if parser.permissions[:follow]
           Task.insert(links.map{|pairs| pairs[1]})
         end
         

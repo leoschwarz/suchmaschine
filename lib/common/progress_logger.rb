@@ -1,6 +1,8 @@
 module Common
   class ProgressLogger
-    def initialize(variables=OrderedHash.new, logger=nil)      
+    def initialize(variables=OrderedHash.new, logger=nil)
+      @default = variables
+      
       @logger = logger
       if @logger.nil?
         @logger = Logger.new
@@ -18,7 +20,7 @@ module Common
     
     # Startet einen neuen Thread
     def start_display(interval)
-      @display_settings = {interval: interval, start_thread: start_thread}
+      @display_settings = {interval: interval}
       self.reset
       
       @display_thread = Thread.new do

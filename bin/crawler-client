@@ -13,7 +13,8 @@ module Crawler
       @logger.log_info("Server:  #{Config.database_connection.host}:#{Config.database_connection.port}")
       Config.crawler.threads.times{ self.launch_thread }
       
-      @progress.start_display(5.0, false)
+      @progress.start_display(5.0)
+      loop{ sleep 100 }
     end
     
     def launch_thread

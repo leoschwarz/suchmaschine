@@ -16,7 +16,7 @@ module Indexer
     end
     
     def run
-      @progress.start_display(5.0, true)
+      @progress.start_display(5.0)
       
       # In Threads einzelne Dokumente indexieren.
       @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."    

@@ -34,7 +34,7 @@ module Common
     end
     
     def clone
-      self.new(pairs)
+      OrderedHash.new(pairs)
     end
   end
 end
