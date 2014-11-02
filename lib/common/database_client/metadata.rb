@@ -6,7 +6,7 @@ module Common
     class Metadata
       include Common::Serializable
       
-      field :url                                     # [URL]  URL des Dokumentes (URL.stored wird gespeichert)
+      field :url                                     # [URL]     URL des Dokumentes (URL.stored wird gespeichert)
       field :title, ""                               # [String]  Titel des Dokumentes.
       field :added_at                                # [Integer] Timestamp der Erstellung
       field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information

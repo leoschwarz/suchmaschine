@@ -5,7 +5,7 @@ module Common
     class Document
       include Common::Serializable
       
-      field :url        # [String] URL des Dokumentes im Format Common::URL.stored
+      field :url        # [URL] URL des Dokumentes (URL.stored wird gespeichert)
       field :links, []  # [Array]  Elemente im Format [Anker, URL]
       field :title, ""  # [String] Titel des Dokumentes, falls vorhanden
       field :text       # [String] Extrahierter Text aus dem Ursprünglichen Dokument
@@ -13,15 +13,20 @@ module Common
       def hash
         Digest::MD5.hexdigest(self.url)
       end
-
+      
       def self.load(_hash)
         raw = Database.document_get(_hash)
         return nil if raw.nil? or raw.empty?
-        self.deserialize(raw)
+        document = self.deserialize(raw)
+        document.url = Common::URL.stored(document.url)
+        document
       end
 
       def save
+        _url = self.url
+        self.url = _url.stored
         Database.document_set(self.hash, self.serialize)
+        self.url = _url
       end
     end
   end
