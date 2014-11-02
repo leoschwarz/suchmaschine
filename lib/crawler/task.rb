@@ -17,46 +17,56 @@ module Crawler
       end
 
       download = Crawler::Download.new(@url)
-      if download.success?
-        if download.redirect_url.nil?
-          parser = HTMLParser.new(@url, download.response_body)
-          links  = parser.links.map{|link| [link[0], link[1].stored]}
-
-          # Ergebniss speichern
+      if not download.success?
+        # Der Download war nicht erfolgreich.
+        :failure
+      elsif download.redirect_url.nil?
+        # Der Download war erfolgreich und es wird nicht weitergeleitet.
+        parser = HTMLParser.new(@url, download.response_body)
+        
+        # Ergebniss speichern
+        metadata = Crawler::Metadata.new
+        metadata.url = @url
+        metadata.title = parser.title
+        metadata.downloaded  = parser.title_ok?
+        metadata.added_at    = Time.now.to_i
+        metadata.permissions = parser.permissions
+        metadata.word_counts = WordCounter.new(parser.text).counts
+        
+        links = parser.links.map{|link| [link[0], link[1].stored]}
+        if parser.following_allowed
+          Task.insert(links.map{|pairs| pairs[1]})
+        end
+        
+        if parser.title_ok?
           document = Crawler::Document.new
-          document.url   = @url.stored
+          document.url   = @url
           document.links = links
           document.title = parser.title
           document.text  = parser.text
           document.save
-
-          metadata = Crawler::Metadata.new
-          metadata.url = @url
-          metadata.title = parser.title
           metadata.downloaded = true
-          metadata.added_at = Time.now.to_i
-          metadata.permissions = parser.permissions
-          metadata.word_counts = WordCounter.new(parser.text).counts
-          metadata.save
-
-          if parser.following_allowed
-            Task.insert(links.map{|pairs| pairs[1]})
-          end
         else
-          destination_url = @url.join_with(download.redirect_url)
-          Task.insert([destination_url.stored]) unless destination_url.nil?
-
-          metadata            = Metadata.new
-          metadata.url        = @url
+          # Wir speichern Dokumente bei denen der Titel nicht in Ordnung ist gar nicht erst,
+          # in Metadata wird dann vermerkt, dass das Dokument nicht heruntergeladen wurde.
           metadata.downloaded = false
-          metadata.redirect   = destination_url.stored unless destination_url.nil?
-          metadata.added_at   = Time.now.to_i
-          metadata.save
         end
 
-        return :success
+        metadata.save
+        :success
       else
-        return :failure
+        # Der Download war erfolgreich, es handelt sich aber nur um eine Weiterleitung.
+        destination_url = @url.join_with(download.redirect_url)
+        Task.insert([destination_url.stored]) unless destination_url.nil?
+
+        metadata            = Metadata.new
+        metadata.url        = @url
+        metadata.downloaded = false
+        metadata.redirect   = destination_url.stored unless destination_url.nil?
+        metadata.added_at   = Time.now.to_i
+        metadata.save
+        
+        :success
       end
     end
 
