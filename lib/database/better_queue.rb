@@ -60,7 +60,16 @@ module Database
     def fetch_items
       batch = @metadata.get_random_readable_batch
       if batch.nil?
-        false
+        # Da kein Stapel auf der Disk vorhanden ist, wird nun einfach versucht den insert_buffer
+        # zu lesen, falls auch dies nicht geling wird jedoch false zurückgegeben.
+        if @insert_buffer.size > 0
+          @fetch_buffer = @insert_buffer.shuffle
+          @insert_buffer = []
+          
+          true
+        else
+          false
+        end
       else
         @fetch_buffer = batch.read_all
         batch.delete
