@@ -9,8 +9,7 @@ module Indexer
 
     # Eine neue Aufgabe laden.
     def self.load(hash)
-      path = File.join(Config.paths.metadata, hash)
-      metadata = Indexer::Metadata.deserialize(LZ4.uncompress(File.read(path)))
+      metadata = Indexer::Metadata.load(hash)
       self.new(hash, metadata)
     end
 
