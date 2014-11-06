@@ -35,3 +35,15 @@ wireless:
   database_connection:
     host: "192.168.1.106"
     port: 2051
+
+offline:
+  <<: *default
+  paths:
+    cache: "db/cache/"
+    document: "db/document/"
+    download_queue: "db/download_q/"
+    index_queue: "db/index_q/"
+    postings: "db/postings/"
+    postings_metadata: "db/postings_metadata/"
+    index_tmp: "db/indextmp/"
+    metadata: "db/metadata/"
