@@ -57,13 +57,21 @@
   ul > li {
     margin-bottom: 10px;
   }
+  
+  #container {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
   </style>
 </head>
 <body>
-  <% if defined? title %>
-  <h1><%= title %></h1>
-  <% end %>
+  <div id="container">
+    <% if defined? title %>
+    <h1><%= title %></h1>
+    <% end %>
   
-  <%= content %>
+    <%= content %>
+  </div>
 </body>
 </html>
