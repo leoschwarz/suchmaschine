@@ -1,3 +1,0 @@
-USER-AGENT:*                                #
-disallow:/     #
-ALLoW:     /news     #   

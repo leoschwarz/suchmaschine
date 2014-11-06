@@ -1,6 +1,0 @@
-# Dies ist eine einfache Beispiels robots.txt Datei, mit Kommentaren
-User-agent: lightblaze #Bla blah
-Disallow: /#lalala
-
-#User-agent: *
-#Allow: /
