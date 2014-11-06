@@ -61,7 +61,7 @@ module Common
     
     def restart_display
       stop_display
-      start_display(@display_settings[:interval], @display_settings[:start_thread])
+      start_display(@display_settings[:interval])
     end
     
     private

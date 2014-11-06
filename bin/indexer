@@ -31,13 +31,13 @@ module Indexer
       
       # Warten bis alle Workerthreads fertig sind.
       threads.map{|t| t.join}
-      @progress.stop
+      @progress.stop_display
     
       # Sortieren beginnen
       @logger.log_info "Sortieren der Zwischenergebnisse gestartet."
       tempfiles = Dir[File.join(Config.paths.index_tmp, "word:*")]
       @logger.log_info "Anzahl zu sortierender Dateien: #{tempfiles.size}"
-      @progress.restart
+      @progress.restart_display
     
       tempfiles.each do |tempfile|
         word = tempfile.split(":")[1]
@@ -62,7 +62,7 @@ module Indexer
         Common::PostingsMetadataFile.new(word).generate_for(destination_file)
       end
       
-      @progress.stop
+      @progress.stop_display
     
       @logger.log_info "10'000 Dokumente erfolgreich indexiert und in Hauptindex eingegliedert."
     end
