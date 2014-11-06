@@ -15,7 +15,6 @@ local: &default
   indexer:
     threads: 10
   paths:
-    leveldb: "/mnt/sdb/suchmaschine/leveldb/"
     cache: "/mnt/sdb/suchmaschine/cache/"
     document: "/home/lightblaze/suchmaschine/db/document/"
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
@@ -40,7 +39,6 @@ wireless:
 offline:
   <<: *default
   paths:
-    leveldb: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/leveldb/"
     cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/cache/"
     document: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/document/"
     download_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/download_q/"

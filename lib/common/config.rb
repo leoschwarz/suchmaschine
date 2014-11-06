@@ -14,6 +14,7 @@ module Config
       ret = hash_proxy(value)
       obj.define_singleton_method(key){ ret }
     end
+    obj.define_singleton_method(:[]){|key| hash[key.to_s]}
     obj
   end
 

@@ -31,7 +31,8 @@ module Database
         handle_action(action, parameters)
       end
       
-      @leveldb = LevelDB::DB.new(Config.paths.leveldb)
+      # Key-Value Stores vorbereiten:
+      @kv_stores = [:document, :metadata, :cache].map{|name| [name, LevelDB::DB.new(Config.paths[name])]}.to_h
     end
 
     def start
@@ -58,23 +59,23 @@ module Database
           end
         when "CACHE_SET" # KEY VALUE
           key, value = parameters.split("\t", 2)
-          @leveldb.put("cache:#{key}", value)
+          @kv_stores[:cache].put(key, value)
         when "CACHE_GET" # KEY
           key = parameters
-          @leveldb.get(key)
+          @kv_stores[:cache].get(key)
         when "DOCUMENT_SET" # ID VALUE
           id, value = parameters.split("\t", 2)
-          @leveldb.put("doc:#{id}", value)
+          @kv_stores[:document].put(id, value)
         when "DOCUMENT_GET" # ID
           id = parameters
-          @leveldb.get("doc:#{id}")
+          @kv_stores[:document].get(id)
         when "METADATA_SET" # ID DATA
           id, data = parameters.split("\t", 2)
           handle_queue_insert(:index, [id])
-          @leveldb.put("meta:#{id}", data)
+          @kv_stores[:metadata].put(id, data)
         when "METADATA_GET" # ID
           id = parameters
-          @leveldb.get("meta:#{id}")
+          @kv_stores[:metadata].get(id)
         else
           @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
       end
