@@ -13,6 +13,7 @@ module Crawler
         # UTF-8 Kodierung sicherstellen,
         # Der String @response_body ist normalerweise ASCII-8BIT.
         # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
+        original_encoding = @response_body.encoding
         if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil?
           encoding = match[1]
           @response_body.force_encoding(encoding)
@@ -27,7 +28,7 @@ module Crawler
         # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
         #        http://www.ruby-doc.org/core-2.0/String.html
         else
-          @response_body.encode!('UTF-8', invalid: :replace, undef: :replace, replace: '')
+          @response_body.force_encoding(original_encoding).encode!('UTF-8', invalid: :replace, undef: :replace, replace: '')
         end
       end
     end
