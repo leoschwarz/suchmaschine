@@ -24,7 +24,7 @@ module Indexer
         Thread.new do
           while @progress[:tasks] < 10_000 and (doc_id = Indexer::Database.index_queue_fetch)
             task = Task.load(doc_id)
-            task.run unless task.nil?
+            task.run
             @progress[:tasks] += 1
           end
         end

@@ -10,12 +10,8 @@ module Indexer
     # Eine neue Aufgabe laden.
     def self.load(hash)
       path = File.join(Config.paths.metadata, hash)
-      if File.exist?(path)
-        metadata = Indexer::Metadata.deserialize(LZ4.uncompress(File.read(path))
-        self.new(hash, metadata)
-      else
-        nil
-      end
+      metadata = Indexer::Metadata.deserialize(LZ4.uncompress(File.read(path)))
+      self.new(hash, metadata)
     end
 
     # Die Aufgabe bearbeiten.

@@ -60,12 +60,12 @@ module Database
           read_file(Config.paths.cache + parameters)
         when "DOCUMENT_SET" # ID VALUE
           id, value = parameters.split("\t", 2)
-          handle_queue_insert(:index, [id])
           write_file(Config.paths.document + id, value)
         when "DOCUMENT_GET" # ID
           read_file(Config.paths.document + parameters)
         when "METADATA_SET" # ID DATA
           id, data = parameters.split("\t", 2)
+          handle_queue_insert(:index, [id])
           write_file(Config.paths.metadata+id, data)
         when "METADATA_GET" # ID
           read_file(Config.paths.metadata + parameters)
