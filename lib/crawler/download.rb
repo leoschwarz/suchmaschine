@@ -15,7 +15,8 @@ module Crawler
         # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
         original_encoding = @response_body.encoding
         if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil?
-          encoding = match[1]
+          encoding = match[1].downcase
+          encoding = "UTF-8" if encoding.include? "utf8"
           @response_body.force_encoding(encoding)
           @response_body.encode!('utf-8', invalid: :replace, undef: :replace, replace: '')
         # 2. Falls der String mit UTF-8 Kodierung korrekt ist, nehmen wir einfach an es
