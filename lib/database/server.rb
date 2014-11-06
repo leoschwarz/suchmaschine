@@ -1,3 +1,4 @@
+require 'leveldb'
 require 'lz4-ruby'
 require 'digest/md5'
 
@@ -29,6 +30,8 @@ module Database
         action, parameters = request.split("\t", 2)
         handle_action(action, parameters)
       end
+      
+      @leveldb = LevelDB::DB.new(Config.paths.leveldb)
     end
 
     def start
@@ -55,20 +58,23 @@ module Database
           end
         when "CACHE_SET" # KEY VALUE
           key, value = parameters.split("\t", 2)
-          write_file(Config.paths.cache+key, value)
+          @leveldb.put("cache:#{key}", value)
         when "CACHE_GET" # KEY
-          read_file(Config.paths.cache + parameters)
+          key = parameters
+          @leveldb.get(key)
         when "DOCUMENT_SET" # ID VALUE
           id, value = parameters.split("\t", 2)
-          write_file(Config.paths.document + id, value)
+          @leveldb.put("doc:#{id}", value)
         when "DOCUMENT_GET" # ID
-          read_file(Config.paths.document + parameters)
+          id = parameters
+          @leveldb.get("doc:#{id}")
         when "METADATA_SET" # ID DATA
           id, data = parameters.split("\t", 2)
           handle_queue_insert(:index, [id])
-          write_file(Config.paths.metadata+id, data)
+          @leveldb.put("meta:#{id}", data)
         when "METADATA_GET" # ID
-          read_file(Config.paths.metadata + parameters)
+          id = parameters
+          @leveldb.get("meta:#{id}")
         else
           @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
       end
@@ -102,22 +108,6 @@ module Database
       elsif queue == :index
         return @queues[:index].fetch
       end
-    end
-    
-    # Datei-Inhalt oder leerer String
-    def read_file(path)
-      if File.exist? path
-        LZ4.uncompress File.read(path)
-      else
-        ""
-      end
-    end
-    
-    def write_file(path, data)
-      File.open(path, "w") do |file|
-        file.write(LZ4.compress data)
-      end
-      nil
     end
   end
 end
