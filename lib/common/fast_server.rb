@@ -33,6 +33,8 @@ module Common
           else
             sleep 0.01
           end
+        rescue Errno::ECONNRESET, Errno::EPIPE
+          @logger.log_error "Verbindung zu einem Client getrennt."
         rescue => e
           @on_error.call(e)
         rescue SystemExit, Interrupt
