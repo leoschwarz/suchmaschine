@@ -57,11 +57,14 @@ module Indexer
         @writer_thread = Thread.new do
           started = Time.now
           puts "Mit dem Niederschreiben des IndexingCache begonnen..."
-      
-          @data.each_pair do |key, item|
-            postings_tmp(key).write_entries(item.entries)
+          
+          @data_mutex.synchronize do
+            @data.each_pair do |key, item|
+              postings_tmp(key).write_entries(item.entries)
+            end
+            @data.clear
           end
-          @data.clear
+          
           @size = 0
       
           puts "IndexingCache in #{(Time.now - started).round(1)}s abgeschlossen."
