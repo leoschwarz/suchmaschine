@@ -14,6 +14,10 @@ module Database
           :download => BetterQueue.new(Config.paths.download_queue),
           :index    => BetterQueue.new(Config.paths.index_queue)
         }
+        
+        @kv_stores = [:document, :metadata, :cache].map do |name|
+          [name, LevelDB::DB.new(Config.paths[name])]
+        end.to_h
       end
 
       @server.on_error do |error|
@@ -30,9 +34,6 @@ module Database
         action, parameters = request.split("\t", 2)
         handle_action(action, parameters)
       end
-      
-      # Key-Value Stores vorbereiten:
-      @kv_stores = [:document, :metadata, :cache].map{|name| [name, LevelDB::DB.new(Config.paths[name])]}.to_h
     end
 
     def start
@@ -96,7 +97,7 @@ module Database
     end
 
     def has_metadata?(url)
-      File.exist?(Config.paths.metadata + Digest::MD5.hexdigest(url))
+      @kv_stores[:metadata].exists?(Digest::MD5.hexdigest(url))
     end
 
     def handle_queue_fetch(queue)
