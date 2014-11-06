@@ -27,6 +27,10 @@ module Common
       File.exist? @path
     end
     
+    def unlink
+      File.unlink @path
+    end
+    
     def rows_count
       File.size(@path)/ROW_SIZE
     end

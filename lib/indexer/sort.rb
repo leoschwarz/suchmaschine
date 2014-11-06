@@ -90,13 +90,13 @@ module Indexer
       
       # Da es wahrscheinlich öfters vorkommt, dass weniger Einträge als die Maximalzahl
       # vorhanden sind, gibt es hier eine spezielle, einfachere, Prozedur für diese:
-      if chunks == 1
+      if chunks <= 1
         # In-Memory Sortierung des gesamten Dokumentes.
         sorted_entries = dumb_sort( unsorted_file.read_bin_entries )
         destination_file.write_bin_entries(sorted_entries)
       else
         # In einem allerersten Schritt werden die einzelnen Chunks mit Dumbsort sortiert.
-        temp_file = Common::PostingsFile.new(self.new_temp_file_path)
+        temp_file = Common::PostingsFile.new(self.new_temp_file_path, true)
         (0...chunks).each do |chunk_i| # TODO Später evtl einen speziellen Enumerator verwenden.
           chunk = PostingsFileChunk.new(temp_file, chunk_i)
           chunk.load
@@ -107,7 +107,7 @@ module Indexer
         self.merge_sort(temp_file, destination_file, chunks)
         
         # Tempfile löschen
-        File.unlink temp_file.path
+        temp_file.unlink
       end
     end
     
