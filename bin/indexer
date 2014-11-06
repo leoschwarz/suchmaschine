@@ -23,7 +23,8 @@ module Indexer
       threads = Config.indexer.threads.times.map do
         Thread.new do
           while @progress[:tasks] < 10_000 and (doc_id = Indexer::Database.index_queue_fetch)
-            Task.load(doc_id).run
+            task = Task.load(doc_id)
+            task.run unless task.nil?
             @progress[:tasks] += 1
           end
         end
@@ -32,6 +33,8 @@ module Indexer
       # Warten bis alle Workerthreads fertig sind.
       threads.map{|t| t.join}
       @progress.stop_display
+      
+      IndexingCache.write_to_disk
     
       # Sortieren beginnen
       @logger.log_info "Sortieren der Zwischenergebnisse gestartet."

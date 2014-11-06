@@ -9,20 +9,20 @@ module Indexer
 
     # Eine neue Aufgabe laden.
     def self.load(hash)
-      metadata = Indexer::Metadata.deserialize(LZ4.uncompress(File.read(Config.paths.metadata + hash)))
-      self.new(hash, metadata)
+      path = File.join(Config.paths.metadata, hash)
+      if File.exist?(path)
+        metadata = Indexer::Metadata.deserialize(LZ4.uncompress(File.read(path))
+        self.new(hash, metadata)
+      else
+        nil
+      end
     end
 
     # Die Aufgabe bearbeiten.
     def run
       @metadata.word_counts.each_pair do |word, count|
-        postings_tmp(word).write_entries([[@hash, count]])
+        IndexingCache[word] << [@hash, count]
       end
-    end
-    
-    private
-    def postings_tmp(word)
-      Common::PostingsFile.new(File.join(Config.paths.index_tmp, "word:#{word}"), true)
     end
   end
 end
