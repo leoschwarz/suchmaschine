@@ -39,11 +39,11 @@ wireless:
 offline:
   <<: *default
   paths:
-    cache: "db/cache/"
-    document: "db/document/"
-    download_queue: "db/download_q/"
-    index_queue: "db/index_q/"
-    postings: "db/postings/"
-    postings_metadata: "db/postings_metadata/"
-    index_tmp: "db/indextmp/"
-    metadata: "db/metadata/"
+    cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/cache/"
+    document: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/document/"
+    download_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/download_q/"
+    index_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/index_q/"
+    postings: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings/"
+    postings_metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings_metadata/"
+    index_tmp: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/indextmp/"
+    metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/metadata/"
