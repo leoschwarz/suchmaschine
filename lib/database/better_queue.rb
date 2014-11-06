@@ -5,9 +5,6 @@
 # - Trotzdem schnell sein.
 
 # TODO: Eventuell das Verhalten auch in Randsituationen testen.
-# TODO: Ein Problem tritt auf, da wenn ein Stapel eingelesen wird dies nur funktioniert, wenn auf dem Dateisystem
-#       ein Stapel vorhanden ist. Bei neuen Warteschlangen ist dies jedoch nicht unbedingt der Fall und die
-#       Warteschlange muss dann explizit gespeichert werden. (Also zbsp die Datenbank neustarten...)
 
 module Database
   class BetterQueue
