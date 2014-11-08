@@ -11,18 +11,18 @@ module Common
     def request(req)
       begin
         socket = TCPSocket.new(@host, @port)
-        socket.puts(req)
-        response = socket.gets
-        response.strip! unless response.nil?
-        socket.close
-
-        unless response.nil?
-          if response.empty?
-            response = nil
-          end
+        socket.write(req)
+        response = ""
+        while !(chunk = socket.read(1024*64)).nil? && chunk.bytesize != 0
+          response << chunk
         end
-
-        response
+        socket.close
+        
+        if !response.nil? && response.empty?
+          nil
+        else
+          response
+        end
       rescue SystemCallError
         nil
       end

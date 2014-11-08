@@ -24,12 +24,17 @@ module Common
         begin
           conn = @server.get_socket
           unless conn.nil?
+            # Die Anfrage lesen
+            request = ""
+            while !(chunk = socket.read(1024*64)).nil? && chunk.bytesize != 0
+              request << chunk
+            end
+            
             # Die Antwort generieren
-            request  = conn.gets.strip
             response = @on_request.call(request)
 
             # Das Resultat schreiben und die Verbindung schliessen
-            conn.puts response
+            conn.write response
           else
             # TODO: entfernen wenn möglich
             sleep 0.001
