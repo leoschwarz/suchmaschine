@@ -5,7 +5,7 @@ gem 'oj', '~> 2.9.9'
 gem 'RubyInline', '~> 3.12.3'
 gem 'curb', '~> 0.8.6'
 gem 'lz4-ruby', '~> 0.3.3'
-gem 'leveldb', '~> 0.1.9'
+gem 'leveldb-native', '~> 0.6'
 
 gem 'sinatra', '~> 1.4.5'
 gem 'erubis', '~> 2.7.0'

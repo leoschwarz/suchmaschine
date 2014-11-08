@@ -1,4 +1,4 @@
-require 'leveldb'
+require 'leveldb-native'
 require 'lz4-ruby'
 require 'digest/md5'
 
@@ -16,7 +16,7 @@ module Database
         }
         
         @kv_stores = {document: 256, metadata: 8, cache: 8}.each_pair.map do |name, kb|
-          [name, LevelDB::DB.new(Config.paths[name], {compression: true, block_size: kb*1024, write_buffer_size: 16*1024*1024})]
+          [name, LevelDBNative::DB.new(Config.paths[name], {compression: true, block_size: kb*1024, write_buffer_size: 16*1024*1024})]
         end.to_h
       end
 
