@@ -31,7 +31,8 @@ module Common
             # Das Resultat schreiben und die Verbindung schliessen
             conn.puts response
           else
-            sleep 0.01
+            # TODO: entfernen wenn möglich
+            sleep 0.001
           end
         rescue Errno::ECONNRESET, Errno::EPIPE
           @logger.log_error "Verbindung zu einem Client getrennt."
