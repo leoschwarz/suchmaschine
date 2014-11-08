@@ -15,8 +15,8 @@ module Database
           :index    => BetterQueue.new(Config.paths.index_queue)
         }
         
-        @kv_stores = [:document, :metadata, :cache].map do |name|
-          [name, LevelDB::DB.new(Config.paths[name])]
+        @kv_stores = {document: 256, metadata: 8, cache: 8}.each_pair.map do |name, kb|
+          [name, LevelDB::DB.new(Config.paths[name], {compression: true, block_size: kb*1024})]
         end.to_h
       end
 
