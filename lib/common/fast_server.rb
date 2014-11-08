@@ -34,7 +34,7 @@ module Common
             response = @on_request.call(request)
 
             # Das Resultat schreiben und die Verbindung schliessen
-            conn.send(response, 0)
+            conn.sendmsg_nonblock(response)
           else
             # TODO: entfernen wenn möglich
             sleep 0.001
