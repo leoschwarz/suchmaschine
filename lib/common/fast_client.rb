@@ -11,9 +11,9 @@ module Common
     def request(req)
       begin
         socket = TCPSocket.new(@host, @port)
-        socket.write(req)
+        socket.send(req)
         response = ""
-        while !(chunk = socket.read(1024*64)).nil? && chunk.bytesize != 0
+        while !(chunk = socket.recv(1024*64)).nil? && chunk.bytesize != 0
           response << chunk
         end
         socket.close
