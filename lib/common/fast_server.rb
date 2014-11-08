@@ -26,7 +26,7 @@ module Common
           unless conn.nil?
             # Die Anfrage lesen
             request = ""
-            while !(chunk = socket.read(1024*64)).nil? && chunk.bytesize != 0
+            while !(chunk = conn.read(1024*64)).nil? && chunk.bytesize != 0
               request << chunk
             end
             
