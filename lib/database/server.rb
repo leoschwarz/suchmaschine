@@ -16,7 +16,7 @@ module Database
         }
         
         @kv_stores = {document: 256, metadata: 8, cache: 8}.each_pair.map do |name, kb|
-          [name, LevelDBNative::DB.new(Config.paths[name], {compression: LevelDBNative::CompressionType::SnappyCompression, block_size: kb*1024, write_buffer_size: 16*1024*1024})]
+          [name, LevelDBNative::DB.new(Config.paths[name], {create_if_missing: true, compression: LevelDBNative::CompressionType::SnappyCompression, block_size: kb*1024, write_buffer_size: 16*1024*1024})]
         end.to_h
       end
 
@@ -61,12 +61,14 @@ module Database
         when "CACHE_SET" # KEY VALUE
           key, value = parameters.split("\t", 2)
           @kv_stores[:cache].put(key, value)
+          nil
         when "CACHE_GET" # KEY
           key = parameters
           @kv_stores[:cache].get(key)
         when "DOCUMENT_SET" # ID VALUE
           id, value = parameters.split("\t", 2)
           @kv_stores[:document].put(id, value)
+          nil
         when "DOCUMENT_GET" # ID
           id = parameters
           @kv_stores[:document].get(id)
@@ -74,6 +76,7 @@ module Database
           id, data = parameters.split("\t", 2)
           handle_queue_insert(:index, [id])
           @kv_stores[:metadata].put(id, data)
+          nil
         when "METADATA_GET" # ID
           id = parameters
           @kv_stores[:metadata].get(id)
