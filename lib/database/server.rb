@@ -5,8 +5,6 @@ require 'digest/md5'
 
 # URL: https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb
 
-# TODO: CTRL-C Interrupt fangen und stop aufrufen...
-
 module Database
   # TODO: Methoden wie instance_eval von dieser Klasse entfernen, da diese eine grosse Sicherheitslücke darstellen!
   class ServerFront
