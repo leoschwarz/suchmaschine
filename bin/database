@@ -19,5 +19,10 @@ require_relative '../lib/database/database'
 # METADATA_GET\tHASH
 
 if __FILE__ == $0
-  Database::Server.new.start
+  begin
+    server = Database::Server.new
+    server.start
+  rescue SystemExit, Interrupt
+    server.stop
+  end
 end

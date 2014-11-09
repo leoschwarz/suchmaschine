@@ -1,86 +1,65 @@
+require 'drb/drb'
+
 module Common
   module DatabaseClient
     class Database
       def self.download_queue_insert(urls)
-        self.run("DOWNLOAD_QUEUE_INSERT\t#{urls.join("\t")}") unless urls.size == 0
+        self.run(:download_queue_insert, urls) unless urls.size == 0
       end
 
       def self.download_queue_fetch()
-        URL.stored(self.run("DOWNLOAD_QUEUE_FETCH", {response_required: true}))
+        URL.stored(self.run(:download_queue_fetch))
       end
 
       def self.index_queue_insert(doc_ids)
-        self.run("INDEX_QUEUE_INSERT\t#{doc_ids.join("\t")}") unless doc_ids.size == 0
+        self.run(:index_queue_insert, doc_ids) unless doc_ids.size == 0
       end
 
       def self.index_queue_fetch()
-        self.run("INDEX_QUEUE_FETCH")
+        self.run(:index_queue_fetch)
       end
       
       def self.index_get(word)
-        r = self.run("INDEX_GET\t#{word}")
+        r = self.run(:index_get, word)
         return [] if r.nil?
         r.split("\t")
       end
 
       def self.cache_set(key, value)
-        self.run("CACHE_SET\t#{key}\t#{value}")
+        self.run(:cache_set, key, value)
       end
 
       def self.cache_get(key)
-        self.run("CACHE_GET\t#{key}")
+        self.run(:cache_get, key)
       end
 
       def self.document_set(hash, document)
-        self.run("DOCUMENT_SET\t#{hash}\t#{document}")
+        self.run(:document_set, hash, document)
       end
 
       def self.document_get(hash)
-        self.run("DOCUMENT_GET\t#{hash}")
+        self.run(:document_get, hash)
       end
 
-      def self.metadata_set(hash, docinfo)
-        self.run("METADATA_SET\t#{hash}\t#{docinfo}")
+      def self.metadata_set(hash, metadata)
+        self.run(:metadata_set, hash, metadata)
       end
 
       def self.metadata_get(hash)
-        self.run("METADATA_GET\t#{hash}")
+        self.run(:metadata_get, hash)
       end
       
       def self.postings_get(word, block_number)
-        self.run("POSTINGS_GET\t#{word}\t#{block_number}")
+        self.run(:postings_get, word, block_number)
       end
       
       def self.postings_set(word, block_number, postings_binary)
-        self.run("POSTINGS_SET\t#{word}\t#{block_number}\t#{postings_binary}")
+        self.run(:postings_set, word, block_number, postings_binary)
       end
       
-      # Führt ein 'query' auf dem Datenbankserver aus.
-      # Optionen:
-      # response_required: [Boolean] Muss eine Antwort erhalten werden?
-      #                              Falls keine zurück gegeben wird, wird erneut versucht eine Antwort zu erhalten.
-      # retries_left: [Integer]      Wieviele Wiederholversuche verbleiben
-      def self.run(query, options={})
-        options[:response_required] = false if options[:response_required].nil?
-        options[:retries_left]      = 3     if options[:retries_left].nil?
-
-        client   = Common::FastClient.new(Config.database_connection.host, Config.database_connection.port)
-        response = client.request(query)
-        if options[:response_required]
-          if response.nil? or response.empty?
-            # Darf noch ein Request gesendet werden?
-            if options[:retries_left] > 0
-              options[:retries_left] -= 1
-              # 1s warten bis erneut versucht wird:
-              sleep 1
-              return self.run(query, options)
-            else
-              raise RuntimeError.new("Fehler bei der Ausführung einer Datenbankabfrage.")
-            end
-          end
-        end
-
-        response
+      def self.run(command, *params)
+        server = DRbObject.new(nil, Config.database_connection)
+        server.execute(command, params)
       end
     end
   end

@@ -10,7 +10,7 @@ module Crawler
       
       @logger.log_info("Crawler-Client wurde gestartet.")
       @logger.log_info("Threads: #{Config.crawler.threads}")
-      @logger.log_info("Server:  #{Config.database_connection.host}:#{Config.database_connection.port}")
+      @logger.log_info("Server:  #{Config.database_connection}")
       Config.crawler.threads.times{ self.launch_thread }
       
       @progress.start_display(5.0)

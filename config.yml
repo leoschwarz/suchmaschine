@@ -1,7 +1,5 @@
 local: &default
-  database_connection:
-    host: "0.0.0.0"
-    port: 2051
+  database_connection: "druby://0.0.0.0:2051"
   database:
     batch_size: 100_000
   crawler:
@@ -26,15 +24,11 @@ local: &default
 
 wired:
   <<: *default
-  database_connection:
-    host: "192.168.10.50"
-    port: 2051
+  database_connection: "druby://192.168.10.50:2051"
 
 wireless:
   <<: *default
-  database_connection:
-    host: "192.168.1.106"
-    port: 2051
+  database_connection: "druby://192.168.1.106:2051"
 
 offline-laptop:
   <<: *default
