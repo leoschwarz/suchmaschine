@@ -29,6 +29,7 @@ module Database
       @queue << [id, command, args]
       
       loop do
+        # TODO: Das hier ist noch ziemlich unschön und verschwendet einiges an Rechenleistung...
         @results_mutex.synchronize do
           if @results.has_key?(id)
             return @results.delete(id)
