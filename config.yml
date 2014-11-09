@@ -36,7 +36,7 @@ wireless:
     host: "192.168.1.106"
     port: 2051
 
-offline:
+offline-laptop:
   <<: *default
   paths:
     cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/cache/"
@@ -47,3 +47,15 @@ offline:
     postings_metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings_metadata/"
     index_tmp: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/indextmp/"
     metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/metadata/"
+
+offline-desktop:
+  <<: *default
+  paths:
+    cache: "/Users/leoschwarz/Desktop/suchmaschine/db/cache/"
+    document: "/Users/leoschwarz/Desktop/suchmaschine/db/document/"
+    download_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/download_q/"
+    index_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/index_q/"
+    postings: "/Users/leoschwarz/Desktop/suchmaschine/db/postings/"
+    postings_metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/postings_metadata/"
+    index_tmp: "/Users/leoschwarz/Desktop/suchmaschine/db/indextmp/"
+    metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/metadata/"
