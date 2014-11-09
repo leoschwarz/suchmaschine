@@ -46,7 +46,15 @@ module Common
       def self.metadata_get(hash)
         self.run("METADATA_GET\t#{hash}")
       end
-
+      
+      def self.postings_get(word, block_number)
+        self.run("POSTINGS_GET\t#{word}\t#{block_number}")
+      end
+      
+      def self.postings_set(word, block_number, postings_binary)
+        self.run("POSTINGS_SET\t#{word}\t#{block_number}\t#{postings_binary}")
+      end
+      
       # Führt ein 'query' auf dem Datenbankserver aus.
       # Optionen:
       # response_required: [Boolean] Muss eine Antwort erhalten werden?

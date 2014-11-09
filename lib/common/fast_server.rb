@@ -22,19 +22,19 @@ module Common
       @logger.log_info "Server gestartet unter #{@host}:#{@port}."
       loop do
         begin
-          conn = @server.get_socket
-          unless conn.nil?
+          unless (socket = @server.get_socket).nil?
             # Die Anfrage lesen
             request = ""
-            while !(chunk = conn.recv(1024*64)).nil? && chunk.bytesize != 0
+            while !(chunk = socket.read(1024*64)).nil? && chunk.bytesize != 0
               request << chunk
             end
             
             # Die Antwort generieren
             response = @on_request.call(request)
+            response ||= ""
 
             # Das Resultat schreiben und die Verbindung schliessen
-            conn.sendmsg_nonblock(response)
+            socket.write(response)
           else
             # TODO: entfernen wenn möglich
             sleep 0.001
