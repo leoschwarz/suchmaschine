@@ -9,17 +9,18 @@ module Common
     # Einträge, sich jeweils im allerersten Block finden lassen werden.
     #
     # Die einzelnen Zeilen folgen diesem Aufbau (big-endian Werte):
-    # FREQUENCY   [4B  big-endian float]
-    # DOCUMENT_ID [16B big-endian hexadezimal/integer]
+    # FREQUENCY   [4B  float]
+    # WORDS       [4B  uint32]
+    # DOCUMENT_ID [16B hexadezimal/integer]
     class Postings
-      ROW_SIZE   = 20
+      ROW_SIZE   = 24
       BLOCK_SIZE = 50_000 * ROW_SIZE
-      PACK_INSTRUCTION = "h32 g"
+      PACK_INSTRUCTION = "h32 L> g"
       
-      def initialize(word, block_number, rawstring="")
+      def initialize(word, block_number, raw_string="")
         @word = word
         @block_number = block_number
-        @raw_string = rawstring
+        @raw_string = raw_string
       end
       
       def bin_entries
@@ -40,11 +41,11 @@ module Common
       end
       
       def self.load(word, block_number)
-        # TODO
+        Postings.new(word, block_number, Database.postings_get(word, block_number))
       end
       
       def save
-        # TODO
+        Database.postings_set(@word, @block_number, @raw_string)
       end
     end
   end

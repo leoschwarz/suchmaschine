@@ -57,6 +57,14 @@ module Common
         self.run(:postings_set, word, block_number, postings_binary)
       end
       
+      def self.postings_metadata_get(word)
+        self.run(:postings_metadata_get, word)
+      end
+      
+      def self.postings_metadata_set(word, data)
+        self.run(:postings_metadata_set, word, data)
+      end
+      
       def self.run(command, *params)
         server = DRbObject.new(nil, Config.database_connection)
         server.execute(command, params)

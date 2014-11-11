@@ -128,6 +128,18 @@ module Database
       when :metadata_get # ID
         id = parameters[0]
         @data_stores[:metadata].get(id)
+      when :postings_set # word, block, data
+        word, block, data = parameters
+        # TODO 
+      when :postings_get # word, block
+        word, block = parameters
+        # TODO
+      when :postings_metadata_set # word, data
+        word, data = parameters
+        # TODO
+      when :postings_metadata_get # word
+        word = parameters[0]
+        # TODO
       else
         @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
       end
