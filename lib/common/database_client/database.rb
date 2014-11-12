@@ -49,12 +49,12 @@ module Common
         self.run(:metadata_get, hash)
       end
       
-      def self.postings_get(word, block_number)
-        self.run(:postings_get, word, block_number)
+      def self.postings_get(id)
+        self.run(:postings_get, id)
       end
       
-      def self.postings_set(word, block_number, postings_binary)
-        self.run(:postings_set, word, block_number, postings_binary)
+      def self.postings_set(id, data)
+        self.run(:postings_set, id, data)
       end
       
       def self.postings_metadata_get(word)
