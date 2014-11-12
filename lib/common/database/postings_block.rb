@@ -25,8 +25,8 @@ module Common
       
       attr_reader :id
       
-      def initialize(_id)
-        @id  = _id
+      def initialize(_id = nil)
+        @id  = _id || generate_id
         @raw = ""
       end
       
@@ -47,7 +47,7 @@ module Common
       end
       
       def load
-        @raw = Database.postings_get(@id)
+        @raw = Database.postings_block_get(@id)
       end
       
       def self.load(id)
@@ -57,7 +57,11 @@ module Common
       end
       
       def save
-        Database.postings_set(@id, @raw)
+        Database.postings_block_set(@id, @raw)
+      end
+      
+      def delete
+        Database.postings_block_delete(@id)
       end
       
       def rows_count

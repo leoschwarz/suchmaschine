@@ -1,44 +1,54 @@
 module Common
   module Database
     class Postings
-      def initialize(word)
+      def initialize(word, options={})
+        options = {temporary: false, load: false}.merge(options)
+        
+        if options[:temporary]
+          word = "temp:"+word
+        end
+        
         @word      = word
-        @temporary = temporary
-        @metadata  = PostingsMetadata.load(word)
-        @item_buffer = []
+        @metadata  = PostingsMetadata.load(@word) if options[:load]
+        @write_buffer = []
       end
       
-      def rows_count
-        @metadata.blocks.inject(:+).to_i
+      def temporary?
+        @temporary
       end
       
       def blocks_count
         @metadata.blocks.count
       end
       
-      def << (item)
-        @item_buffer << item
+      def rows_count
+        @metadata.blocks.map{|_,block_rows| block_rows}.inject(:+).to_i
       end
       
-      def set_items (items)
-        @item_buffer = items
+      def add_row(row)
+        @write_buffer << row
       end
       
+      def add_rows(rows)
+        @write_buffer.concat(rows)
+      end
+      
+      # Löscht die alten Blöcke die zu diesem Postings gehören...
+      def delete_blocks
+        @metadata.blocks.map{|id,count| PostingsBlock.new(id).delete}
+        @metadata.blocks = []
+      end
+      
+      # Schreibt den write_buffer in Blöcken nieder...
       def save
-        while @item_buffer.size > 0
-          block = @metadata.load_writeable_block
-          items = @item_buffer.shift(block.free_rows)
-          block.entries += items
+        @write_buffer.each_slice(PostingsBlock::MAX_ROWS) do |rows|
+          block = PostingsBlock.new
+          block.entries = rows
           block.save
-          @metadata.blocks[block.block_number] += items.size
+          @metadata.blocks << [block.id, block.rows_count]
         end
-        
         @metadata.save
-      end
-      
-      def self.temporary(word, load)
-        PostingsBlock.temporary(word, load)
-      end
+      end      
     end
   end
 end

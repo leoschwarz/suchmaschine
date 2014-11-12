@@ -99,13 +99,16 @@ module Database
       when :metadata_get # ID
         id = parameters[0]
         @data_stores[:metadata].get(id)
-      when :postings_set # word, block, data
+      when :postings_block_set # word, block, data
         id, data = parameters
         @data_stores[:postings].put(id, data)
         nil
-      when :postings_get # word, block
+      when :postings_block_get # word, block
         id = parameters[0]
         @data_stores[:postings].get(id)
+      when :postings_block_delete
+        id = parameters[0]
+        @data_stores[:postings].delete(id)
       when :postings_metadata_set # word, data
         word, data = parameters
         @data_stores[:postings_metadata].put(word, data)
