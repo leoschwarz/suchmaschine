@@ -19,10 +19,18 @@ module Common
       
       attr_reader :word, :block_number
       
-      def initialize(word, block_number, raw_string="")
+      def initialize(word, block_number, options={})
+        options = {raw_string: "", temporary: false, temporary_path: nil, temporary_load: false}.merge(options)
+        
         @word = word
         @block_number = block_number
-        @raw_string = raw_string
+        @raw_string     = options[:raw_string]
+        @temporary      = options[:temporary]
+        @temporary_path = options[:temporary_path]
+        
+        if options[:temporary] && options[:temporary_load]
+          @raw_string = File.read(@temporary_path)
+        end
       end
       
       def bin_entries
@@ -43,11 +51,22 @@ module Common
       end
       
       def self.load(word, block_number)
-        Postings.new(word, block_number, Database.postings_get(word, block_number))
+        Postings.new(word, block_number, raw_string: Database.postings_get(word, block_number))
+      end
+      
+      def self.temporary(word, load=false, path=nil)
+        path ||= Config.paths.index_tmp + word
+        postings = Postings.new(word, nil, temporary: true, temporary_path: path, temporary_load: load)
       end
       
       def save
-        Database.postings_set(@word, @block_number, @raw_string)
+        if @temporary
+          File.open(@temporary_file, "w") do |file|
+            file.write(@raw_string)
+          end
+        else
+          Database.postings_set(@word, @block_number, @raw_string)
+        end
       end
       
       def rows_count

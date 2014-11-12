@@ -45,7 +45,7 @@ module Indexer
     end
     
     def register_row_append
-      @size += Common::PostingsFile::ROW_SIZE
+      @size += Indexer::Postings::ROW_SIZE
       if @size > MAX_SIZE
         write_to_disk
         raise IndexingCacheFullError
@@ -53,21 +53,24 @@ module Indexer
     end
     
     def write_to_disk
-      if @writer_thread.nil? || ! @writer_thread.alive?
+      if @writer_thread.nil? || !@writer_thread.alive?
         @writer_thread = Thread.new do
-          started = Time.now
-          puts "Mit dem Niederschreiben des IndexingCache begonnen..."
+          # TODO: Fortschrittanzeige?
+          #started = Time.now
+          #puts "Mit dem Niederschreiben des IndexingCache begonnen..."
           
           @data_mutex.synchronize do
-            @data.each_pair do |key, item|
-              postings_tmp(key).write_entries(item.entries)
+            @data.each_pair do |word, item|
+              postings = Common::Postings.temporary(word, false)
+              postings.set_items(item.entries)
+              postings.save
             end
             @data.clear
           end
           
           @size = 0
       
-          puts "IndexingCache in #{(Time.now - started).round(1)}s abgeschlossen."
+          #puts "IndexingCache in #{(Time.now - started).round(1)}s abgeschlossen."
         end
       end
       
@@ -84,11 +87,6 @@ module Indexer
     
     def self.write_to_disk
       self.instance.write_to_disk
-    end
-    
-    private
-    def postings_tmp(word)
-      Common::PostingsFile.new(File.join(Config.paths.index_tmp, "word:#{word}"), true)
     end
   end
 end

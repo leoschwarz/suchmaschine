@@ -2,8 +2,6 @@
 require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
 
-# TODO: Eventuell wäre es auch interessant BigQueue um eine Bestätigungsfunktion zu erweitern, bzw. eine andere Warteschlange mit solcher Funktionalität
-#       zu implementieren. So wäre es sichergestellt, dass einzelne Einträge am Ende nicht ohne Indexeinträge bleiben.
 # TODO: Den Code übersichtlicher machen.
 
 module Indexer
@@ -11,60 +9,60 @@ module Indexer
     def initialize
       @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/s"}})
       @logger.add_output($stdout, Common::Logger::INFO)
-      @progress = @logger.progress_logger(Common::OrderedHash.new([[:tasks, 0]]))
+      @progress = @logger.progress_logger(Common::OrderedHash.new([[:tasks, 0], [:tasks_per_second, nil]]))
       @progress[:tasks_per_second] = proc{|p| p.elapsed_time}
     end
     
     def run
-      @progress.start_display(5.0)
-      
       # In Threads einzelne Dokumente indexieren.
-      @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."    
-      threads = Config.indexer.threads.times.map do
-        Thread.new do
-          while @progress[:tasks] < 10_000 and (doc_id = Indexer::Database.index_queue_fetch)
-            task = Task.load(doc_id)
-            task.run
-            @progress[:tasks] += 1
-          end
+      @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."
+      @progress.start_display(5.0)
+      Common::WorkerThreads.new(10).run do
+        while @progress[:tasks] < 10_000 && (doc_id = Indexer::Database.index_queue_fetch)
+          Task.load(doc_id).run
+          @progress[:tasks] += 1
         end
       end
-      
-      # Warten bis alle Workerthreads fertig sind.
-      threads.map{|t| t.join}
       @progress.stop_display
-      
       IndexingCache.write_to_disk
     
-      # Sortieren beginnen
+      # Sortieren der Einträge beginnen...
       @logger.log_info "Sortieren der Zwischenergebnisse gestartet."
-      tempfiles = Dir[File.join(Config.paths.index_tmp, "word:*")]
+      tempfiles = Dir[File.join(Config.paths.index_tmp, "*")]
       @logger.log_info "Anzahl zu sortierender Dateien: #{tempfiles.size}"
+      
       @progress.restart_display
-    
-      tempfiles.each do |tempfile|
-        word = tempfile.split(":")[1]
-      
-        # Überprüfen ob bereits eine gesicherte Indexdatei existiert, falls ja wird diese ans Ende des tempfile gehängt
-        # und die originale gelöscht...
-        destination_path = File.join(Config.paths.postings, word)
-        if File.exist? destination_path
-          File.open(tempfile, "a") do |file|
-            file.write(File.binread(destination_path))
+      Common::WorkerThreads.new(10).run do
+        while (tempfile = tempfiles.pop)
+          word = tempfile.split("/")[-1]
+          
+          # ob bereits eine gesicherte Indexdatei existiert, falls ja wird diese ans Ende des tempfile gehängt
+          # und die originale gelöscht...
+          destination = Common::Postings.new(word)
+          if destination.rows_count > 0
+            
+          
+          
+          
+          
+          destination_path = File.join(Config.paths.postings, word)
+          if File.exist? destination_path
+            File.open(tempfile, "a") do |file|
+              file.write(File.binread(destination_path))
+            end
+            File.unlink destination_path
           end
-          File.unlink destination_path
-        end
       
-        # Die temporäre Datei in die Zieldatei hineinsortieren und die temporäre Datei anschliessend löschen.
-        destination_file = Common::PostingsFile.new(destination_path, true)
-        IndexSorter.sort(Common::PostingsFile.new(tempfile, true), destination_file)
-        @progress[:tasks] += 1
-        File.unlink tempfile
+          # Die temporäre Datei in die Zieldatei hineinsortieren und die temporäre Datei anschliessend löschen.
+          destination_file = Common::PostingsFile.new(destination_path, true)
+          IndexSorter.sort(Common::PostingsFile.new(tempfile, true), destination_file)
+          @progress[:tasks] += 1
+          File.unlink tempfile
         
-        # PostingsMetadata-File generieren
-        Common::PostingsMetadataFile.new(word).generate_for(destination_file)
+          # PostingsMetadata-File generieren
+          Common::PostingsMetadataFile.new(word).generate_for(destination_file)
+        end
       end
-      
       @progress.stop_display
     
       @logger.log_info "10'000 Dokumente erfolgreich indexiert und in Hauptindex eingegliedert."
