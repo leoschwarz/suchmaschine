@@ -1,7 +1,7 @@
 require 'digest/md5'
 
 module Common
-  module DatabaseClient
+  module Database
     class Document
       include Common::Serializable
       

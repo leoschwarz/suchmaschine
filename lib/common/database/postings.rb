@@ -1,20 +1,19 @@
 module Common
-  module DatabaseClient
+  module Database
     class Postings
       def initialize(word)
         @word      = word
         @temporary = temporary
         @metadata  = PostingsMetadata.load(word)
-        
         @item_buffer = []
       end
       
       def rows_count
-        @metadata.blocks.inject(:+)
+        @metadata.blocks.inject(:+).to_i
       end
       
       def blocks_count
-        @metadata.blocks.count.to_i
+        @metadata.blocks.count
       end
       
       def << (item)

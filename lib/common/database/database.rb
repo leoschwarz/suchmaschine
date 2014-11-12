@@ -1,7 +1,14 @@
+require_relative './database.rb'
+require_relative './document.rb'
+require_relative './metadata.rb'
+require_relative './postings.rb'
+require_relative './postings_block.rb'
+require_relative './postings_metadata.rb'
+
 require 'drb/drb'
 
 module Common
-  module DatabaseClient
+  module Database
     class Database
       def self.download_queue_insert(urls)
         self.run(:download_queue_insert, urls) unless urls.size == 0

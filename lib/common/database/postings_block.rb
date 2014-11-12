@@ -1,7 +1,7 @@
 require 'securerandom'
 
 module Common
-  module DatabaseClient
+  module Database
     # PostingsBlocks bilden die eigentlichen Postings Listen. Der blockbasierte Aufbau hat
     # zum Vorteil, dass das Sortieren der Listen einfacher wird, und das generell nicht mit
     # gigantischen Dateien hantiert werden muss. Ausserdem können bei der Abfrage auch nur

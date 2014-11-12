@@ -1,5 +1,5 @@
 module Common
-  module DatabaseClient
+  module Database
     class PostingsMetadata < Common::SerializableObject
       field :word
       field :blocks # Anzahl Zeilen in den einzelnen Blöcken...

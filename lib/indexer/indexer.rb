@@ -1,5 +1,5 @@
 module Indexer
-  include Common::DatabaseClient
+  include Common::Database
 end
 
 # Alle Dateien im Verzeichnis laden
