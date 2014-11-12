@@ -36,7 +36,13 @@ module Database
       @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
       
       @data_stores = {}
-      {document: 256, metadata: 8, cache: 8, postings: 256, postings_metadata: 8, postings_temporary: 8}.each_pair do |name, kb|
+      {document: 256, 
+       metadata: 8,
+          cache: 8,
+       postings: 256,
+       postings_metadata: 8,
+       postings_temporary: 8,
+       postings_metadata_temporary: 8}.each_pair do |name, kb|
         options = {}
         options[:create_if_missing] = true
         options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
@@ -123,12 +129,20 @@ module Database
         end
         nil
       when :postings_metadata_set # word, data
-        word, data = parameters
-        @data_stores[:postings_metadata].put(word, data)
+        word, data, temporary = parameters
+        if temporary
+          @data_stores[:postings_metadata_temporary].get(word)
+        else
+          @data_stores[:postings_metadata].put(word, data)
+        end
         nil
       when :postings_metadata_get # word
-        word = parameters[0]
-        @data_stores[:postings_metadata].get(word)
+        word, temporary = parameters
+        if temporary
+          @data_stores[:postings_metadata_temporary].get(word)
+        else
+          @data_stores[:postings_metadata].get(word)
+        end
       else
         @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
       end
@@ -144,8 +158,8 @@ module Database
           @queues[:download].insert(url) unless has_metadata?(url)
         end
       elsif queue == :index
-        items.each do |docinfo_key|
-          @queues[:index].insert(docinfo_key)
+        items.each do |id|
+          @queues[:index].insert(id)
         end
       end
 

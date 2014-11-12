@@ -40,8 +40,16 @@ module Common
         @metadata.blocks = []
       end
       
+      def delete_metadata
+        @metadata.delete unless @metadata.nil?
+      end
+      
       # Schreibt den write_buffer in Blöcken nieder...
       def save
+        if @metadata.nil?
+          @metadata = PostingsMetadata.load(@word, @temporary)
+        end
+        
         @write_buffer.each_slice(PostingsBlock::MAX_ROWS) do |rows|
           block = PostingsBlock.new(nil, @temporary)
           block.entries = rows

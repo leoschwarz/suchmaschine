@@ -68,12 +68,12 @@ module Common
         self.run(:postings_block_delete, id, temporary)
       end
       
-      def self.postings_metadata_get(word)
-        self.run(:postings_metadata_get, word)
+      def self.postings_metadata_get(word, temporary=false)
+        self.run(:postings_metadata_get, word, temporary)
       end
       
-      def self.postings_metadata_set(word, data)
-        self.run(:postings_metadata_set, word, data)
+      def self.postings_metadata_set(word, data, temporary=false)
+        self.run(:postings_metadata_set, word, data, temporary)
       end
       
       def self.run(command, *params)

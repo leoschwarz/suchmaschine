@@ -1,8 +1,7 @@
 require 'digest/md5'
-require 'lz4-ruby' # TODO wieder entfern falls hier nicht gebraucht
 
 module Common
-  module DatabaseClient
+  module Database
     class Metadata
       include Common::Serializable
       
@@ -30,21 +29,12 @@ module Common
       end
 
       def self.load(_hash)
-        metadata = self.deserialize(Database.metadata_get(_hash))
-        metadata.url = Common::URL.stored(metadata.url)
-        metadata
-      end
-      
-      # TODO: Dies wird z.z. nur von Frontend::SearchRunner benötigt und ist keine wirklich schöne Lösung
-      #       und sollte deshalb wenn möglich entfernt werden...
-      def self.open(path_or_hash, full_path)
-        if full_path
-          path = path_or_hash
-        else
-          path = Config.paths.metadata + path_or_hash
+        raw = Database.metadata_get(_hash)
+        if raw.nil?
+          return nil
         end
         
-        metadata = self.deserialize(LZ4.uncompress File.read(path))
+        metadata = self.deserialize(raw)
         metadata.url = Common::URL.stored(metadata.url)
         metadata
       end

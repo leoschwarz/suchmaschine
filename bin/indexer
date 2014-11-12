@@ -21,7 +21,9 @@ module Indexer
       cache = IndexingCache.new
       Common::WorkerThreads.new(10).run do
         while @progress[:tasks] < 10_000 && (doc_id = Indexer::Database.index_queue_fetch)
-          Task.load(doc_id).run(cache)
+          task = Task.load(doc_id)
+          task.run(cache) unless task.nil?
+          
           @progress[:tasks] += 1
         end
       end
@@ -32,7 +34,7 @@ module Indexer
       @logger.log_info "Sortieren der Zwischenergebnisse gestartet."
       temporary_words = cache.words
       cache = nil
-      @logger.log_info "Anzahl zu sortierender Dateien: #{tempfiles.size}"
+      @logger.log_info "Anzahl zu sortierender Dateien: #{temporary_words.size}"
       
       @progress.restart_display
       Common::WorkerThreads.new(10).run do
@@ -52,7 +54,7 @@ module Indexer
           # 2.
           stored_posting = Indexer::Postings.new(word, temporary: false, load: true)
           stored_posting.insert_from(tmp_posting)
-          tmp_posting.delete
+          tmp_posting.delete_metadata
           
           # 3.
           sorter = Indexer::PostingsSorter.new(stored_posting)

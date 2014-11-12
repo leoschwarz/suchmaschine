@@ -21,7 +21,7 @@ module Common
       ROW_SIZE   = 24
       MAX_ROWS   = 50_000
       BLOCK_SIZE = MAX_ROWS * ROW_SIZE
-      PACK_INSTRUCTION = "h32 L> g"
+      PACK_INSTRUCTION = "g L> h32"
       
       attr_reader :id
       

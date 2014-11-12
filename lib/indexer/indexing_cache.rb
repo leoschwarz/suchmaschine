@@ -47,7 +47,7 @@ module Indexer
     
     # true falls erfolgreich, false falls nicht (bereits voll...)
     def register_row_append
-      @size += Indexer::Postings::ROW_SIZE
+      @size += Indexer::PostingsBlock::ROW_SIZE
       if @size > MAX_SIZE
         write_to_disk
         return false
@@ -65,7 +65,7 @@ module Indexer
           
           @data_mutex.synchronize do
             @data.each_pair do |word, item|
-              postings = Common::Postings.new(word, temporary: true, load: false)
+              postings = Indexer::Postings.new(word, temporary: true, load: false)
               postings.add_rows(item.entries)
               postings.save
             end

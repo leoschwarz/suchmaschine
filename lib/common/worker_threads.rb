@@ -12,7 +12,7 @@ module Common
       end
       
       if blocking
-        @threads.map{|thread| thread.join}
+        @threads.map(&:join)
       end
     end
   end

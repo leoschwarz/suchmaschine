@@ -1,6 +1,8 @@
 module Common
   module Database
-    class PostingsMetadata < Common::SerializableObject
+    class PostingsMetadata
+      include Common::Serializable
+      
       field :word
       
       # Array bestehend aus Arrays folgendes Formats:
