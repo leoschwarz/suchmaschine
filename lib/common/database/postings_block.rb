@@ -25,9 +25,10 @@ module Common
       
       attr_reader :id
       
-      def initialize(_id = nil)
+      def initialize(_id = nil, temporary = false)
         @id  = _id || generate_id
         @raw = ""
+        @temporary = temporary
       end
       
       def bin_entries
@@ -46,8 +47,12 @@ module Common
         self.bin_entries = _entries.map{|row| row.pack(PACK_INSTRUCTION)}
       end
       
+      def entries_cached
+        @_entries ||= self.entries
+      end
+      
       def load
-        @raw = Database.postings_block_get(@id)
+        Database.postings_block_get(@id, @temporary)
       end
       
       def self.load(id)
@@ -57,11 +62,11 @@ module Common
       end
       
       def save
-        Database.postings_block_set(@id, @raw)
+        Database.postings_block_set(@id, @raw, @temporary)
       end
       
       def delete
-        Database.postings_block_delete(@id)
+        Database.postings_block_delete(@id, @temporary)
       end
       
       def rows_count

@@ -1,7 +1,4 @@
 module Indexer
-  class IndexingCacheFullError < StandardError
-  end
-  
   class IndexingCacheItem
     attr_accessor :entries
     
@@ -12,9 +9,7 @@ module Indexer
     end
     
     def << (row)
-      begin
-        @cache.register_row_append
-      rescue IndexingCacheFullError
+      if !@cache.register_row_append
         @cache[@word] << row
         return
       end
@@ -29,6 +24,7 @@ module Indexer
     def initialize
       @size = 0
       @data = {}
+      @words = {}
       @writing = false
       
       @data_mutex = Mutex.new
@@ -39,16 +35,24 @@ module Indexer
         if @data.has_key?(key)
           return @data[key]
         else
+          @words[key] = nil
           return @data[key] = IndexingCacheItem.new(self, key)
         end
       end
     end
     
+    def words
+      @words.keys
+    end
+    
+    # true falls erfolgreich, false falls nicht (bereits voll...)
     def register_row_append
       @size += Indexer::Postings::ROW_SIZE
       if @size > MAX_SIZE
         write_to_disk
-        raise IndexingCacheFullError
+        return false
+      else
+        return true
       end
     end
     
@@ -61,8 +65,8 @@ module Indexer
           
           @data_mutex.synchronize do
             @data.each_pair do |word, item|
-              postings = Common::Postings.temporary(word, false)
-              postings.set_items(item.entries)
+              postings = Common::Postings.new(word, temporary: true, load: false)
+              postings.add_rows(item.entries)
               postings.save
             end
             @data.clear
@@ -75,18 +79,6 @@ module Indexer
       end
       
       @writer_thread.join
-    end
-    
-    def self.instance
-      @@instance ||= IndexingCache.new
-    end
-    
-    def self.[](key)
-      self.instance[key]
-    end
-    
-    def self.write_to_disk
-      self.instance.write_to_disk
     end
   end
 end

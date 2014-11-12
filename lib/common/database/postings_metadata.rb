@@ -9,17 +9,25 @@ module Common
       field :blocks
       field :total_occurences, 0
       
-      def self.load(word)
-        data = Database.postings_metadata_get(word)
+      attr_accessor :temporary
+      
+      def add_block(block)
+        self.blocks << [block.id, block.rows_count]
+      end
+      
+      def self.load(word, temporary=false)
+        data = Database.postings_metadata_get(word, temporary)
         if data.nil?
-          self.new({word: word, blocks:[]})
+          metadata = self.new({word: word, blocks:[]})
         else
-          self.deserialize(data)
+          metadata = self.deserialize(data)
         end
+        metadata.temporary = temporary
+        metadata
       end
       
       def save
-        Database.postings_metadata_set(self.word, self.serialize)
+        Database.postings_metadata_set(self.word, self.serialize, self.temporary)
       end
     end
   end

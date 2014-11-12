@@ -17,50 +17,46 @@ module Indexer
       # In Threads einzelne Dokumente indexieren.
       @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."
       @progress.start_display(5.0)
+      
+      cache = IndexingCache.new
       Common::WorkerThreads.new(10).run do
         while @progress[:tasks] < 10_000 && (doc_id = Indexer::Database.index_queue_fetch)
-          Task.load(doc_id).run
+          Task.load(doc_id).run(cache)
           @progress[:tasks] += 1
         end
       end
       @progress.stop_display
-      IndexingCache.write_to_disk
-    
+      cache.write_to_disk
+      
       # Sortieren der Einträge beginnen...
       @logger.log_info "Sortieren der Zwischenergebnisse gestartet."
-      tempfiles = Dir[File.join(Config.paths.index_tmp, "*")]
+      temporary_words = cache.words
+      cache = nil
       @logger.log_info "Anzahl zu sortierender Dateien: #{tempfiles.size}"
       
       @progress.restart_display
       Common::WorkerThreads.new(10).run do
-        while (tempfile = tempfiles.pop)
-          word = tempfile.split("/")[-1]
+        while (word = temporary_words.pop)
+          # Ablauf:
+          # 1. Die einzelnen Blöcke des temporären Postings individuell sortieren.
+          # 2. Temporäres und bereits existierendes Posting verbinden...
+          # 3. Das Posting sortieren...
           
-          # ob bereits eine gesicherte Indexdatei existiert, falls ja wird diese ans Ende des tempfile gehängt
-          # und die originale gelöscht...
-          destination = Common::Postings.new(word)
-          if destination.rows_count > 0
-            
-          
-          
-          
-          
-          destination_path = File.join(Config.paths.postings, word)
-          if File.exist? destination_path
-            File.open(tempfile, "a") do |file|
-              file.write(File.binread(destination_path))
-            end
-            File.unlink destination_path
+          # 1.
+          tmp_posting = Indexer::Postings.new(word, temporary: true, load: true)
+          tmp_posting.blocks.each do |block|
+            block.bin_entries = block.bin_entries.sort
+            block.save
           end
-      
-          # Die temporäre Datei in die Zieldatei hineinsortieren und die temporäre Datei anschliessend löschen.
-          destination_file = Common::PostingsFile.new(destination_path, true)
-          IndexSorter.sort(Common::PostingsFile.new(tempfile, true), destination_file)
-          @progress[:tasks] += 1
-          File.unlink tempfile
-        
-          # PostingsMetadata-File generieren
-          Common::PostingsMetadataFile.new(word).generate_for(destination_file)
+          
+          # 2.
+          stored_posting = Indexer::Postings.new(word, temporary: false, load: true)
+          stored_posting.insert_from(tmp_posting)
+          tmp_posting.delete
+          
+          # 3.
+          sorter = Indexer::PostingsSorter.new(stored_posting)
+          sorter.sort_blocks
         end
       end
       @progress.stop_display

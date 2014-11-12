@@ -14,9 +14,9 @@ module Indexer
     end
 
     # Die Aufgabe bearbeiten.
-    def run
+    def run(cache)
       @metadata.word_counts.each_pair do |word, count|
-        IndexingCache[word] << [@hash, count]
+        cache[word] << [@hash, count]
       end
     end
   end
