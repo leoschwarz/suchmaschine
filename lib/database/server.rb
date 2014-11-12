@@ -64,7 +64,7 @@ module Database
       @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
       
       @data_stores = {}
-      {document: 256, metadata: 8, cache: 8}.each_pair do |name, kb|
+      {document: 256, metadata: 8, cache: 8, postings: 256, postings_metadata: 8}.each_pair do |name, kb|
         options = {}
         options[:create_if_missing] = true
         options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
@@ -130,16 +130,18 @@ module Database
         @data_stores[:metadata].get(id)
       when :postings_set # word, block, data
         word, block, data = parameters
-        # TODO 
+        @data_stores[:postings].put([word,block].join(":"), data)
+        nil
       when :postings_get # word, block
         word, block = parameters
-        # TODO
+        @data_stores[:postings].get([word, block].join(":"))
       when :postings_metadata_set # word, data
         word, data = parameters
-        # TODO
+        @data_stores[:postings_metadata].put(word, data)
+        nil
       when :postings_metadata_get # word
         word = parameters[0]
-        # TODO
+        @data_stores[:postings_metadata].get(word)
       else
         @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
       end
