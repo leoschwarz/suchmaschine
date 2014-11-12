@@ -36,7 +36,7 @@ module Database
       @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
       
       @data_stores = {}
-      {document: 256, metadata: 8, cache: 8, postings: 256, postings_metadata: 8}.each_pair do |name, kb|
+      {document: 256, metadata: 8, cache: 8, postings: 256, postings_metadata: 8, postings_temporary: 8}.each_pair do |name, kb|
         options = {}
         options[:create_if_missing] = true
         options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
@@ -100,15 +100,28 @@ module Database
         id = parameters[0]
         @data_stores[:metadata].get(id)
       when :postings_block_set # word, block, data
-        id, data = parameters
-        @data_stores[:postings].put(id, data)
+        id, data, temporary = parameters
+        if temporary
+          @data_stores[:postings_temporary].put(id, data)
+        else
+          @data_stores[:postings].put(id, data)
+        end
         nil
       when :postings_block_get # word, block
-        id = parameters[0]
-        @data_stores[:postings].get(id)
+        id, temporary = parameters
+        if temporary
+          @data_stores[:postings_temporary].get(id)
+        else
+          @data_stores[:postings].get(id)
+        end
       when :postings_block_delete
-        id = parameters[0]
-        @data_stores[:postings].delete(id)
+        id, temporary = parameters
+        if temporary
+          @data_stores[:postings_temporary].delete(id)
+        else
+          @data_stores[:postings].delete(id)
+        end
+        nil
       when :postings_metadata_set # word, data
         word, data = parameters
         @data_stores[:postings_metadata].put(word, data)
