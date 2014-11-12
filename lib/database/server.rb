@@ -6,48 +6,20 @@ require 'digest/md5'
 # URL: https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb
 
 module Database
-  # TODO: Methoden wie instance_eval von dieser Klasse entfernen, da diese eine grosse Sicherheitslücke darstellen!
+  # TODO: Methoden wie instance_eval von dieser Klasse entfernen, da diese eine grosse Sicherheitslücke darstellen!,
+  #       bzw. den Zugriff auf den Server nur von bestimmten IPs erlauben...
+  # TODO: Mutex per Resource (also einen für DownloadQueue, einen für IndexQueue, etc...)
   class ServerFront
     def initialize(server)
       @server = server
-      @queue  = Thread::Queue.new
-      
-      @counter_mutex = Mutex.new
-      @counter = 0
-      @results_mutex = Mutex.new
-      @results = {}
+      @run_mutex = Mutex.new
     end
     
     def execute(command, *args)
-      id = nil
-      @counter_mutex.synchronize do
-        @counter += 1
-        id = @counter
-      end
-      @queue << [id, command, args]
-      
-      loop do
-        # TODO: Das hier ist noch ziemlich unschön und verschwendet einiges an Rechenleistung...
-        @results_mutex.synchronize do
-          if @results.has_key?(id)
-            return @results.delete(id)
-          end
-        end
-        sleep 0.05
-      end
-    end
-    
-    def run
-      loop do
-        begin
-          id, command, args = @queue.pop
-          result = @server.execute(command, args)
-          @results_mutex.synchronize do 
-            @results[id] = result
-          end
-        rescue ThreadError
-          sleep 0.001
-        end
+      # Mit dem Mutex wird verhindert, dass zwei Threads zur selben Zeit auf der Datenbank
+      # arbeiten. Jede Anfrage führt die Methode ServerFront.execute nämlich in einem eigenen Thread aus.
+      @run_mutex.synchronize do
+        return @server.execute(command, args)
       end
     end
   end
@@ -76,8 +48,7 @@ module Database
       front_object = ServerFront.new(self)
       DRb.start_service(Config.database_connection, front_object)
       @logger.log_info "Datenbank Server gestartet."
-      front_object.run
-      #DRb.thread.join
+      DRb.thread.join
     end
     
     def stop
