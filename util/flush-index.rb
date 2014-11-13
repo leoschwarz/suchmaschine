@@ -1,56 +1,70 @@
 #!/usr/bin/env ruby
 # Dieses Skript löscht den Index der Suchmaschine und befüllt die INDEX_QUEUE erneut.
+load './bin/database'
 load './bin/indexer'
 
-INDEX_DIRECTORY       = Config.paths.postings
-INDEX_QUEUE_DIRECTORY = Config.paths.index_queue
-DOCINFO_DIRECTORY     = Config.paths.metadata
-raise "Dieses Programm muss mit Zugriff auf das INDEX-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_DIRECTORY
-raise "Dieses Programm muss mit Zugriff auf das INDEX_QUEUE-Verzeichniss ausgeführt werden" unless Dir.exist? INDEX_QUEUE_DIRECTORY
-raise "Dieses Programm muss mit Zugriff auf das DOCINFO-Verzeichniss ausgeführt werden" unless Dir.exist? DOCINFO_DIRECTORY
+options = {block_size: 8* 1024*1024, write_buffer_size: 16 *1024*1024, compression: LevelDBNative::CompressionType::SnappyCompression}
+
+# aus: lib/database/server.rb
+db_options = {}
+{document: 256, 
+ metadata: 8,
+    cache: 8,
+ postings: 256,
+ postings_metadata: 8,
+ postings_temporary: 8,
+ postings_metadata_temporary: 8}.each_pair do |name, kb|
+  options = {}
+  options[:create_if_missing] = true
+  options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
+  options[:block_size]        = kb * 1024
+  options[:write_buffer_size] = 16 * 1024*1024
+  db_options[name] = options # = LevelDBNative::DB.new(Config.paths[name], options)
+end
 
 
-index_files = Dir["#{INDEX_DIRECTORY}/*"]
-index_queue_files = Dir["#{INDEX_QUEUE_DIRECTORY}/*"]
-index_files_count = index_files.size
-index_queue_files_count = index_queue_files.size
 
-puts "Warnung, dieses Skript wird #{index_files.size} INDEX-Einträge unwiederbringlich löschen."
-puts "Die Datenbank DARF NICHT laufen solange dieses Skript ausgeführt wird."
+print "Warnung, dieses Skript wird alle Postings (und zugehörige Metadaten) unwiederbringlich löschen.\n"
 print "Um fortzufahren, bitte 'index löschen' eintippen: "
 input = gets.strip
-
 if input != "index löschen"
   puts "Es wurde nichts gelöscht."
-  exit
+  Kernel.exit
 end
 
 puts "Löschvorgang begonnen..."
-puts "Löschen aller Dateien im INDEX-Verzeichniss:"
+puts "Löschen aller Index-Dateien..."
+files  = Dir[Config.paths.postings + "*"]
+files += Dir[Config.paths.postings_metadata + "*"]
+files += Dir[Config.paths.postings_temporary + "*"]
+files += Dir[Config.paths.postings_metadata_temporary + "*"]
+
+total = files.count
+
 counter = 0
-index_files.each do |index_file|
-  File.unlink index_file
+files.each do |file|
+  File.unlink file
   counter += 1
-  print "\r[#{counter}/#{index_files_count}] gelöscht." if counter % 1000 == 0
+  print "\r[#{counter}/#{total}] gelöscht." if counter % 100 == 0
 end
-puts "\rLöschen aller Dateien im INDEX-Verzeichniss erfolgreich."
+puts "\rLöschen aller Index Dateien erfolgreich."
 
 puts "Löschen der alten INDEX_QUEUE begonnen..."
-index_queue_files.each do |file|
+Dir[Config.paths.index_queue + "*"].each do |file|
   File.unlink(file)
 end
 puts "Löschen der alten INDEX_QUEUE erfolgreich."
 
-docinfo_ids = Dir["#{DOCINFO_DIRECTORY}/*"].map{|path| path.split("/")[-1]}
-docinfo_ids_count = docinfo_ids.size
-puts "Bitte Datenbank jetzt starten und dann Enter drücken..."
-gets
-
 puts "Befüllen der INDEX_QUEUE begonnen..."
+ids = LevelDBNative::DB.new(Config.paths.metadata, db_options[:metadata]).keys
 counter = 0
-docinfo_ids.each_slice(200) do |ids|
-  Indexer::Database.index_queue_insert(ids)
-  counter += 200
-  print "\r[#{counter}/#{docinfo_ids_count}] eingefügt." if counter % 1000 == 0
+total = ids.count
+queue = Database::BetterQueue.new(Config.paths.index_queue)
+ids.each do |id|
+  queue.insert(id)
+  counter += 1
+  print "\r[#{counter}/#{total}] eingefügt." if counter % 100 == 0
 end
-puts "\rBefüllen beendet. Jetzt können Clients wie gewohnt verbunden werden..."
+
+queue.save
+puts "\rBefüllen beendet."
