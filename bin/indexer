@@ -40,27 +40,16 @@ module Indexer
       Common::WorkerThreads.new(10).run do
         while (word = temporary_words.pop)
           # Ablauf:
-          # 1. Die einzelnen Blöcke des temporären Postings individuell sortieren.
-          # 2. Temporäres und bereits existierendes Posting verbinden...
-          # 3. Das Posting sortieren...
+          # 1. Die (bereits vorsortierten) Blöcke des entsprechenden Posting laden.
+          # 2. Das Posting sortieren...
           
           # 1.
-          tmp_posting = Indexer::Postings.new(word, temporary: true, load: true)
-          tmp_posting.blocks.each do |block|
-            block.bin_entries = block.bin_entries.sort
-            block.save
-          end
-          tmp_posting.save
+          posting = Indexer::Postings.new(word, temporary: false, load: true)
           
           # 2.
-          stored_posting = Indexer::Postings.new(word, temporary: false, load: true)
-          stored_posting.insert_from(tmp_posting)
-          stored_posting.save
-          #tmp_posting.delete_metadata
-          
-          # 3.
-          sorter = Indexer::PostingsSorter.new(stored_posting)
+          sorter = Indexer::PostingsSorter.new(posting)
           sorter.sort_blocks
+          posting.save
         end
       end
       @progress.stop_display

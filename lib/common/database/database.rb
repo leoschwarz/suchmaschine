@@ -56,24 +56,24 @@ module Common
         self.run(:metadata_get, hash)
       end
       
-      def self.postings_block_get(id, temporary=false)
-        self.run(:postings_block_get, id, temporary)
+      def self.postings_block_get(id)
+        self.run(:postings_block_get, id)
       end
       
-      def self.postings_block_set(id, data, temporary=false)
-        self.run(:postings_block_set, id, data, temporary)
+      def self.postings_block_set(id, data)
+        self.run(:postings_block_set, id, data)
       end
       
-      def self.postings_block_delete(id, temporary=false)
-        self.run(:postings_block_delete, id, temporary)
+      def self.postings_block_delete(id)
+        self.run(:postings_block_delete, id)
       end
       
-      def self.postings_metadata_get(word, temporary=false)
-        self.run(:postings_metadata_get, word, temporary)
+      def self.postings_metadata_get(word)
+        self.run(:postings_metadata_get, word)
       end
       
-      def self.postings_metadata_set(word, data, temporary=false)
-        self.run(:postings_metadata_set, word, data, temporary)
+      def self.postings_metadata_set(word, data)
+        self.run(:postings_metadata_set, word, data)
       end
       
       def self.run(command, *params)

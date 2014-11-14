@@ -9,6 +9,7 @@ module Common
       # [0] => id
       # [1] => rows
       field :blocks
+      # TODO: Dieses Feld ging bis jetzt noch ein bisschen in Vergessenheit
       field :total_occurences, 0
       
       attr_accessor :temporary
@@ -18,18 +19,20 @@ module Common
       end
       
       def self.load(word, temporary=false)
-        data = Database.postings_metadata_get(word, temporary)
-        if data.nil?
-          metadata = self.new({word: word, blocks:[]})
-        else
+        if !temporary && (data = Database.postings_metadata_get(word)) != nil
           metadata = self.deserialize(data)
+        else
+          metadata = self.new({word: word, blocks:[]})
         end
+        
         metadata.temporary = temporary
         metadata
       end
       
       def save
-        Database.postings_metadata_set(self.word, self.serialize, self.temporary)
+        unless self.temporary
+          Database.postings_metadata_set(self.word, self.serialize)
+        end
       end
     end
   end

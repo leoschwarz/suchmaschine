@@ -58,6 +58,8 @@ module Indexer
     
     def write_to_disk
       if @writer_thread.nil? || !@writer_thread.alive?
+        # TODO: Hier nur einen Thread zu verwenden, d.h. jeden Eintrag einen nach dem anderen zur Datenbank zu übertragen
+        # ist extrem ineffizient, dies muss dringend verbessert werden!
         @writer_thread = Thread.new do
           # TODO: Fortschrittanzeige?
           started = Time.now
@@ -65,7 +67,7 @@ module Indexer
           
           @data_mutex.synchronize do
             @data.each_pair do |word, item|
-              postings = Indexer::Postings.new(word, temporary: true, load: true)
+              postings = Indexer::Postings.new(word, temporary: false, load: true)
               postings.add_rows(item.entries)
               postings.save
             end

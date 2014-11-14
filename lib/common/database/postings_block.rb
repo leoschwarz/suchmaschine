@@ -52,7 +52,9 @@ module Common
       end
       
       def load
-        Database.postings_block_get(@id, @temporary)
+        unless @temporary
+          Database.postings_block_get(@id)
+        end
       end
       
       def self.load(id)
@@ -62,11 +64,15 @@ module Common
       end
       
       def save
-        Database.postings_block_set(@id, @raw, @temporary)
+        unless @temporary
+          Database.postings_block_set(@id, @raw)
+        end
       end
       
       def delete
-        Database.postings_block_delete(@id, @temporary)
+        unless @temporary
+          Database.postings_block_delete(@id)
+        end
       end
       
       def rows_count

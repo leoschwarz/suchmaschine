@@ -1,6 +1,9 @@
 module Common
   module Database
     class Postings
+      # word: das Stichwort
+      # options[:temporary]: falls wahr werden die Daten nicht in der Datenbank gespeichert
+      # options[:load]: falls wahr werden die Metadaten aus der Datenbank geladen
       def initialize(word, options={})
         options = {temporary: false, load: false}.merge(options)
         

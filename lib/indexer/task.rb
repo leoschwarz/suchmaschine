@@ -1,4 +1,4 @@
-require 'lz4-ruby'
+# TODO: Diese Datei noch sinnvol umbenennen...
 
 module Indexer
   class Task

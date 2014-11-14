@@ -11,9 +11,7 @@ db_options = {}
  metadata: 8,
     cache: 8,
  postings: 256,
- postings_metadata: 8,
- postings_temporary: 8,
- postings_metadata_temporary: 8}.each_pair do |name, kb|
+ postings_metadata: 8}.each_pair do |name, kb|
   options = {}
   options[:create_if_missing] = true
   options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
@@ -36,8 +34,6 @@ puts "Löschvorgang begonnen..."
 puts "Löschen aller Index-Dateien..."
 files  = Dir[Config.paths.postings + "*"]
 files += Dir[Config.paths.postings_metadata + "*"]
-files += Dir[Config.paths.postings_temporary + "*"]
-files += Dir[Config.paths.postings_metadata_temporary + "*"]
 
 total = files.count
 
