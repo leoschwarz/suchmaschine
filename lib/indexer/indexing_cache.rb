@@ -60,12 +60,12 @@ module Indexer
       if @writer_thread.nil? || !@writer_thread.alive?
         @writer_thread = Thread.new do
           # TODO: Fortschrittanzeige?
-          #started = Time.now
-          #puts "Mit dem Niederschreiben des IndexingCache begonnen..."
+          started = Time.now
+          puts "Mit dem Niederschreiben des IndexingCache begonnen..."
           
           @data_mutex.synchronize do
             @data.each_pair do |word, item|
-              postings = Indexer::Postings.new(word, temporary: true, load: false)
+              postings = Indexer::Postings.new(word, temporary: true, load: true)
               postings.add_rows(item.entries)
               postings.save
             end
@@ -74,7 +74,7 @@ module Indexer
           
           @size = 0
       
-          #puts "IndexingCache in #{(Time.now - started).round(1)}s abgeschlossen."
+          puts "IndexingCache in #{(Time.now - started).round(1)}s abgeschlossen."
         end
       end
       

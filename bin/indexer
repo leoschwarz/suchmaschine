@@ -20,7 +20,7 @@ module Indexer
       
       cache = IndexingCache.new
       Common::WorkerThreads.new(10).run do
-        while @progress[:tasks] < 10_000 && (doc_id = Indexer::Database.index_queue_fetch)
+        while @progress[:tasks] < 100 && (doc_id = Indexer::Database.index_queue_fetch)
           task = Task.load(doc_id)
           task.run(cache) unless task.nil?
           
@@ -50,11 +50,13 @@ module Indexer
             block.bin_entries = block.bin_entries.sort
             block.save
           end
+          tmp_posting.save
           
           # 2.
           stored_posting = Indexer::Postings.new(word, temporary: false, load: true)
           stored_posting.insert_from(tmp_posting)
-          tmp_posting.delete_metadata
+          stored_posting.save
+          #tmp_posting.delete_metadata
           
           # 3.
           sorter = Indexer::PostingsSorter.new(stored_posting)

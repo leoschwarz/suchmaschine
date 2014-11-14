@@ -5,8 +5,6 @@ require 'sinatra/base'
 require 'erubis'
 
 module Frontend
-  include Common::DatabaseClient
-
   class WebServer < Sinatra::Base
     set :views, File.join(File.dirname(__FILE__), "../ui/")
     set :bind, "0.0.0.0"

@@ -19,7 +19,7 @@ module Common
     # DOCUMENT_ID [16B hexadezimal/integer]
     class PostingsBlock
       ROW_SIZE   = 24
-      MAX_ROWS   = 50_000
+      MAX_ROWS   = 100_000
       BLOCK_SIZE = MAX_ROWS * ROW_SIZE
       PACK_INSTRUCTION = "g L> h32"
       

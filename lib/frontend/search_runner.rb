@@ -16,8 +16,10 @@ module Frontend
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
       @query.split(" ").uniq.each do |word|
-        postings = Common::PostingsFile.new(word)
-        postings_metadata = Common::PostingsMetadataFile.new(word)
+        postings = Indexer::Postings.new(word, load: true)
+        postings_metadata = Indexer::PostingsMetadata.
+#        postings = Common::PostingsFile.new(word)
+#        postings_metadata = Common::PostingsMetadataFile.new(word)
         
         if postings.exist?
           postings_metadata.read

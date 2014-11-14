@@ -80,6 +80,7 @@ module Indexer
     
     def sort_blocks
       # Jeden Block in eine eigene Kette laden...
+      @postings.load unless @postings.loaded?
       all_chains = @postings.blocks.map{|block| PostingsBlockChain.new([block])}
       
       # Nun werden jeweils fünf Ketten umsortiert, bis es nur noch eine Kette gibt...
@@ -90,20 +91,12 @@ module Indexer
           result = PostingsBlockWriter.new(true)
           while chains.size > 1
             # Das minimum finden:
-            min_i     = 0
-            min_value = chains[0].current_row
-            chains.each_with_index do |chain, index|
-              if chain.current_row < min_value
-                min_value = chain.current_row
-                min_i     = index
-              end
-            end
+            min_chunk, min_i = chains.each_with_index.min_by{|chunk, i| chunk.current_row}
             
-            # Resultat feststellen
-            result.add_row(min_value)
-            chains[min_i].increase_pointer
-            if chains[min_i].current_row.nil?
-              chains.delete_at(min_i).delete_blocks
+            result.add_row(min_chunk.current_row)
+            min_chunk.increase_pointer
+            if min_chunk.current_row.nil?
+              chains.delete_at(min_i)
             end
           end
           
@@ -119,7 +112,10 @@ module Indexer
       
       # Nun gibt es nur noch eine grosse sortierte Kette, welche zurückgegeben werden kann...
       @postings.delete_blocks
-      all_chains[0].blocks.each{|block| @postings.add_block(block)}
+      
+      result = all_chains[0]
+      result.load
+      result.blocks.each{|block| @postings.add_block(block)}
     end
   end
 end

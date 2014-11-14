@@ -6,7 +6,7 @@ module Common
         
         @word      = word
         @temporary = options[:temporary]
-        @metadata  = PostingsMetadata.load(@word, @temporary) if options[:load]
+        load if options[:load]
         @write_buffer = []
       end
       
@@ -42,6 +42,14 @@ module Common
       
       def delete_metadata
         @metadata.delete unless @metadata.nil?
+      end
+      
+      def load
+        @metadata = PostingsMetadata.load(@word, @temporary)
+      end
+      
+      def loaded?
+        !@metadata.nil?
       end
       
       # Schreibt den write_buffer in Blöcken nieder...
