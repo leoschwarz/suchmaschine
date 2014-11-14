@@ -14,7 +14,7 @@ module Common
         Digest::MD5.hexdigest(self.url)
       end
       
-      def self.load(_hash)
+      def self.fetch(_hash)
         raw = Database.document_get(_hash)
         return nil if raw.nil? or raw.empty?
         document = self.deserialize(raw)

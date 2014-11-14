@@ -18,7 +18,7 @@ module Common
       end
 
       def document
-        Document.load(self.hash)
+        Document.fetch(self.hash)
       end
 
       def save
@@ -28,7 +28,7 @@ module Common
         self.url = _url
       end
 
-      def self.load(_hash)
+      def self.fetch(_hash)
         raw = Database.metadata_get(_hash)
         if raw.nil?
           return nil

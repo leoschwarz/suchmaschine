@@ -18,7 +18,7 @@ module Common
         self.blocks << [block.id, block.rows_count]
       end
       
-      def self.load(word, temporary=false)
+      def self.fetch(word, temporary=false)
         if !temporary && (data = Database.postings_metadata_get(word)) != nil
           metadata = self.deserialize(data)
         else

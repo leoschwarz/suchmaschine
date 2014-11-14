@@ -73,14 +73,6 @@ module Database
         handle_queue_insert(:index, parameters.flatten)
       when :index_queue_fetch #
         handle_queue_fetch(:index)
-      when :index_get # WORD
-        # TODO
-        index_file = Common::IndexFile.new(Config.paths.index+"word:#{parameters}")
-        if File.exist? index_file.path
-          index_file.read_entries.join("\t")
-        else
-          nil
-        end
       when :cache_set # KEY VALUE
         key, value = parameters[0], parameters[1]
         @data_stores[:cache].put(key, value)

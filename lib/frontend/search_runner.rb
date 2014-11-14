@@ -22,7 +22,7 @@ module Frontend
         if blocks.size > 0
           # TODO: Falls im ersten Block nicht alle relevanten Ergebnisse sind, weitere Blöcke laden...
           block = blocks[0]
-          block.load
+          block.fetch
           block.entries.each do |frequency, occurences, id|
             corpus_count = 1.0 # TODO
             results[id] += Math.log( occurences*1.0 / corpus_count)
@@ -31,7 +31,7 @@ module Frontend
       end
       
       @results_count = results.size
-      @results = results.sort_by{|doc, score| score}.reverse.first(10).map{|id, score| [Frontend::Metadata.load(id), score]}
+      @results = results.sort_by{|doc, score| score}.reverse.first(10).map{|id, score| [Frontend::Metadata.fetch(id), score]}
     end
   end
 end

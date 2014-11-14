@@ -9,7 +9,7 @@ module Common
         
         @word      = word
         @temporary = options[:temporary]
-        load if options[:load]
+        load_metadata if options[:load]
         @write_buffer = []
       end
       
@@ -47,18 +47,18 @@ module Common
         @metadata.delete unless @metadata.nil?
       end
       
-      def load
-        @metadata = PostingsMetadata.load(@word, @temporary)
+      def load_metadata
+        @metadata = PostingsMetadata.fetch(@word, @temporary)
       end
       
-      def loaded?
+      def fetched?
         !@metadata.nil?
       end
       
       # Schreibt den write_buffer in Blöcken nieder...
       def save
         if @metadata.nil?
-          @metadata = PostingsMetadata.load(@word, @temporary)
+          @metadata = PostingsMetadata.fetch(@word, @temporary)
         end
         
         @write_buffer.each_slice(PostingsBlock::MAX_ROWS) do |rows|
@@ -67,6 +67,7 @@ module Common
           block.save
           @metadata.blocks << [block.id, block.rows_count]
         end
+        @write_buffer.clear
         @metadata.save
       end
       

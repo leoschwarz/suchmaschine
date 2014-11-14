@@ -51,15 +51,15 @@ module Common
         @_entries ||= self.entries
       end
       
-      def load
+      def fetch
         unless @temporary
           Database.postings_block_get(@id)
         end
       end
       
-      def self.load(id)
+      def self.fetch(id)
         block = self.new(id)
-        block.load
+        block.fetch
         block
       end
       

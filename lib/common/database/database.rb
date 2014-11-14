@@ -26,12 +26,6 @@ module Common
         self.run(:index_queue_fetch)
       end
       
-      def self.index_get(word)
-        r = self.run(:index_get, word)
-        return [] if r.nil?
-        r.split("\t")
-      end
-
       def self.cache_set(key, value)
         self.run(:cache_set, key, value)
       end

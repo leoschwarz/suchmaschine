@@ -3,6 +3,7 @@ require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
 
 # TODO: Den Code übersichtlicher machen.
+Thread.abort_on_exception = true
 
 module Indexer
   class Main
@@ -39,17 +40,15 @@ module Indexer
       @progress.restart_display
       Common::WorkerThreads.new(10).run do
         while (word = temporary_words.pop)
-          # Ablauf:
           # 1. Die (bereits vorsortierten) Blöcke des entsprechenden Posting laden.
-          # 2. Das Posting sortieren...
-          
-          # 1.
           posting = Indexer::Postings.new(word, temporary: false, load: true)
           
-          # 2.
+          # 2. Das Posting sortieren...
           sorter = Indexer::PostingsSorter.new(posting)
           sorter.sort_blocks
           posting.save
+          
+          @progress[:tasks] += 1
         end
       end
       @progress.stop_display

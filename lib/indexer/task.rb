@@ -9,7 +9,7 @@ module Indexer
 
     # Eine neue Aufgabe laden.
     def self.load(hash)
-      metadata = Indexer::Metadata.load(hash)
+      metadata = Indexer::Metadata.fetch(hash)
       if metadata.nil?
         return nil
       end

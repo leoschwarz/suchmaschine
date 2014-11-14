@@ -15,17 +15,17 @@ module Indexer
       @current_block = @blocks.shift
     end
     
-    def load
-      @current_block.load
+    def fetch
+      @current_block.fetch
     end
     
     def increase_pointer
       @pointer[:row] += 1
-      if @pointer[:row] >= @current_block.size
+      if @pointer[:row] >= @current_block.rows_count
         @pointer[:row]    = 0
         @pointer[:block] += 1
-        @current_block    = @blocks.shift
-        @current_block.load
+        @current_block = @blocks.shift
+        @current_block.fetch unless @current_block.nil?
       end
     end
     
@@ -80,13 +80,13 @@ module Indexer
     
     def sort_blocks
       # Jeden Block in eine eigene Kette laden...
-      @postings.load unless @postings.loaded?
+      @postings.fetch unless @postings.fetched?
       all_chains = @postings.blocks.map{|block| PostingsBlockChain.new([block])}
       
       # Nun werden jeweils fünf Ketten umsortiert, bis es nur noch eine Kette gibt...
       while all_chains.size > 1
         all_chains = all_chains.each_slice(5).map do |chains|
-          chains.map{|c| c.load}
+          chains.map{|c| c.fetch}
         
           result = PostingsBlockWriter.new(true)
           while chains.size > 1
@@ -114,7 +114,7 @@ module Indexer
       @postings.delete_blocks
       
       result = all_chains[0]
-      result.load
+      result.fetch
       result.blocks.each{|block| @postings.add_block(block)}
     end
   end
