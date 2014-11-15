@@ -68,7 +68,8 @@ module Indexer
           
           Common::WorkerThread.new(10).run(true) do
             begin
-              while (word, entries = queue.pop)
+              while (pair = queue.pop)
+                word, entries = pair
                 # TODO: Die Möglichkeit, dass hier mehr als ein Block entstehen können, was dem 
                 #       Index Sortierer Probleme machen würde, wird zwar mit der Momenanten Konfiguration
                 #       nicht eintreten, soll aber dennoch nicht vernachlässigt werden, denn es
