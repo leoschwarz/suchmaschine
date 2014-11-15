@@ -67,6 +67,7 @@ module Indexer
           
           @data_mutex.synchronize do
             @data.each_pair do |word, item|
+              # TODO: Hier können unter Umständen mehrere Blöcke entstehen, was nacher im Sortierer zu Problemen führen wird...
               postings = Indexer::Postings.new(word, temporary: false, load: true)
               postings.add_rows(item.entries)
               postings.save

@@ -1,18 +1,30 @@
 module Common
   module Database
+    # TODO: Dokumentation etwas verschönern (-:
     class PostingsMetadata
       include Common::Serializable
       
       field :word
       
+      # Wieviele der Blöcke sind sortiert. (0 = keine, .., 2= der erste und der zweite block sind so sortiert, dass der letzte eintrag vom ersten kleiner ist als der des zweiten, muss aber nicht für die darauffolgedenen Blöcke gelten...)
+      field :blocks_sorted, 0
+      
       # Array bestehend aus Arrays folgendes Formats:
-      # [0] => id
-      # [1] => rows
+      # [0] => ID
+      # [1] => Anzahl Zeilen
       field :blocks
       # TODO: Dieses Feld ging bis jetzt noch ein bisschen in Vergessenheit
       field :total_occurences, 0
       
       attr_accessor :temporary
+      
+      def sorted_blocks
+        self.blocks[0...blocks_sorted]
+      end
+      
+      def unsorted_blocks
+        self.blocks[blocks_sorted..-1]
+      end
       
       def add_block(block)
         self.blocks << [block.id, block.rows_count]

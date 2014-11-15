@@ -37,6 +37,11 @@ module Indexer
       end
     end
     
+    # Gibt eingeschlossen der aktuellen Zeile, alle noch verbleibenden Zeilen als Array zurück...
+    def rows_left
+      @current_block.entries_cached[@pointer[:row]..-1]
+    end
+    
     def delete_blocks
       @blocks.map{|block| block.delete}
     end
@@ -47,8 +52,7 @@ module Indexer
     
     attr_reader :blocks
     
-    def initialize(temporary)
-      @temporary = temporary
+    def initialize
       @buffer = []
       @blocks = []
     end
@@ -59,16 +63,12 @@ module Indexer
     end
     
     def write
-      loaded_block = Indexer::PostingsBlock.new(nil, temporary: @temporary)
-      loaded_block.bin_entries = @buffer
-      loaded_block.save
+      block = Indexer::PostingsBlock.new
+      block.bin_entries = @buffer
+      block.save
       
-      @blocks << Indexer::PostingsBlock.new(loaded_block.id, temporary: @temporary)
+      @blocks << Indexer::PostingsBlock.new(block.id)
       @buffer.clear
-    end
-    
-    def to_chain
-      PostingsBlockChain.new(@blocks)
     end
   end
   
@@ -79,43 +79,41 @@ module Indexer
     end
     
     def sort_blocks
-      # Jeden Block in eine eigene Kette laden...
-      @postings.fetch unless @postings.fetched?
-      all_chains = @postings.blocks.map{|block| PostingsBlockChain.new([block])}
-      
-      # Nun werden jeweils fünf Ketten umsortiert, bis es nur noch eine Kette gibt...
-      while all_chains.size > 1
-        all_chains = all_chains.each_slice(5).map do |chains|
-          chains.map{|c| c.fetch}
-        
-          result = PostingsBlockWriter.new(true)
-          while chains.size > 1
-            # Das minimum finden:
-            min_chunk, min_i = chains.each_with_index.min_by{|chunk, i| chunk.current_row}
-            
-            result.add_row(min_chunk.current_row)
-            min_chunk.increase_pointer
-            if min_chunk.current_row.nil?
-              chains.delete_at(min_i)
-            end
-          end
-          
-          while chains[0].current_row != nil
-            result.add_row(chains[0].current_row)
-            chains[0].increase_pointer
-          end
-        
-          result.write
-          result.to_chain
+      unsorted_blocks = @postings.unsorted_blocks
+      if unsorted_blocks.size > 0        
+        if unsorted_blocks.size != 1
+          raise "Fehler: Der Indexierer muss verhindern, dass mehr als ein unsortierter Indexblock in den Sortierer gelangt."
         end
+        
+        if @postings.sorted_blocks.size == 0
+          # In diesem Fall haben wir Glück, da es nur einen neuen Block gibt und noch keinen im Postings,
+          # können wir schlichtweg den neuen Block hinzufügen und sind bereits fertig.
+          @postings.add_block(unsorted_blocks[0])
+          @postings.mark_blocks_sorted
+          
+          return
+        end
+        
+        result = PostingsBlockWriter.new
+        chains = [PostingsBlockChain.new(@postings.blocks), PostingsBlockChain.new(unsorted_blocks)]
+        chains.map{|chain| chain.fetch}
+        while chains.size == 2
+          chain, i = chains.each_with_index.min_by{|chain, i| chain.current_row}
+          
+          result.add_row(chain.current_row)
+          chain.increase_pointer
+          if chain.current_row.nil?
+            chains.delete_at(i)
+          end
+        end
+        
+        result.add_rows(chains[0].rows_left)
+        
+        # TODO der zweite block wird auch als sortiert markiert obwohl leer...
+        @postings.delete_blocks
+        result.blocks.each{|block| @postings.add_block(block)}
+        @postings.mark_blocks_sorted
       end
-      
-      # Nun gibt es nur noch eine grosse sortierte Kette, welche zurückgegeben werden kann...
-      @postings.delete_blocks
-      
-      result = all_chains[0]
-      result.fetch
-      result.blocks.each{|block| @postings.add_block(block)}
     end
   end
 end

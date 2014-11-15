@@ -16,9 +16,10 @@ module Frontend
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
       @query.split(" ").uniq.each do |word|
-        postings = Frontend::Postings.new(word, load: true)
+        postings = Frontend::Postings.new(word, temporary: false, load: true)
         
-        blocks = postings.blocks
+        blocks = postings.sorted_blocks
+        
         if blocks.size > 0
           # TODO: Falls im ersten Block nicht alle relevanten Ergebnisse sind, weitere Blöcke laden...
           block = blocks[0]

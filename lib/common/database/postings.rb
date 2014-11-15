@@ -9,7 +9,7 @@ module Common
         
         @word      = word
         @temporary = options[:temporary]
-        load_metadata if options[:load]
+        fetch if options[:load]
         @write_buffer = []
       end
       
@@ -34,12 +34,12 @@ module Common
       end
       
       def blocks
-        @metadata.blocks.map{|id,_| PostingsBlock.new(id, temporary: @temporary)}
+        @metadata.blocks.map{|id,_| PostingsBlock.new(id, @temporary)}
       end
       
       # Löscht die alten Blöcke die zu diesem Postings gehören...
       def delete_blocks
-        @metadata.blocks.map{|id,count| PostingsBlock.new(id, @temporary).delete}
+        self.blocks.map{|block| block.delete}
         @metadata.blocks = []
       end
       
@@ -47,7 +47,7 @@ module Common
         @metadata.delete unless @metadata.nil?
       end
       
-      def load_metadata
+      def fetch
         @metadata = PostingsMetadata.fetch(@word, @temporary)
       end
       
@@ -55,11 +55,21 @@ module Common
         !@metadata.nil?
       end
       
+      def sorted_blocks
+        @metadata.sorted_blocks.map{|id,_| PostingsBlock.new(id, @temporary)}
+      end
+      
+      def unsorted_blocks
+        @metadata.unsorted_blocks.map{|id,_| PostingsBlock.new(id, @temporary)}
+      end
+      
+      def mark_blocks_sorted
+        @metadata.blocks_sorted = @metadata.blocks.count
+      end
+      
       # Schreibt den write_buffer in Blöcken nieder...
       def save
-        if @metadata.nil?
-          @metadata = PostingsMetadata.fetch(@word, @temporary)
-        end
+        @metadata ||= PostingsMetadata.fetch(@word, @temporary)
         
         @write_buffer.each_slice(PostingsBlock::MAX_ROWS) do |rows|
           block = PostingsBlock.new(nil, @temporary)
@@ -67,6 +77,7 @@ module Common
           block.save
           @metadata.blocks << [block.id, block.rows_count]
         end
+        
         @write_buffer.clear
         @metadata.save
       end

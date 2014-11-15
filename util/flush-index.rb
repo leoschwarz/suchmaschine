@@ -63,4 +63,4 @@ ids.each do |id|
 end
 
 queue.save
-puts "\rBefüllen beendet."
+puts "\rBefüllen beendet.                      "

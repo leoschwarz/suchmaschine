@@ -41,7 +41,7 @@ module Indexer
       Common::WorkerThreads.new(10).run do
         while (word = temporary_words.pop)
           # 1. Die (bereits vorsortierten) Blöcke des entsprechenden Posting laden.
-          posting = Indexer::Postings.new(word, temporary: false, load: true)
+          posting = Indexer::Postings.new(word, load: true)
           
           # 2. Das Posting sortieren...
           sorter = Indexer::PostingsSorter.new(posting)

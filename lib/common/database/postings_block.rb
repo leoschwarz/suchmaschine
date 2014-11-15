@@ -53,7 +53,7 @@ module Common
       
       def fetch
         unless @temporary
-          Database.postings_block_get(@id)
+          @raw = Database.postings_block_get(@id)
         end
       end
       
