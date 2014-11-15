@@ -76,7 +76,7 @@ module Common
         @metadata ||= PostingsMetadata.fetch(@word, @temporary)
         
         # Zuerst versuchen zum bestehenden Block soviel wie möglich vom Buffer zu speichern...
-        last_unsorted_block = @unsorted_blocks[-1]
+        last_unsorted_block = unsorted_blocks[-1]
         if last_unsorted_block != nil && PostingsBlock::MAX_ROWS - @metadata.blocks[-1][1] > 0
           last_unsorted_block.fetch
           last_unsorted_block.append_entries(@write_buffer.shift(last_unsorted_block.rows_free))
