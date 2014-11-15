@@ -46,13 +46,16 @@ module Crawler
           document.text  = parser.text
           document.save
           metadata.downloaded = true
+          metadata.save
+          
+          Database.index_queue_insert([metadata.hash])
         else
           # Wir speichern Dokumente bei denen der Titel nicht in Ordnung ist gar nicht erst,
           # in Metadata wird dann vermerkt, dass das Dokument nicht heruntergeladen wurde.
           metadata.downloaded = false
+          metadata.save
         end
-
-        metadata.save
+        
         :success
       else
         # Der Download war erfolgreich, es handelt sich aber nur um eine Weiterleitung.

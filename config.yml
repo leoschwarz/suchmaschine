@@ -17,7 +17,7 @@ local: &default
     document: "/home/lightblaze/suchmaschine/db/document/"
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
     index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
-    postings: "/mnt/sdb/suchmaschine/postings/"
+    postings_block: "/mnt/sdb/suchmaschine/postings/"
     postings_metadata: "/mnt/sdb/suchmaschine/postings_metadata/"
     metadata: "/mnt/sdb/suchmaschine/metadata/"
 
@@ -36,7 +36,7 @@ offline-laptop:
     document: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/document/"
     download_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/download_q/"
     index_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/index_q/"
-    postings: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings/"
+    postings_block: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings/"
     postings_metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings_metadata/"
     metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/metadata/"
 
@@ -47,6 +47,6 @@ offline-desktop:
     document: "/Users/leoschwarz/Desktop/suchmaschine/db/document/"
     download_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/download_q/"
     index_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/index_q/"
-    postings: "/Users/leoschwarz/Desktop/suchmaschine/db/postings/"
+    postings_block: "/Users/leoschwarz/Desktop/suchmaschine/db/postings/"
     postings_metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/postings_metadata/"
     metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/metadata/"

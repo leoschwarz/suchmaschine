@@ -5,24 +5,6 @@ require 'digest/md5'
 # URL: https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb
 
 module Database
-  # TODO: Methoden wie instance_eval von dieser Klasse entfernen, da diese eine grosse Sicherheitslücke darstellen!,
-  #       bzw. den Zugriff auf den Server nur von bestimmten IPs erlauben...
-  # TODO: Mutex per Resource (also einen für DownloadQueue, einen für IndexQueue, etc...)
-  class ServerFront
-    def initialize(server)
-      @server = server
-      @run_mutex = Mutex.new
-    end
-    
-    def execute(command, *args)
-      # Mit dem Mutex wird verhindert, dass zwei Threads zur selben Zeit auf der Datenbank
-      # arbeiten. Jede Anfrage führt die Methode ServerFront.execute nämlich in einem eigenen Thread aus.
-      @run_mutex.synchronize do
-        return @server.execute(command, args)
-      end
-    end
-  end
-  
   class Server
     def initialize
       @logger = Common::Logger.new
@@ -38,7 +20,7 @@ module Database
       {document: 256, 
        metadata: 8,
           cache: 8,
-       postings: 256,
+       postings_block: 256,
        postings_metadata: 8}.each_pair do |name, kb|
         options = {}
         options[:create_if_missing] = true
@@ -59,62 +41,6 @@ module Database
       @queues[:download].save
       @queues[:index].save
       @logger.log_info "Daten erfolgreich gespeichert."
-    end
-    
-    def execute(action, parameters)
-      parameters = parameters[0]
-      case action
-      when :download_queue_insert # URL1\tURL2...
-        handle_queue_insert(:download, parameters.flatten)
-      when :download_queue_fetch # 
-        handle_queue_fetch(:download)
-      when :index_queue_insert # DOC_HASH1\tDOC_HASH2...
-        handle_queue_insert(:index, parameters.flatten)
-      when :index_queue_fetch #
-        handle_queue_fetch(:index)
-      when :cache_set # KEY VALUE
-        key, value = parameters[0], parameters[1]
-        @data_stores[:cache].put(key, value)
-        nil
-      when :cache_get # KEY
-        key = parameters[0]
-        @data_stores[:cache].get(key)
-      when :document_set # ID VALUE
-        id, value = parameters[0], parameters[1]
-        @data_stores[:document].put(id, value)
-        nil
-      when :document_get # ID
-        id = parameters[0]
-        @data_stores[:document].get(id)
-      when :metadata_set # ID DATA
-        id, data = parameters[0], parameters[1]
-        handle_queue_insert(:index, [id])
-        @data_stores[:metadata].put(id, data)
-        nil
-      when :metadata_get # ID
-        id = parameters[0]
-        @data_stores[:metadata].get(id)
-      when :postings_block_set # word, block, data
-        id, data = parameters
-        @data_stores[:postings].put(id, data)
-        nil
-      when :postings_block_get # word, block
-        id = parameters[0]
-        @data_stores[:postings].get(id)
-      when :postings_block_delete
-        id = parameters[0]
-        @data_stores[:postings].delete(id)
-        nil
-      when :postings_metadata_set # word, data
-        word, data = parameters
-        @data_stores[:postings_metadata].put(word, data)
-        nil
-      when :postings_metadata_get # word
-        word = parameters[0]
-        @data_stores[:postings_metadata].get(word)
-      else
-        @logger.log_error "Unbekanter Datenbank Befehl #{action} mit Parameter: #{parameters}"
-      end
     end
     
     def has_metadata?(url)
@@ -145,6 +71,19 @@ module Database
       elsif queue == :index
         return @queues[:index].fetch
       end
+    end
+    
+    def handle_datastore_set(datastore, key, value)
+      @data_stores[datastore].put(key, value)
+      nil
+    end
+    
+    def handle_datastore_get(datastore, key)
+      @data_stores[datastore].get(key)
+    end
+    
+    def handle_datastore_delete(datastore, key)
+      @data_stores[datastore].delete(key)
     end
   end
 end
