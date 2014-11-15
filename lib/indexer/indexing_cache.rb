@@ -66,7 +66,7 @@ module Indexer
             @data.clear
           end
           
-          Common::WorkerThread.new(10).run(true) do
+          Common::WorkerThreads.new(10).run(true) do
             begin
               while (pair = queue.pop)
                 word, entries = pair
