@@ -21,7 +21,7 @@ module Indexer
       
       cache = IndexingCache.new
       Common::WorkerThreads.new(10).run do
-        while @progress[:tasks] < 100 && (doc_id = Indexer::Database.index_queue_fetch)
+        while @progress[:tasks] < 10_000 && (doc_id = Indexer::Database.index_queue_fetch)
           task = Task.load(doc_id)
           task.run(cache) unless task.nil?
           
