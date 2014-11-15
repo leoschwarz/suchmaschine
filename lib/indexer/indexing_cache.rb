@@ -58,26 +58,33 @@ module Indexer
     
     def write_to_disk
       if @writer_thread.nil? || !@writer_thread.alive?
-        # TODO: Hier nur einen Thread zu verwenden, d.h. jeden Eintrag einen nach dem anderen zur Datenbank zu übertragen
-        # ist extrem ineffizient, dies muss dringend verbessert werden!
         @writer_thread = Thread.new do
-          # TODO: Fortschrittanzeige?
-          started = Time.now
-          puts "Mit dem Niederschreiben des IndexingCache begonnen..."
-          
+          # Wertepaare in eine Warteschlange laden...
+          queue = Thread::Queue.new
           @data_mutex.synchronize do
-            @data.each_pair do |word, item|
-              # TODO: Hier können unter Umständen mehrere Blöcke entstehen, was nacher im Sortierer zu Problemen führen wird...
-              postings = Indexer::Postings.new(word, temporary: false, load: true)
-              postings.add_rows(item.entries)
-              postings.save
-            end
+            @data.each_pair{|word, item| queue << [word, item.entries]}
             @data.clear
           end
           
+          Common::WorkerThread.new(10).run(true) do
+            begin
+              while (word, entries = queue.pop)
+                # TODO: Die Möglichkeit, dass hier mehr als ein Block entstehen können, was dem 
+                #       Index Sortierer Probleme machen würde, wird zwar mit der Momenanten Konfiguration
+                #       nicht eintreten, soll aber dennoch nicht vernachlässigt werden, denn es
+                #       könnte unter Umständen dennoch zu Problemen kommen.
+                #       (Beispielsweise wenn der Indexierer mehrfach gestartet wird, aber nicht bis zum
+                #        sortieren gelangt...)
+                postings = Indexer::Postings.new(word, temporary: false, load: true)
+                postings.add_rows(entries)
+                postings.save
+              end
+            rescue ThreadError
+              # Dies tritt ein, wenn die Warteschlange abgearbeitet wurde.
+            end
+          end
+          
           @size = 0
-      
-          puts "IndexingCache in #{(Time.now - started).round(1)}s abgeschlossen."
         end
       end
       
