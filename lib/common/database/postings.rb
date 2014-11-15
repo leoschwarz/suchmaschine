@@ -67,18 +67,31 @@ module Common
         @metadata.blocks_sorted = @metadata.blocks.count
       end
       
-      # Schreibt den write_buffer in Blöcken nieder...
+      # Fügt den write_buffer zu den Blöcken hinzu.
+      # Falls es bereits einen unsortierten und noch nicht vollen Block gibt, wird dieser zunächst.
+      # Ansonsten werden die Zeilen in der Reihenfolge niedergeschrieben und neue Blöcke erstellt.
       def save
+        return nil if @write_buffer.nil? || @write_buffer.size == 0
+        
         @metadata ||= PostingsMetadata.fetch(@word, @temporary)
         
-        @write_buffer.each_slice(PostingsBlock::MAX_ROWS) do |rows|
+        # Zuerst versuchen zum bestehenden Block soviel wie möglich vom Buffer zu speichern...
+        last_unsorted_block = @unsorted_blocks[-1]
+        if last_unsorted_block != nil && PostingsBlock::MAX_ROWS - @metadata.blocks[-1][1] > 0
+          last_unsorted_block.fetch
+          last_unsorted_block.append_entries(@write_buffer.shift(last_unsorted_block.rows_free))
+          last_unsorted_block.save
+          @metadata.blocks[-1][1] = last_unsorted_block.rows_count
+        end
+        
+        # Neue Blöcke für die restlichen Einträge erstellen...
+        while @write_buffer.size > 0
           block = PostingsBlock.new(nil, @temporary)
-          block.entries = rows
+          block.entries = @write_buffer.shift(PostingsBlock::MAX_ROWS)
           block.save
           @metadata.blocks << [block.id, block.rows_count]
         end
         
-        @write_buffer.clear
         @metadata.save
       end
       

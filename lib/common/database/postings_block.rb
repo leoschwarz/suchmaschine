@@ -39,6 +39,14 @@ module Common
         @raw = _bin_entries.join("")
       end
       
+      def append_bin_entries(_bin_entries)
+        @raw += _bin_entries.join("")
+      end
+      
+      def append_entries(_entries)
+        append_bin_entries _entries.map{|row| row.pack(PACK_INSTRUCTION)}
+      end
+      
       def entries
         self.bin_entries.map{|bin_row| bin_row.unpack(PACK_INSTRUCTION)}
       end
