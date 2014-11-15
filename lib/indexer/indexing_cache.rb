@@ -68,7 +68,11 @@ module Indexer
           
           Common::WorkerThreads.new(10).run(true) do
             begin
-              while (pair = queue.pop)
+              while (pair = queue.pop(true))
+                # TODO: Diese Übertragung hier ist noch immer viel zu langsam...
+                #       Wahrscheinlich sollte man mehrere Anfragen bündeln und dann diese die Datenbank in einem
+                #       Durchgang schreiben lassen...
+                
                 word, entries = pair
                 # TODO: Die Möglichkeit, dass hier mehr als ein Block entstehen können, was dem 
                 #       Index Sortierer Probleme machen würde, wird zwar mit der Momenanten Konfiguration
