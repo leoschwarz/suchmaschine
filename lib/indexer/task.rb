@@ -18,9 +18,10 @@ module Indexer
 
     # Die Aufgabe bearbeiten.
     def run(cache)
+      total = @metadata.word_counts_total
+      
       @metadata.word_counts.each_pair do |word, count|
-        # TODO: Dies ist natürlich falsch, aber nun nur zu Testzwecken...
-        frequency = Math.log(count)
+        frequency = Math.log(count*1.0 / total)
         cache[word] << [frequency, count, @hash]
       end
     end

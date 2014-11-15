@@ -12,6 +12,10 @@ module Common
       field :word_counts, {}                         # [Hash]    Wort => Anzahl, Wie oft kommen die Worte im Dokument vor?
       field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
       field :downloaded, true                        # [Boolean] Gibt es ein heruntergeladenes Dokument?
+      
+      def word_counts_total
+        self.word_counts.values.inject(:+).to_i
+      end
 
       def hash
         Digest::MD5.hexdigest(self.url)
