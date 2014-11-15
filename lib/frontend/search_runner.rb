@@ -25,8 +25,8 @@ module Frontend
           block = blocks[0]
           block.fetch
           block.entries.each do |frequency, occurences, id|
-            corpus_count = 1.0 # TODO
-            results[id] += Math.log( occurences*1.0 / corpus_count)
+            corpus_count = postings.rows_count
+            results[id] += Math.log( frequency / corpus_count)
           end
         end
       end

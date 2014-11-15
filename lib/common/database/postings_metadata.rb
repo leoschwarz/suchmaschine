@@ -13,8 +13,6 @@ module Common
       # [0] => ID
       # [1] => Anzahl Zeilen
       field :blocks
-      # TODO: Dieses Feld ging bis jetzt noch ein bisschen in Vergessenheit
-      field :total_occurences, 0
       
       attr_accessor :temporary
       

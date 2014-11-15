@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require_relative '../../lib/common/config'
-require 'oj'; require 'lz4-ruby'
+require 'oj'; # TODO: entweder benchmark entfernen, oder updaten... require 'lz4-ruby'
 
 n = 100
 

@@ -1,6 +1,5 @@
 require 'drb/drb'
 require 'leveldb-native'
-require 'lz4-ruby'
 require 'digest/md5'
 
 # URL: https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb
