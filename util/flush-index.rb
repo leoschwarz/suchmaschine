@@ -32,7 +32,7 @@ end
 
 puts "Löschvorgang begonnen..."
 puts "Löschen aller Index-Dateien..."
-files  = Dir[Config.paths.postings + "*"]
+files  = Dir[Config.paths.postings_block + "*"]
 files += Dir[Config.paths.postings_metadata + "*"]
 
 total = files.count
