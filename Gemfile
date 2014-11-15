@@ -7,5 +7,3 @@ gem 'leveldb-native', '~> 0.6'
 
 gem 'sinatra', '~> 1.4.5'
 gem 'erubis', '~> 2.7.0'
-
-gem 'webmock', '~> 1.18.0'
