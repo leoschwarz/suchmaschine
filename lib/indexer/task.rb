@@ -21,7 +21,7 @@ module Indexer
       total = @metadata.word_counts_total
       
       @metadata.word_counts.each_pair do |word, count|
-        frequency = Math.log(count*1.0 / total)
+        frequency = count*1.0 / total
         cache[word] << [frequency, count, @hash]
       end
     end
