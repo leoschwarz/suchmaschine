@@ -64,7 +64,14 @@ module Indexer
           @data_mutex.synchronize do
             while @data.size > 0
               # TODO: Hier eventuell noch andere Parameter evaluieren. (vor allem hinsichtlich der Grösse der Blöcke etc...)
-              queue << @data.pop(500).map{|word, item| [word, item.entries]}
+              pairs = []
+              
+              @data.keys[0...500].each do |key|
+                pairs << @data[key]
+                @data.delete(key)
+              end
+              
+              queue << pairs
             end
           end
           
