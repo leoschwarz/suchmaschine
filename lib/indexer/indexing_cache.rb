@@ -81,7 +81,6 @@ module Indexer
                 postings_objects = []
                 
                 pairs.each do |word, entries|
-                  word, entries = pair
                   # TODO: Die Möglichkeit, dass hier mehr als ein Block entstehen können, was dem 
                   #       Index Sortierer Probleme machen würde, wird zwar mit der Momenanten Konfiguration
                   #       nicht eintreten, soll aber dennoch nicht vernachlässigt werden, denn es
