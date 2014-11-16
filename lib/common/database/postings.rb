@@ -116,7 +116,7 @@ module Common
         postings_objects.each{ |postings| postings.save(true)}
         
         PostingsMetadata.batch_save(postings_objects.map{|postings| postings.metadata})
-        PostingsBlock.batch_save(postings_objects.map{|postings| postings.unsaved_blocks})
+        PostingsBlock.batch_save(postings_objects.map{|postings| postings.unsaved_blocks}.flatten)
         
         postings_objects.each{|postings| postings.unsaved_blocks.clear}
       end

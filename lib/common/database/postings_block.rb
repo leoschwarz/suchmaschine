@@ -79,7 +79,7 @@ module Common
       end
       
       def self.batch_save(blocks)
-        Database.postings_block_batch_set(objects.map{|block| [block.id, block.raw]})
+        Database.postings_block_batch_set(blocks.map{|block| [block.id, block.raw]})
       end
       
       def delete
