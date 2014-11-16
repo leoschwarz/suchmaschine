@@ -33,6 +33,14 @@ module Common
       def self.cache_get(key)
         self.run(:cache, :get, key)
       end
+      
+      def self.search_cache_set(key, value)
+        self.run(:search_cache, :set, key, value)
+      end
+
+      def self.search_cache_get(key)
+        self.run(:search_cache, :get, key)
+      end
 
       def self.document_set(hash, document)
         self.run(:document, :set, hash, document)

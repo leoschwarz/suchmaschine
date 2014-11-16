@@ -4,14 +4,20 @@ module Frontend
     
     def initialize(query)
       @query = query
-    end
-    
-    def run
+      
       # Alle Sonderzeichen entfernen
       @query.gsub!(/[^a-zA-ZäöüÄÖÜ]+/, " ")
       
       # Kleinschreiben
       @query.downcase!
+    end
+    
+    def run
+      # Überprüfen ob es bereits einen Cache-Eintrag gibt.
+      if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
+        @results = cache_item.documents.first(10).map{|id, score| [Frontend::Metadata.fetch(id), score]}
+        return
+      end
       
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
@@ -33,6 +39,9 @@ module Frontend
       
       @results_count = results.size
       @results = results.sort_by{|doc, score| score}.reverse.first(10).map{|id, score| [Frontend::Metadata.fetch(id), score]}
+      
+      # Cache schreiben
+      SearchCacheItem.create(@query, results.sort_by{|_, score| score}.reverse)
     end
   end
 end

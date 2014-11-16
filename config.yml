@@ -14,6 +14,7 @@ local: &default
     threads: 10
   paths:
     cache: "/mnt/sdb/suchmaschine/cache/"
+    search_cache: "/mnt/sdb/suchmaschine/search_cache/"
     document: "/home/lightblaze/suchmaschine/db/document/"
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
     index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
@@ -33,6 +34,7 @@ offline-laptop:
   <<: *default
   paths:
     cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/cache/"
+    search_cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/search_cache/"
     document: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/document/"
     download_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/download_q/"
     index_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/index_q/"
@@ -44,6 +46,7 @@ offline-desktop:
   <<: *default
   paths:
     cache: "/Users/leoschwarz/Desktop/suchmaschine/db/cache/"
+    search_cache: "/Users/leoschwarz/Desktop/suchmaschine/db/search_cache/"
     document: "/Users/leoschwarz/Desktop/suchmaschine/db/document/"
     download_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/download_q/"
     index_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/index_q/"

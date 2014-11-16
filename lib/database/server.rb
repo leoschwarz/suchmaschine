@@ -20,6 +20,7 @@ module Database
       {document: 256, 
        metadata: 8,
           cache: 8,
+   search_cache: 8,
        postings_block: 256,
        postings_metadata: 8}.each_pair do |name, kb|
         options = {}
