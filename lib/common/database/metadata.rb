@@ -18,7 +18,13 @@ module Common
       end
 
       def hash
-        Digest::MD5.hexdigest(self.url)
+        if self.url.class == URL
+          Digest::MD5.hexdigest(self.url.stored)
+        elsif self.url.class == String
+          Digest::MD5.hexdigest(self.url)
+        else
+          raise "Falscher Typ für url: #{self.url.class}"
+        end
       end
 
       def document
