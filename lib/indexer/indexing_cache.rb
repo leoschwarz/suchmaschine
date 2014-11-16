@@ -19,7 +19,7 @@ module Indexer
   end
   
   class IndexingCache
-    MAX_SIZE = 5_000_000
+    MAX_SIZE = 100_000_000
     
     def initialize
       @size = 0
@@ -66,7 +66,7 @@ module Indexer
               # TODO: Hier eventuell noch andere Parameter evaluieren. (vor allem hinsichtlich der Grösse der Blöcke etc...)
               pairs = []
               
-              @data.keys[0...500].each do |key|
+              @data.keys[0...2000].each do |key|
                 pairs << [key, @data[key].entries]
                 @data.delete(key)
               end
