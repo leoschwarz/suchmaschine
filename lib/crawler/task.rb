@@ -48,7 +48,7 @@ module Crawler
           metadata.downloaded = true
           metadata.save
           
-          Database.index_queue_insert([metadata.hash])
+          Task::Database.index_queue_insert([metadata.hash])
         else
           # Wir speichern Dokumente bei denen der Titel nicht in Ordnung ist gar nicht erst,
           # in Metadata wird dann vermerkt, dass das Dokument nicht heruntergeladen wurde.
