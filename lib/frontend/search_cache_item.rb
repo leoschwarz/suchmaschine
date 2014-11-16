@@ -16,7 +16,7 @@ module Frontend
 
     def self.load(query)
       key = Digest::MD5.hexdigest(query)
-      raw = Database.search_cache_get(key)
+      raw = Frontend::Database.search_cache_get(key)
   
       if raw.nil?
         nil
@@ -36,7 +36,7 @@ module Frontend
     end
 
     def save
-      Database.search_cache_set(key, serialize)
+      Frontend::Database.search_cache_set(key, serialize)
     end
   end
 end
