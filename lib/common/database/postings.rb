@@ -77,8 +77,11 @@ module Common
       #
       # Falls dry_run = true , dann werden die Daten nicht gespeichert, aber die einezelnen Objekte dennoch verwendet
       # (Dies wird von self.batch_save benötigt)
-      def save(dry_run=false)
-        return nil if @write_buffer.nil? || @write_buffer.size == 0
+      def save(options={})
+        dry_run = options[:dry_run] || false
+        force   = options[:force]   || false
+        
+        return nil if !force && (@write_buffer.nil? || @write_buffer.size == 0)
         
         @metadata ||= PostingsMetadata.fetch(@word, @temporary)
         
@@ -113,7 +116,7 @@ module Common
       end
       
       def self.batch_save(postings_objects)
-        postings_objects.each{ |postings| postings.save(true)}
+        postings_objects.each{ |postings| postings.save(dry_run: true)}
         
         PostingsMetadata.batch_save(postings_objects.map{|postings| postings.metadata})
         PostingsBlock.batch_save(postings_objects.map{|postings| postings.unsaved_blocks}.flatten)

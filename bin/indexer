@@ -46,7 +46,7 @@ module Indexer
           # 2. Das Posting sortieren...
           sorter = Indexer::PostingsSorter.new(posting)
           sorter.sort_blocks
-          posting.save
+          posting.save(force: true)
           
           @progress[:tasks] += 1
         end
