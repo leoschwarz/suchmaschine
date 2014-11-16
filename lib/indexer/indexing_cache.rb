@@ -67,7 +67,7 @@ module Indexer
               pairs = []
               
               @data.keys[0...500].each do |key|
-                pairs << @data[key]
+                pairs << [key, @data[key].entries]
                 @data.delete(key)
               end
               
