@@ -62,27 +62,31 @@ module Indexer
           # Wertepaare in eine Warteschlange laden...
           queue = Thread::Queue.new
           @data_mutex.synchronize do
-            @data.each_pair{|word, item| queue << [word, item.entries]}
-            @data.clear
+            while @data.size > 0
+              # TODO: Hier eventuell noch andere Parameter evaluieren. (vor allem hinsichtlich der Grösse der Blöcke etc...)
+              queue << @data.pop(500).map{|word, item| [word, item.entries]}
+            end
           end
           
           Common::WorkerThreads.new(10).run(true) do
             begin
-              while (pair = queue.pop(true))
-                # TODO: Diese Übertragung hier ist noch immer viel zu langsam...
-                #       Wahrscheinlich sollte man mehrere Anfragen bündeln und dann diese die Datenbank in einem
-                #       Durchgang schreiben lassen...
+              while (pairs = queue.pop(true))
+                postings_objects = []
                 
-                word, entries = pair
-                # TODO: Die Möglichkeit, dass hier mehr als ein Block entstehen können, was dem 
-                #       Index Sortierer Probleme machen würde, wird zwar mit der Momenanten Konfiguration
-                #       nicht eintreten, soll aber dennoch nicht vernachlässigt werden, denn es
-                #       könnte unter Umständen dennoch zu Problemen kommen.
-                #       (Beispielsweise wenn der Indexierer mehrfach gestartet wird, aber nicht bis zum
-                #        sortieren gelangt...)
-                postings = Indexer::Postings.new(word, temporary: false, load: true)
-                postings.add_rows(entries)
-                postings.save
+                pairs.each do |word, entries|
+                  word, entries = pair
+                  # TODO: Die Möglichkeit, dass hier mehr als ein Block entstehen können, was dem 
+                  #       Index Sortierer Probleme machen würde, wird zwar mit der Momenanten Konfiguration
+                  #       nicht eintreten, soll aber dennoch nicht vernachlässigt werden, denn es
+                  #       könnte unter Umständen dennoch zu Problemen kommen.
+                  #       (Beispielsweise wenn der Indexierer mehrfach gestartet wird, aber nicht bis zum
+                  #        sortieren gelangt...)
+                  postings = Indexer::Postings.new(word, temporary: false, load: true)
+                  postings.add_rows(entries)
+                  postings_objects << postings
+                end
+                
+                Indexer::Postings.batch_save(postings_objects)
               end
             rescue ThreadError
               # Dies tritt ein, wenn die Warteschlange abgearbeitet wurde.

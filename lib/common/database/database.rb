@@ -58,6 +58,10 @@ module Common
         self.run(:postings_block, :set, id, data)
       end
       
+      def self.postings_block_batch_set(pairs)
+        self.run(:postings_block, :batch_set, pairs)
+      end
+      
       def self.postings_block_delete(id)
         self.run(:postings_block, :delete, id)
       end
@@ -68,6 +72,10 @@ module Common
       
       def self.postings_metadata_set(word, data)
         self.run(:postings_metadata, :set, word, data)
+      end
+      
+      def self.postings_metadata_batch_set(pairs)
+        self.run(:postings_metadata, :batch_set, pairs)
       end
       
       def self.run(resource, action, *parameters)

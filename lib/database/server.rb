@@ -78,6 +78,15 @@ module Database
       nil
     end
     
+    def handle_datastore_batch_set(datastore, pairs)
+      @data_stores[datastore].batch do |batch|
+        pairs.each do |key, value|
+          batch.put(key, value)
+        end
+      end
+      nil
+    end
+    
     def handle_datastore_get(datastore, key)
       @data_stores[datastore].get(key)
     end

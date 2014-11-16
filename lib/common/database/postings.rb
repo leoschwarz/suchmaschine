@@ -1,6 +1,9 @@
 module Common
   module Database
     class Postings
+      attr_reader :metadata
+      attr_accessor :unsaved_blocks
+      
       # word: das Stichwort
       # options[:temporary]: falls wahr werden die Daten nicht in der Datenbank gespeichert
       # options[:load]: falls wahr werden die Metadaten aus der Datenbank geladen
@@ -11,6 +14,7 @@ module Common
         @temporary = options[:temporary]
         fetch if options[:load]
         @write_buffer = []
+        @unsaved_blocks = []
       end
       
       def blocks_count
@@ -70,7 +74,10 @@ module Common
       # Fügt den write_buffer zu den Blöcken hinzu.
       # Falls es bereits einen unsortierten und noch nicht vollen Block gibt, wird dieser zunächst.
       # Ansonsten werden die Zeilen in der Reihenfolge niedergeschrieben und neue Blöcke erstellt.
-      def save
+      #
+      # Falls dry_run = true , dann werden die Daten nicht gespeichert, aber die einezelnen Objekte dennoch verwendet
+      # (Dies wird von self.batch_save benötigt)
+      def save(dry_run=false)
         return nil if @write_buffer.nil? || @write_buffer.size == 0
         
         @metadata ||= PostingsMetadata.fetch(@word, @temporary)
@@ -80,7 +87,11 @@ module Common
         if last_unsorted_block != nil && PostingsBlock::MAX_ROWS - @metadata.blocks[-1][1] > 0
           last_unsorted_block.fetch
           last_unsorted_block.append_entries(@write_buffer.shift(last_unsorted_block.rows_free))
-          last_unsorted_block.save
+          if !dry_run       
+            last_unsorted_block.save
+          else
+            @unsaved_blocks << last_unsorted_block
+          end
           @metadata.blocks[-1][1] = last_unsorted_block.rows_count
         end
         
@@ -88,11 +99,26 @@ module Common
         while @write_buffer.size > 0
           block = PostingsBlock.new(nil, @temporary)
           block.entries = @write_buffer.shift(PostingsBlock::MAX_ROWS)
-          block.save
+          if !dry_run
+            block.save
+          else
+            @unsaved_blocks << block
+          end
           @metadata.blocks << [block.id, block.rows_count]
         end
         
-        @metadata.save
+        if !dry_run
+          @metadata.save
+        end
+      end
+      
+      def self.batch_save(postings_objects)
+        postings_objects.each{ |postings| postings.save(true)}
+        
+        PostingsMetadata.batch_save(postings_objects.map{|postings| postings.metadata})
+        PostingsBlock.batch_save(postings_objects.map{|postings| postings.unsaved_blocks})
+        
+        postings_objects.each{|postings| postings.unsaved_blocks.clear}
       end
       
       def insert_from(other_posting)

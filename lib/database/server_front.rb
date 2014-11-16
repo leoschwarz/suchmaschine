@@ -46,6 +46,8 @@ module Database
     def handle_datastore(datastore_name, action, parameters)
       if action == :set
         @server.handle_datastore_set(datastore_name, parameters[0], parameters[1])
+      elsif action == :batch_set
+        @server.handle_datastore_batch_set(datastore_name, parameters[0])
       elsif action == :get
         @server.handle_datastore_get(datastore_name, parameters[0])
       elsif action == :delete

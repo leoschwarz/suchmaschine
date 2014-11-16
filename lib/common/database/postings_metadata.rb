@@ -44,6 +44,10 @@ module Common
           Database.postings_metadata_set(self.word, self.serialize)
         end
       end
+      
+      def self.batch_save(metadata_objects)
+        Database.postings_metadata_batch_set(metadata_objects.map{|metadata| [metadata.word, metadata.serialize]})
+      end
     end
   end
 end

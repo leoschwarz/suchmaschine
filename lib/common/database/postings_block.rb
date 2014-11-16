@@ -24,6 +24,7 @@ module Common
       PACK_INSTRUCTION = "g L> h32"
       
       attr_reader :id
+      attr_reader :raw
       
       def initialize(_id = nil, temporary = false)
         @id  = _id || generate_id
@@ -75,6 +76,10 @@ module Common
         unless @temporary
           Database.postings_block_set(@id, @raw)
         end
+      end
+      
+      def self.batch_save(blocks)
+        Database.postings_block_batch_set(objects.map{|block| [block.id, block.raw]})
       end
       
       def delete
