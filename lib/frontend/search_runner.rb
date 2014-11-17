@@ -15,7 +15,7 @@ module Frontend
     def run
       # Überprüfen ob es bereits einen Cache-Eintrag gibt.
       if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
-        @results = cache_item.documents.first(10).map{|id, score| [Frontend::Metadata.fetch(id), score]}
+        @cache_item = cache_item
         return
       end
       
@@ -37,11 +37,25 @@ module Frontend
         end
       end
       
-      @results_count = results.size
-      @results = results.sort_by{|doc, score| score}.reverse.first(10).map{|id, score| [Frontend::Metadata.fetch(id), score]}
-      
       # Cache schreiben
-      SearchCacheItem.create(@query, results.sort_by{|_, score| score}.reverse)
+      @cache_item = SearchCacheItem.create(@query, results.sort_by{|_, score| score}.reverse)
+    end
+    
+    def results_count
+      run if @cache_item.nil?
+      @cache_item.documents.size.to_i
+    end
+    
+    def pages_count
+      run if @cache_item.nil?
+      (results_count.to_f / 10).ceil
+    end
+    
+    def page(page_number=1)
+      run if @cache_item.nil?
+      
+      i = page_number-1
+      @cache_item.documents[10*i...10*(i+1)].map{|id, score| [Frontend::Metadata.fetch(id), score]}
     end
   end
 end
