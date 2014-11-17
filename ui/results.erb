@@ -16,3 +16,13 @@
   </li>
 <% end %>
 </ul>
+
+<div id="pagination">
+  <% pagination.entries.each do |pagination_entry| %>
+    <a href="<%= pagination_entry.url %>">
+      <%= "<b>" if pagination_entry.current? %>
+      <%= pagination_entry.number %>
+      <%= "</b>" if pagination_entry.current? %>
+    </a>
+  <% end %>
+</div>

@@ -27,7 +27,8 @@ module Frontend
       results = search.page(page)
       
       duration  = Time.now - start_time
-      render_page("results.erb", {query: query, duration: duration, results: results, results_count: search.results_count})
+      pagination = Frontend::WebPagination.new(search.pages_count, page, query)
+      render_page("results.erb", {query: query, duration: duration, results: results, results_count: search.results_count, pagination: pagination})
     end
 
     def render_page(page, vars={})
