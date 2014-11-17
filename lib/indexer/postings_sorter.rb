@@ -62,6 +62,10 @@ module Indexer
       write if @buffer.size >= MAX_ROWS
     end
     
+    def add_rows(rows)
+      rows.each{|row| add_row(row)}
+    end
+    
     def write
       block = Indexer::PostingsBlock.new
       block.bin_entries = @buffer
