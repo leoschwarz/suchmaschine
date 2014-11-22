@@ -1,8 +1,15 @@
 require 'nokogiri'
-# TODO: Effizienzoptimierung + Tests
-# TODO: Etwas aufräumen + Kommentare
+# TODO: evtl. Effizienzoptimierung + Aufräumen
 
 module Crawler
+  # Arbeitet HTML-Dokumente für die weitere Verwendung auf:
+  #
+  # Folgende Informationen werden extrahiert:
+  # - Titel des Dokumentes
+  # - Erlaubnis das Dokument zu indexieren und Links zu verfolgen
+  # - Fliesstext des Dokumentkörpers, falls Indexierung erlaubt
+  # - Links die verfolgt werden dürfen
+  
   class HTMLParser
     attr_reader :links, :text, :title
 
@@ -40,6 +47,7 @@ module Crawler
         meta_robots_tag = @doc.at_xpath("//meta[@name='robots']/@content")
         unless meta_robots_tag.nil?
           meta_robots = meta_robots_tag.text.downcase
+          
           if meta_robots.include? "noindex"
             @indexing_allowed  = false
           end
