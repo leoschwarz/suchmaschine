@@ -2,9 +2,9 @@ require 'curb'
 
 module Crawler
   class Download
-    # TODO: Nur diese Kodierungen zulassen (ist aber leider etwas kompliziert,
-    # da man verschiedene Schreibweisen der Kodierungen kennt. beispielsweise bei utf-8)
-    SUPPORTED_ENCODINGS = ::Encoding.name_list.map{|name| name.downcase}.freeze
+    # Das hier ist leider nicht perfekt, da es verschiedene Schreibweisen für die verschiedenen
+    # Kodierungen gibt und somit einige deshalb nicht erkannt werden.
+    SUPPORTED_ENCODINGS = (::Encoding.name_list.map{|name| name.downcase}+["utf8"]).freeze
     
     attr_reader :redirect_url, :response_body, :status
 
@@ -18,9 +18,7 @@ module Crawler
         # Der String @response_body ist normalerweise ASCII-8BIT.
         # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
         original_encoding = @response_body.encoding
-        if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil?
-    #      and SUPPORTED_ENCODINGS.include?((encoding = match[1].downcase))
-          encoding = match[1].downcase
+        if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil? and SUPPORTED_ENCODINGS.include?(encoding = match[1].downcase)
           encoding = "UTF-8" if encoding.include? "utf8"
           @response_body.force_encoding(encoding)
           @response_body.encode!('utf-8', invalid: :replace, undef: :replace, replace: '')
