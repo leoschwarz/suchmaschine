@@ -18,8 +18,7 @@ module Crawler
         # Der String @response_body ist normalerweise ASCII-8BIT.
         # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
         original_encoding = @response_body.encoding
-        if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil?
-           and SUPPORTED_ENCODINGS.include?(encoding = match[1].downcase)
+        if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil? and SUPPORTED_ENCODINGS.include?(encoding = match[1].downcase)
           encoding = "UTF-8" if encoding.include? "utf8"
           @response_body.force_encoding(encoding)
           @response_body.encode!('utf-8', invalid: :replace, undef: :replace, replace: '')
