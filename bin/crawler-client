@@ -14,7 +14,7 @@ module Crawler
       Config.crawler.threads.times{ self.launch_thread }
       
       @progress.start_display(5.0)
-      loop{ sleep 100 }
+      sleep
     end
     
     def launch_thread
