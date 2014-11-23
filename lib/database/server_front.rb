@@ -1,7 +1,14 @@
 module Database
-  # TODO: Methoden wie instance_eval von dieser Klasse entfernen, da diese eine grosse Sicherheitslücke darstellen!,
-  #       bzw. den Zugriff auf den Server nur von bestimmten IPs erlauben...
-  class ServerFront
+  # Sowohl Object, als auch BasicObject, werden mitsamt gefährlicher Methoden wie instance_eval und class_eval definiert.
+  # Deshalb werden von dieser Klasse alle Methoden entfernt, die nicht unbedingt notwendig sind, um das ServerFront Objekt
+  # sicher zu machen.
+  class BlankObject
+    (instance_methods - [:__send__, :__id__, :object_id, :private_methods, :protected_methods]).each do |method|
+      undef_method method
+    end
+  end
+  
+  class ServerFront < BlankObject
     def initialize(server)
       @server = server
       

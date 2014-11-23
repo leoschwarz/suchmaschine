@@ -1,4 +1,5 @@
 require 'drb/drb'
+require 'drb/acl'
 require 'leveldb-native'
 require 'digest/md5'
 
@@ -17,6 +18,7 @@ module Database
       @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
       
       @data_stores = {}
+      # TODO: Konfigurationsauslagerung
       {document: 256, 
        metadata: 8,
           cache: 8,
@@ -32,6 +34,8 @@ module Database
       end
       
       front_object = ServerFront.new(self)
+      directive = (["deny", "all"] + Config.database.client_whitelist.map{|ip| ["allow", ip]}).flatten
+      DRb.install_acl(ACL.new(directive))
       DRb.start_service(Config.database_connection, front_object)
       @logger.log_info "Datenbank Server gestartet."
       DRb.thread.join

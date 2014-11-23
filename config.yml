@@ -2,6 +2,9 @@ local: &default
   database_connection: "druby://0.0.0.0:2051"
   database:
     batch_size: 100_000
+    client_whitelist:
+      - 127.0.0.1
+      - 192.168.10.100
   crawler:
     agent: "lightblaze"
     threads: 100
