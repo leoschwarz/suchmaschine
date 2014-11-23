@@ -2,6 +2,13 @@ local: &default
   database_connection: "druby://0.0.0.0:2051"
   database:
     batch_size: 100_000
+    block_size: # Angaben in KB
+      document: 128
+      metadata: 4
+      cache: 4
+      search_cache: 4
+      postings_block: 32
+      postings_metadata: 8
     client_whitelist:
       - 127.0.0.1
       - 192.168.10.100

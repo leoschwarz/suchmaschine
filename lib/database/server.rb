@@ -18,13 +18,9 @@ module Database
       @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
       
       @data_stores = {}
-      # TODO: Konfigurationsauslagerung
-      {document: 256, 
-       metadata: 8,
-          cache: 8,
-   search_cache: 8,
-       postings_block: 256,
-       postings_metadata: 8}.each_pair do |name, kb|
+      names = [:document, :metadata, :cache, :search_cache, :postings_block, :postings_metadata]
+      names.each do |name|
+        kb = Config.database.block_size[name]
         options = {}
         options[:create_if_missing] = true
         options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
