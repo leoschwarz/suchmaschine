@@ -33,14 +33,14 @@ wireless:
 offline-laptop:
   <<: *default
   paths:
-    cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/cache/"
-    search_cache: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/search_cache/"
-    document: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/document/"
-    download_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/download_q/"
-    index_queue: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/index_q/"
-    postings_block: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings/"
-    postings_metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/postings_metadata/"
-    metadata: "/Users/leonardo.schwarz/Desktop/suchmaschine/db/metadata/"
+    cache: "/Users/leonardo.schwarz/Maturarbeit/Code/db/cache/"
+    search_cache: "/Users/leonardo.schwarz/Maturarbeit/Code/db/search_cache/"
+    document: "/Users/leonardo.schwarz/Maturarbeit/Code/db/document/"
+    download_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/download_q/"
+    index_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index_q/"
+    postings_block: "/Users/leonardo.schwarz/Maturarbeit/Code/db/postings/"
+    postings_metadata: "/Users/leonardo.schwarz/Maturarbeit/Code/db/postings_metadata/"
+    metadata: "/Users/leonardo.schwarz/Maturarbeit/Code/db/metadata/"
 
 offline-desktop:
   <<: *default
