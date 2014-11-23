@@ -1,6 +1,6 @@
 module Common
   class ProgressLogger
-    def initialize(variables=OrderedHash.new, logger=nil)
+    def initialize(variables={}, logger=nil)
       @default = variables
       @variables = @default.clone
       

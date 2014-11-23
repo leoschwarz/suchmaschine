@@ -10,7 +10,7 @@ module Indexer
     def initialize
       @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/s"}})
       @logger.add_output($stdout, Common::Logger::INFO)
-      @progress = @logger.progress_logger(Common::OrderedHash.new([[:tasks, 0], [:tasks_per_second, nil]]))
+      @progress = @logger.progress_logger({tasks: 0, tasks_per_second: nil}))
       @progress[:tasks_per_second] = proc{|p| p.elapsed_time}
     end
     
