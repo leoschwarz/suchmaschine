@@ -94,6 +94,7 @@ module Database
     
     def handle_datastore_delete(datastore, key)
       @data_stores[datastore].delete(key)
+      nil
     end
   end
 end
