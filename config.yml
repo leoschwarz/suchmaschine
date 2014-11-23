@@ -17,9 +17,10 @@ local: &default
     threads: 100
     timeout: 10
     maxsize: 500_000
-  robotstxt: # TODO Diesen Abschnitt eventuelln nochmals überarbeiten
-    use_cache: YES
-    cache_lifetime: 86400
+  robotstxt:
+    cache:
+      enabled: YES
+      lifetime: 86400
   indexer:
     threads: 10
   paths:
