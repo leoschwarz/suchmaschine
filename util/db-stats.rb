@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-load( File.join(File.basename(__FILE__), "..", "bin", "database") )
+load( File.join(File.dirname(__FILE__), "..", "bin", "database") )
 
 kb = Config.database.block_size.metadata
 options = {}
