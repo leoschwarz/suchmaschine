@@ -1,5 +1,4 @@
 require 'nokogiri'
-# TODO: evtl. Effizienzoptimierung + Aufräumen
 
 module Crawler
   # Arbeitet HTML-Dokumente für die weitere Verwendung auf:
@@ -12,75 +11,96 @@ module Crawler
   
   class HTMLParser
     attr_reader :links, :text, :title
-
+  
+    # Initialisiert eine neue Parser-Instanz und verarbeitet das Dokument.
+    # @param [URL] base_url Die URL des Dokumentes (wird für die Ergänzung von relativen Links benötigt)
+    # @param [String] html Das HTML das gelesen werden soll.
     def initialize(base_url, html)
+      # Instanzvariabeln setzen
       @base_url = base_url
       @doc      = Nokogiri::HTML(html)
-
-      parse()
-    end
-    
-    def permissions
-      {index: @indexing_allowed, follow: @following_allowed}
-    end
-    
-    def title_ok?
-      !@title.nil? && @title.size > 1 && @title.size < 100
-    end
-
-    def parse
-      # Standardwerte
-      @indexing_allowed  = true
-      @following_allowed = true
-      @links = []
-      @text  = ""
-      @title = nil
+      @links    = []
+      @text     = ""
       
-      # Titel
-      title_tag = @doc.xpath("//title")[0]
-      @title = title_tag.text unless title_tag.nil?
-      
-      # Wenn das Dokument keinen richtigen Titel hat können wir es sowieso nicht brauchen.
-      if title_ok?
-        # 'robots' Meta-Tag
-        # TODO: Varianten der Gross- und Kleinschreibung im XPath
-        meta_robots_tag = @doc.at_xpath("//meta[@name='robots']/@content")
-        unless meta_robots_tag.nil?
-          meta_robots = meta_robots_tag.text.downcase
-          
-          if meta_robots.include? "noindex"
-            @indexing_allowed  = false
-          end
-          if meta_robots.include? "nofollow"
-            @following_allowed = false
-          end
-        end
-
-        # Links
-        if @following_allowed
-          @doc.xpath('//a[@href]').each do |link|
-            if link['rel'].nil? or not link['rel'].include? "nofollow"
-              url = @base_url.join_with(link['href'])
-              unless url.nil?
-                @links << [_clean_text(link.text), url]
-              end
-            end
-          end
-        end
-
-        # Text
-        if @indexing_allowed
-          @doc.search("script").each{|el| el.unlink}
-          @doc.search("style").each{|el| el.unlink}
-          @doc.xpath("//comment()").remove
-          @text = _clean_text(@doc.text)
-        end
+      # HTML-Verarbeitung      
+      @title = extract_title
+      @permissions = extract_permissions if title_ok?
+      @links = extract_links if permissions[:follow]
+      if permissions[:index]
+        remove_invisible_items
+        @text = extract_text
       end
+    end
+    
+    # Gibt die Berechtigungen der Suchmaschine zurück.
+    # @return [Hash]
+    def permissions
+      @permissions || {index: true, follow: true}
+    end
+    
+    # Überprüft ob der Dokumenttitel in Ordnung ist.
+    # @return [Boolean]
+    def title_ok?
+      @title != nil
     end
 
     private
-    def _clean_text(text)
+    # Entfernt alle mehrfachen Wiederholungen von Leerzeichen und Leerzeichen zu Beginn und Ende des Strings.
+    # @param [String] text
+    # @return [String]
+    def clean_text(text)
       text.gsub(/\s+/, " ").strip
+    end
+    
+    # Entfernt Scripts, Styles und Kommentare aus dem Dokument.
+    # @return [nil]
+    def remove_invisible_items
+      @doc.search("script").each{|el| el.unlink}
+      @doc.search("style").each{|el| el.unlink}
+      @doc.xpath("//comment()").remove
+    end
+    
+    # Extrahiert den Titel aus dem Dokument.
+    # Falls der Titel nicht existiert wird nil zurückgegeben, ansonsten maximal 100 Zeichen des Titels.
+    # @return [String]
+    def extract_title
+      title_tag = @doc.xpath("//title")[0]
+      return nil if title_tag.nil?
+      return nil if (title = clean_text(title_tag.text)).size < 1
+      title[0..100]
+    end
+    
+    # Extrahiert die Bot-Berechtigungen aus dem Dokument.
+    # Standardwerte werden angenommen, wenn keine Informationen im Dokument gefunden werden.
+    # @return [Hash]
+    def extract_permissions
+      result = {index: true, follow: true}
+      if (metatag_robots = @doc.at_xpath("//meta[@name='robots']/@content")) != nil
+        data = metatag_robots.text.downcase
+        result[:index]  = !data.include?("noindex")
+        result[:follow] = !data.include?("nofollow")
+      end
+      result
+    end
+    
+    # Extrahiert die Links aus dem Dokument.
+    # Nur gültige Links werden zurückgegeben.
+    # @return [Array]
+    def extract_links
+      links = []
+      @doc.xpath('//a[@href]').each do |link|
+        if link['rel'].nil? or not link['rel'].include?("nofollow")
+          url = @base_url.join_with(link['href'])
+          links << [clean_text(link.text), url] unless url.nil?
+        end
+      end
+      links
+    end
+    
+    # Extrahiert den Fliesstext aus dem Dokumentkörper.
+    # @return [String]
+    def extract_text
+      clean_text(@doc.text)
     end
   end
 end
