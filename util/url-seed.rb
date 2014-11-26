@@ -5,11 +5,11 @@ require 'oj'
 
 # Deutschsprachige Seiten:
 $domains  = %w[de.wikipedia.org tagesanzeiger.ch srf.ch 20min.ch nzz.ch spiegel.de chip.de heise.de]
+$domains += %w[sueddeutsche.de baz.ch faz.net zeit.de gutefrage.net mozilla.org yahoo.de]
 $domains += %w[focus.de blick.ch bluewin.ch blogspot.ch sbb.ch local.ch comparis.ch]
-$domains += %w[gutefrage.net mozilla.org yahoo.de]
 
 # Englischsprachige Seiten:
-$domains += %w[en.wikipedia.org stackoverflow.com imdb.com forbes.com cnn.com bbc.com theguardian.com]
+$domains += %w[en.wikipedia.org stackoverflow.com imdb.com forbes.com cnn.com bbc.com theguardian.com nytimes.com]
 
 # Funktion um die URLs zu speichern.
 def insert_urls(urls)
