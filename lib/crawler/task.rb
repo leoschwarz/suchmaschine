@@ -34,15 +34,16 @@ module Crawler
         metadata.permissions = parser.permissions
         metadata.word_counts = WordCounter.new(parser.text).counts
         
-        links = parser.links.map{|link| [link[0], link[1].stored]}
         if parser.permissions[:follow]
-          Task.insert(links.map{|pairs| pairs[1]})
+          # Links einfügen, aber zuvor werden die Fragmentbezeichner aus den URLs entfernt,
+          # um unnötige Duplikate zu verhindern.
+          Task.insert(parser.links.map{|anchor, url| url.remove_fragment_identifier; url.stored})
         end
         
         if parser.title_ok?
           document = Crawler::Document.new
           document.url   = @url
-          document.links = links
+          document.links = parser.links.map{|anchor, url| [anchor, url.stored]}
           document.title = parser.title
           document.text  = parser.text
           document.save
@@ -75,7 +76,7 @@ module Crawler
     end
 
     # Neue Aufgaben erstellen.
-    # @param urls [Array] URLs im stored Format
+    # @param urls [Array] URLs im stored Format (ohne Fragmentbezeichner)
     # @return [nil]
     def self.insert(urls)
       Crawler::Database.download_queue_insert urls.select{|url| url.bytesize < 512}
