@@ -11,14 +11,15 @@ data_store = LevelDBNative::DB.new(Config.paths.metadata, options)
 
 domain_counts = Hash.new(0)
 data_store.keys.each do |key|
-  metadata = Database::Metadata.deserialize(data_store[key])
+  metadata = Common::Database::Metadata.deserialize(data_store[key])
   domain   = (metadata.url).split("/")[0]
-  @domain_counts[domain] += 1
+  domain_counts[domain] += 1
 end
 
 total = 0
-domain_counts.sort_by{|k,v| v}.reverse.each do |domain, value|
-  puts "#{domain} => #{value}"
+domain_counts.sort_by{|k,v| v}.last(200).reverse.each_with_index do |pair, index|
+  domain, value = pair
+  puts "[#{index.to_s.ljust(3)}]: #{domain} => #{value}"
   total += value
 end
 puts "="*20
