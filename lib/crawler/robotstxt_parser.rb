@@ -10,7 +10,7 @@ module Crawler
     # @return [RobotstxtParser]
     def self.for_domain(domain)
       # Datenbank-Cache überprüfen...
-      if (data = Database.cache_get("robotstxt:#{domain}"))
+      if Config.robotstxt.cache.enabled && (data = Crawler::Database.cache_get("robotstxt:#{domain}"))
         parser = deserialize(data)
         # Falls noch gültig, ist hier schon fertig.
         return parser if parser.valid_until > Time.now.to_i
@@ -18,19 +18,17 @@ module Crawler
       
       # Datei aus dem Internet laden...
       parser = self.new
-      parser.fetch(Common::URL.encoded "http://#{@domain}/robots.txt")
-      Database.cache_set("robotstxt:#{domain}", parser.serialize)
+      parser.fetch(Common::URL.encoded("http://#{domain}/robots.txt"))
+      Crawler::Database.cache_set("robotstxt:#{domain}", parser.serialize) if Config.robotstxt.cache.enabled
       parser
     end
     
     # Überprüft ob der Zugriff auf einen Pfad erlaubt ist.
     # @param path [String] Der zu überprüfende Pfad.
     # @return [Boolean]
-    def allowed?(path)
-      fetch if @rules.nil?
-      
+    def allowed?(path)      
       allowed = true
-      @rules.each do |rule|
+      self.rules.each do |rule|
         if /^(#{rule[1]})/.match(path)
           if rule[0] == :disallow
             allowed = false
@@ -43,7 +41,6 @@ module Crawler
       allowed
     end
     
-    private
     # Lädt die robots.txt-Datei herunter und verarbeitet sie.
     # @param url [URL] URL zur Datei.
     # @return [nil]
@@ -52,16 +49,17 @@ module Crawler
       code = download.status[0]
       if code == "2"
         self.rules = parse(download.response_body)
-        self.valid_until = Time.now.to_i + Config.robotstxt.lifetime
+        self.valid_until = Time.now.to_i + Config.robotstxt.cache.lifetime
       elsif code == "3" || code == "5"
         self.rules = [[:disallow, "/"]]
         self.valid_until = Time.now.to_i + 120
-      elsif c == "4"
+      elsif code == "4"
         self.rules = []
-        self.valid_until = Time.now.to_i + Config.robotstxt.lifetime
+        self.valid_until = Time.now.to_i + Config.robotstxt.cache.lifetime
       end
     end
     
+    private
     # Verarbeitet die robots.txt-Datei und gibt ein Array an Regeln zurück.
     # @param raw [String] Der Inhalt der robots.txt-Datei.
     # @return [Array]

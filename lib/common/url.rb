@@ -112,7 +112,7 @@ module Common
       
       # Wir sind fertig, falls die URL nil ist oder es sich um eine absolute URL handelt.
       return nil if url.nil?
-      return url if url.full_url?
+      return url if url.full_url
       
       # Die URIs zusammenfügen
       begin
@@ -155,7 +155,7 @@ module Common
     # Teilt die kodierte URL in die Domain und den Pfad auf.
     # @return [Array]
     def url_parts
-      match = %r{^http[s]?://([a-zA-Z0-9\.-]+)(.*)}.match(url)
+      match = %r{^http[s]?://([a-zA-Z0-9\.-]+)(.*)}.match(@encoded_url)
       result = []
       if match
         [match[1], match[2]]

@@ -6,7 +6,7 @@ module Crawler
     def launch
       @logger = Common::Logger.new({labels: {success: :Erfolge, failure: :Fehler, not_allowed: :Verboten}})
       @logger.add_output($stdout, Common::Logger::INFO)
-      @progress = @logger.progress_logger({success: 0, failure: 0, not_allowed: 0}))
+      @progress = @logger.progress_logger({success: 0, failure: 0, not_allowed: 0})
       
       @logger.log_info("Crawler-Client wurde gestartet.")
       @logger.log_info("Threads: #{Config.crawler.threads}")
