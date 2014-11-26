@@ -13,8 +13,8 @@ module Crawler
     attr_reader :links, :text, :title
   
     # Initialisiert eine neue Parser-Instanz und verarbeitet das Dokument.
-    # @param [URL] base_url Die URL des Dokumentes (wird für die Ergänzung von relativen Links benötigt)
-    # @param [String] html Das HTML das gelesen werden soll.
+    # @param base_url [URL] Die URL des Dokumentes (wird für die Ergänzung von relativen Links benötigt)
+    # @param html [String] Das HTML das gelesen werden soll.
     def initialize(base_url, html)
       # Instanzvariabeln setzen
       @base_url = base_url
@@ -46,7 +46,7 @@ module Crawler
 
     private
     # Entfernt alle mehrfachen Wiederholungen von Leerzeichen und Leerzeichen zu Beginn und Ende des Strings.
-    # @param [String] text
+    # @param text [String]
     # @return [String]
     def clean_text(text)
       text.gsub(/\s+/, " ").strip

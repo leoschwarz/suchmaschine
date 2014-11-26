@@ -15,8 +15,8 @@ module Common
     private_class_method :new
     
     # Erzeugt eine neue URL Instanz.
-    # @param [String] encoded_url Die kodierte URL mit dem Schema.
-    # @param [Boolean] full_url Handelt es sich um eine absolute URL?
+    # @param encoded_url [String] Die kodierte URL mit dem Schema.
+    # @param full_url [Boolean] Handelt es sich um eine absolute URL?
     def initialize(encoded_url, full_url=true)
       @encoded_url = encoded_url
       @full_url    = full_url
@@ -74,21 +74,21 @@ module Common
     end
 
     # Neue URL-Instanz aus URL im "encoded" Format erstellen.
-    # @param [String] url Die kodierte URL mit Schema.
+    # @param url [String] Die kodierte URL mit Schema.
     # @return [URL]
     def self.encoded(url)
       new(url)
     end
 
     # Neue URL-Instanz aus URL im "decoded" Format erstellen.
-    # @param [String] url Die dekodierte URL mit Schema.
+    # @param url [String] Die dekodierte URL mit Schema.
     # @return [URL]
     def self.decoded(url)
       new(URI.encode url)
     end
 
     # Neue URL-Instanz aus URL im "stored" Format erstellen.
-    # @param [String] url Die kodierte URL ohne Schema.
+    # @param url [String] Die kodierte URL ohne Schema.
     # @return [URL]
     def self.stored(url)
       new("http://"+url)
@@ -126,8 +126,8 @@ module Common
     # Versucht einen String, dessen Typ ungeklärt ist, in ein URL Objekt zu konvertieren.
     # Es werden nur encoded und decoded unterstützt.
     # Falls dies nicht gelingt wird stattdessen nil zurückgegeben.
-    # @param [String] string Der zu konvertierende String.
-    # @param [Boolean] second_try Soll ein zweiter Versuch erlaubt sein? (In dem Fall wird versucht die URL zu kodieren)
+    # @param string [String] Der zu konvertierende String.
+    # @param second_try [Boolean] Soll ein zweiter Versuch erlaubt sein? (In dem Fall wird versucht die URL zu kodieren)
     # @return [URL, nil]
     def self.from_unknown(string, second_try=true)
       # 1. Versuch: die URL enthält keine besonderen Sonderzeichen...

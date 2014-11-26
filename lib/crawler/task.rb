@@ -1,7 +1,7 @@
 module Crawler
   class Task
     # Erzeugt eine neue Aufgabe.
-    # @param [URL] url URL der Aufgabe.
+    # @param url [URL] URL der Aufgabe.
     def initialize(url)
       @url = url
     end
@@ -75,7 +75,7 @@ module Crawler
     end
 
     # Neue Aufgaben erstellen.
-    # @param [Array] urls URLs im stored Format
+    # @param urls [Array] URLs im stored Format
     # @return [nil]
     def self.insert(urls)
       Crawler::Database.download_queue_insert urls.select{|url| url.bytesize < 512}
