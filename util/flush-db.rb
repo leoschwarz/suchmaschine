@@ -10,12 +10,12 @@ end
 
 dirs = [
   Config.paths.cache,
+  Config.paths.search_cache,
   Config.paths.document,
   Config.paths.download_queue,
   Config.paths.index_queue,
-  Config.paths.postings,
+  Config.paths.postings_block,
   Config.paths.postings_metadata,
-  Config.paths.index_tmp,
   Config.paths.metadata
 ]
 
