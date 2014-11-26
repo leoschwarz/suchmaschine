@@ -1,21 +1,22 @@
 module Crawler
   class Task
-    attr_reader :url
-
+    # Erzeugt eine neue Aufgabe.
+    # @param [URL] url URL der Aufgabe.
     def initialize(url)
       @url = url
     end
 
-    # Bearbeitet die URL und gibt einen der folgedenen Werte zurück:
-    # :success -> Alles lief einwandfrei.
-    # :failure -> Es gab einen Fehler beim Download. (zBsp. ein HTTP-Fehler)
-    # :not_allowed -> Die URL darf nicht heruntergeladen werden
+    # Führt die Aufgabe aus.
+    # @return [Symbol] :success -> Alles lief einwandfrei.
+    #                  :failure -> Es gab einen Fehler beim Download. (zBsp. ein HTTP-Fehler)
+    #                  :not_allowed -> Die URL darf nicht heruntergeladen werden.
     def execute
       # Überprüfen ob es erlaubt ist die Seite herunterzuladen
       unless RobotsTXT.allowed?(@url.encoded)
         return :not_allowed
       end
-
+      
+      # Den Download durchführen.
       download = Crawler::Download.new(@url, "text/html")
       if not download.success?
         # Der Download war nicht erfolgreich.
@@ -73,11 +74,15 @@ module Crawler
       end
     end
 
-    # URLs an die Datenbank übergeben (im URL.stored Format)
+    # Neue Aufgaben erstellen.
+    # @param [Array] urls URLs im stored Format
+    # @return [nil]
     def self.insert(urls)
       Crawler::Database.download_queue_insert urls.select{|url| url.bytesize < 512}
     end
 
+    # Neue Aufgabe laden.
+    # @return [Task]
     def self.fetch
       Task.new(Crawler::Database.download_queue_fetch)
     end

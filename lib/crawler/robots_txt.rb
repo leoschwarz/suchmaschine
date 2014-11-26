@@ -1,6 +1,8 @@
 module Crawler
   # Implementierung ähnlich der Google Spezifikation:
   # https://developers.google.com/webmasters/control-crawl-index/docs/robots_txt
+  
+  # TODO: RobotsTXT ist der letzte Teil im Crawler der noch überarbeitet werden muss...
 
   class RobotsTXT
     def initialize(robot_name)
@@ -13,13 +15,9 @@ module Crawler
       @@instances[robot_name] ||= RobotsTXT.new(robot_name)
     end
 
-    # Deferrable, callback wird mit Rückgabewert true/false aufgerufen
     def allowed?(url)
-      match  = /^http[s]?:\/\/([a-zA-Z0-9\.-]+)(.*)/.match(url)
-      if match.nil? then return false end
-      domain = match[1].downcase
-      path   = match[2]
-      if path.empty? then path = "/" end
+      domain, path = url.domain, url.path
+      return false if domain.nil? || path.nil?
 
       @parsers[domain] ||= RobotsTXTParser.new(domain, @robot_name)
       @parsers[domain].allowed?(path)
