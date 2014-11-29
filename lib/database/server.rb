@@ -1,6 +1,5 @@
 require 'drb/drb'
 require 'drb/acl'
-require 'leveldb-native'
 require 'digest/md5'
 
 # URL: https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb
@@ -10,25 +9,10 @@ module Database
     def initialize
       @logger = Common::Logger.new
       @logger.add_output($stdout, Common::Logger::INFO)
+      @backend = Database::Backend.new
     end
     
     def start
-      @queues = {}
-      @queues[:download] = BetterQueue.new(Config.paths.download_queue)
-      @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
-      
-      @data_stores = {}
-      names = [:document, :metadata, :cache, :search_cache, :postings_block, :postings_metadata]
-      names.each do |name|
-        kb = Config.database.block_size[name]
-        options = {}
-        options[:create_if_missing] = true
-        options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
-        options[:block_size]        = kb * 1024
-        options[:write_buffer_size] = 16 * 1024*1024
-        @data_stores[name] = LevelDBNative::DB.new(Config.paths[name], options)
-      end
-      
       front_object = ServerFront.new(self)
       directive = (["deny", "all"] + Config.database.client_whitelist.map{|ip| ["allow", ip]}).flatten
       DRb.install_acl(ACL.new(directive))
@@ -39,23 +23,22 @@ module Database
     
     def stop
       @logger.log_info "Datenbank wird heruntergefahren."
-      @queues[:download].save
-      @queues[:index].save
+      @backend.save
       @logger.log_info "Daten erfolgreich gespeichert."
     end
     
     def has_metadata?(url)
-      @data_stores[:metadata].exists?(Digest::MD5.hexdigest(url))
+      @backend.datastore_haskey?(Digest::MD5.hexdigest(url))
     end
     
     def handle_queue_insert(queue, items)
       if queue == :download
         items.each do |url|
-          @queues[:download].insert(url) unless has_metadata?(url)
+          @backend.queue_insert(:download, url) unless has_metadata?(url)
         end
       elsif queue == :index
         items.each do |id|
-          @queues[:index].insert(id)
+          @backend.queue_insert(id)
         end
       end
 
@@ -64,36 +47,29 @@ module Database
     
     def handle_queue_fetch(queue)
       if queue == :download
-        url = @queues[:download].fetch
-        while has_metadata? url
-          url = @queues[:download].fetch
-        end
-        return url
+        while has_metadata? (url = @backend.queue_fetch(:download)); end
+        url
       elsif queue == :index
-        return @queues[:index].fetch
+        @backend.queue_fetch(:index)
       end
     end
     
     def handle_datastore_set(datastore, key, value)
-      @data_stores[datastore].put(key, value)
+      @backend.datastore_set(datastore, key, value)
       nil
     end
     
     def handle_datastore_batch_set(datastore, pairs)
-      @data_stores[datastore].batch do |batch|
-        pairs.each do |key, value|
-          batch.put(key, value)
-        end
-      end
+      @backend.datastore_batchset(datastore, pairs)
       nil
     end
     
     def handle_datastore_get(datastore, key)
-      @data_stores[datastore].get(key)
+      @backend.datastore_get(datastore, key)
     end
     
     def handle_datastore_delete(datastore, key)
-      @data_stores[datastore].delete(key)
+      @backend.datastore_delete(datastore, key)
       nil
     end
   end
