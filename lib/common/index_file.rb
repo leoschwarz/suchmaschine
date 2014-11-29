@@ -110,7 +110,7 @@ module Common
       elsif !@buffer_last && @buffer.bytesize - @buffer_offset < 100 # Indem im Voraus geladen wird, wird vermieden komplizierte Logik für das Nachladen von weiteren Einträgen zu implementieren, was nötig wäre, wenn der Buffer einen Eintrag zertrennen würde...
         
         @file_offset += @buffer_offset
-        @buffer = @buffer.byteslice(@buffer_offset, BUFFER_SIZE)
+        @buffer = @buffer.byteslice(@buffer_offset, BUFFER_SIZE) || ""
         @buffer_offset = 0
         @buffer << IO.binread(@file_path, @file_offset, BUFFER_SIZE)
         @buffer_last = (@file_offset+BUFFER_SIZE >= @file_size)
