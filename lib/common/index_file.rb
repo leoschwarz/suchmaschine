@@ -104,7 +104,7 @@ module Common
       end
       
       @buffer_offset += BUFFER_SIZE      
-      if @buffer_last && @buffer_offset >= @buffer_offset >= @buffer.bytesize
+      if @buffer_last && @buffer_offset >= @buffer.bytesize
         # Das Ende der Datei wurde erreicht.
         @end = true
       elsif !@buffer_last && @buffer.bytesize - @buffer_offset < 100 # Indem im Voraus geladen wird, wird vermieden komplizierte Logik für das Nachladen von weiteren Einträgen zu implementieren, was nötig wäre, wenn der Buffer einen Eintrag zertrennen würde...
