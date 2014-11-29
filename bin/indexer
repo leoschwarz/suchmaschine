@@ -53,6 +53,8 @@ module Indexer
       merger = Indexer::Merger.new(destination, sources)
       merger.merge
       
+      db.save
+      
       @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
     end
   end
