@@ -60,7 +60,7 @@ module Indexer
           File.unlink Config.paths.index
         end
         destination = Common::IndexFile.new(Config.paths.index).writer
-        sources = Dir["#{dir}/*"].each{|path| IndexFile.new(path).reader}
+        sources = Dir["#{dir}/*"].each{|path| Common::IndexFile.new(path).reader}
         merger = Indexer::Merger.new(destination, sources)
         merger.merge
       
