@@ -36,7 +36,6 @@ module Indexer
       
         cache = Indexer::IndexingCache.new(dir)
         queue_mutex = Mutex.new
-        datastore_mutex = Mutex.new
         Common::WorkerThreads.new(20).run(true) do
           loop do
             key = queue_mutex.synchronize do
@@ -45,9 +44,7 @@ module Indexer
             
             break if key.nil?
             
-            raw = datastore_mutex.synchronize do
-              db.datastore_get(:metadata, key)
-            end
+            raw = db.datastore_get(:metadata, key)
             
             if raw          
               metadata = Common::Database::Metadata.deserialize(raw)
@@ -70,7 +67,7 @@ module Indexer
         db.save
       
         @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
-      rescue => e
+      rescue Exception => e
         db.save
         raise e
       end
