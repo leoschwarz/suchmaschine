@@ -1,6 +1,6 @@
 module Database
   class BetterQueueMetadata
-    include ::Common::Serializable
+    include Common::Serializable
     
     # Array mit Namen aller Stapel
     field :batches # Hash: Name => Anzahl Zeilen
