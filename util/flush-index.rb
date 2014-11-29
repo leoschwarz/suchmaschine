@@ -23,7 +23,8 @@ puts "Alte Dateien gelöscht, beginne die neue Warteschlange zu befüllen..."
 begin
   db = Database::Backend.new
 rescue => e
-  raise "Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden."
+  puts "Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden."
+  raise e
 end
 
 puts "Befüllen der Index-Warteschlange begonnen..."
