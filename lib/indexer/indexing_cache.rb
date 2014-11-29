@@ -26,7 +26,7 @@ module Indexer
         @flush_thread = Thread.new do
           file = Common::IndexFile.new(File.join(@flush_directory, @flushes.to_s)).writer
       
-          @data_mutex.synchronize
+          @data_mutex.synchronize do
             @data.sort_by{|word, rows| word}.each do |word, rows|
               file.write_header(word, rows.size)
               rows.sort_by{|freq, doc| freq}.reverse.each do |freq, doc|
