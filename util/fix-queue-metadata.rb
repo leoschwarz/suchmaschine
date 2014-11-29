@@ -19,7 +19,7 @@ end
 metadata_path = File.join(path, "metadata")
 if File.exist?(metadata_path)
   puts "Es existiert eine metadata-Datei."
-  print "Datei löschen? Ja/[Nein]"
+  print "Datei löschen? Ja/[Nein] "
   answer = gets.strip
   unless answer.downcase == "ja"
     Kernel.exit
@@ -34,7 +34,7 @@ metadata.batches = {}
 files = Dir[File.join(path, "*")]
 files.each do |file|
   lines = File.read(file).lines.count
-  metadata.batches[File.basename(file), lines]
+  metadata.batches[File.basename(file)] = [lines]
 end
 
 # Counter rekonstruieren
