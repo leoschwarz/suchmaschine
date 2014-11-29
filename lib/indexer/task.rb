@@ -2,27 +2,23 @@
 
 module Indexer
   class Task
-    def initialize(hash, metadata)
-      @hash     = hash
-      @metadata = metadata
+    def initialize(indexing_cache, metadata)
+      @indexing_cache = indexing_cache
+      @metadata       = metadata
     end
-
-    # Eine neue Aufgabe laden.
-    def self.load(hash)
-      metadata = Indexer::Metadata.fetch(hash)
-      if metadata.nil?
-        return nil
+    
+    def run
+      # Zuerst die Maximal Anzahl eines beliebigen wortes finden...
+      max_occurences = 0
+      @metadata.word_counts.values.each do |count|
+        max_occurences = count if max_occurences < count
       end
-      self.new(hash, metadata)
-    end
-
-    # Die Aufgabe bearbeiten.
-    def run(cache)
-      total = @metadata.word_counts_total
       
+      # Nun die Resultate finden
+      key = @metadata.hash
       @metadata.word_counts.each_pair do |word, count|
-        frequency = count*1.0 / total
-        cache[word] << [frequency, count, @hash]
+        term_frequency = count.to_f / max_occurences
+        @indexing_cache.add(word, term_frequency, key)
       end
     end
   end

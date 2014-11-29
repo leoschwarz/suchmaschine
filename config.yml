@@ -28,6 +28,7 @@ local: &default
     search_cache: "/mnt/sdb/suchmaschine/search_cache/"
     document: "/home/lightblaze/suchmaschine/db/document/"
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
+    index: "/homt/lightblaze/suchmaschine/db/index"
     index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
     postings_block: "/mnt/sdb/suchmaschine/postings/"
     postings_metadata: "/mnt/sdb/suchmaschine/postings_metadata/"

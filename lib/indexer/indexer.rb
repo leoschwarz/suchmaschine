@@ -1,5 +1,4 @@
 module Indexer
-  include Common::Database
 end
 
 # Alle Dateien im Verzeichnis laden

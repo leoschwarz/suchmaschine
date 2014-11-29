@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require_relative '../lib/database/backend.rb' # TODO: nach lib/common verschieben ? 
 require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
 
@@ -10,54 +11,51 @@ module Indexer
     def initialize
       @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/s"}})
       @logger.add_output($stdout, Common::Logger::INFO)
-      @progress = @logger.progress_logger({tasks: 0, tasks_per_second: nil}))
-      @progress[:tasks_per_second] = proc{|p| p.elapsed_time}
     end
     
     def run
-      # In Threads einzelne Dokumente indexieren.
-      @logger.log_info "10'000 Dokumente werden indexiert und anschliessend in den Hauptindex eingegliedert."
-      @progress.start_display(5.0)
+      @logger.log_info "Indexierer wurde gestartet."
       
-      cache = IndexingCache.new
-      Common::WorkerThreads.new(10).run do
-        while @progress[:tasks] < 10_000 && (doc_id = Indexer::Database.index_queue_fetch)
-          task = Task.load(doc_id)
-          task.run(cache) unless task.nil?
-          
-          @progress[:tasks] += 1
+      begin
+        db = Database::Backend.new
+      rescue => e
+        @logger.log_exception(e)
+        @logger.log_warning("Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden.")
+        Kernel.exit
+      end
+      
+      # Temporäres Verzeichnis für den Index überprüfen...
+      dir = File.join(File.dirname(__FILE__), "..", "tmp", "index")
+      if Dir.exist?(dir)
+        raise "Bitte das tmp/index-Verzeichniss entleeren."
+      else
+        Dir.mkdir(dir)
+      end
+      
+      cache = Indexer::IndexingCache.new(dir)
+      Common::WorkerThreads.new(20).run(true) do
+        while (key = db.queue_fetch(:index)) != nil
+          raw = db.datastore_get(:metadata, key)
+          metadata = Common::Database::Metadata.deserialize(raw)
+          Task.new(cache, metadata).run
         end
       end
-      @progress.stop_display
-      cache.write_to_disk
+      cache.flush
       
-      # Sortieren der Einträge beginnen...
-      @logger.log_info "Sortieren der Zwischenergebnisse gestartet."
-      temporary_words = cache.words
-      cache = nil
-      @logger.log_info "Anzahl zu sortierender Dateien: #{temporary_words.size}"
-      
-      @progress.restart_display
-      Common::WorkerThreads.new(10).run do
-        while (word = temporary_words.pop)
-          # 1. Die (bereits vorsortierten) Blöcke des entsprechenden Posting laden.
-          posting = Indexer::Postings.new(word, load: true)
-          
-          # 2. Das Posting sortieren...
-          sorter = Indexer::PostingsSorter.new(posting)
-          sorter.sort_blocks
-          posting.save(force: true)
-          
-          @progress[:tasks] += 1
-        end
+      # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
+      @logger.log_info "Die Einträge werden nun gemerged..."
+      if File.exist?(Config.paths.index)
+        File.unlink Config.paths.index
       end
-      @progress.stop_display
-    
-      @logger.log_info "10'000 Dokumente erfolgreich indexiert und in Hauptindex eingegliedert."
+      destination = Common::IndexingFile.new(Config.paths.index).writer
+      sources = Dir["#{dir}/*"].each{|path| IndexFile.new(path).reader}
+      merger = Indexer::Merger.new(destination, sources)
+      merger.merge
+      
+      @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
     end
   end
 end
-
 
 if __FILE__ == $0
   Indexer::Main.new.run()
