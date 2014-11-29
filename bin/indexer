@@ -45,8 +45,8 @@ module Indexer
             
             break if key.nil?
             
-            datastore_mutex.synchronize do
-              raw = db.datastore_get(:metadata, key)
+            raw = datastore_mutex.synchronize do
+              db.datastore_get(:metadata, key)
             end
             
             metadata = Common::Database::Metadata.deserialize(raw)
