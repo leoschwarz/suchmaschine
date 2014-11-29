@@ -50,6 +50,10 @@ module Database
       @datastores[datastore].exists?(key)
     end
     
+    def datastore_keys(datastore)
+      @datastores[datastore].keys
+    end
+    
     def queue_fetch(queue)
       @queues[queue].fetch
     end
