@@ -29,9 +29,7 @@ module Indexer
           @data_mutex.synchronize do
             @data.sort_by{|word, rows| word}.each do |word, rows|
               file.write_header(word, rows.size)
-              rows.sort_by{|freq, doc| freq}.reverse.each do |freq, doc|
-                file.write_row(freq, doc)
-              end
+              file.write_rows(rows.sort_by{|freq, doc| freq}.reverse)
             end
             @data.clear
             @data_size = 0
