@@ -4,8 +4,8 @@ module Database
   class Backend
     def initialize
       @queues = {}
-      @queues[:download] = BetterQueue.new(Config.paths.download_queue)
-      @queues[:index]    = BetterQueue.new(Config.paths.index_queue)
+      @queues[:download] = Database::BetterQueue.new(Config.paths.download_queue)
+      @queues[:index]    = Database::BetterQueue.new(Config.paths.index_queue)
       
       @datastores = {}
       names = [:document, :metadata, :cache, :search_cache, :postings_block, :postings_metadata]
