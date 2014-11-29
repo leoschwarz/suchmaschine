@@ -83,7 +83,7 @@ module Common
       return nil if @end
       
       if @current.nil?
-        frequency = @buffer.byteslice(@buffer_offset, 4).unpack("g")
+        frequency = @buffer.byteslice(@buffer_offset, 4).unpack("g")[0]
         if frequency != 0.0
           # Es handelt sich um einen normalen Eintrag
           data = @buffer.byteslice(@buffer_offset, IndexFile::ROW_SIZE).unpack(IndexFile::ROW_PACK)
