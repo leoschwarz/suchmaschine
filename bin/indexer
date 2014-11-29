@@ -49,8 +49,10 @@ module Indexer
               db.datastore_get(:metadata, key)
             end
             
-            metadata = Common::Database::Metadata.deserialize(raw)
-            Task.new(cache, metadata).run unless metadata.nil?
+            if raw          
+              metadata = Common::Database::Metadata.deserialize(raw)
+              Task.new(cache, metadata).run unless metadata.nil?
+            end
           end
         end
         cache.flush
