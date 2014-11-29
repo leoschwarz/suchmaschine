@@ -2,6 +2,7 @@
 # Durch einen Fehler und ein schlechtes Programm ist es dazu gekommen, dass die Metadaten einer Warteschlange nicht gespeichert wurden?
 # Kein Problem, mit diesem kleinen Skript kann man diese wieder regenerieren...
 # TODO: Eventuell dies später direkt in die Warteschlange integriereren...
+require_relative '../lib/common/common.rb'
 require_relative '../lib/database/better_queue_metadata.rb'
 
 # Pfad erhalten
