@@ -20,7 +20,7 @@ end
 puts "Löschvorgang begonnen..."
 puts "Löschen aller Index-Dateien..."
 
-File.unlink(Config.paths.index)
+File.unlink(Config.paths.index) if File.exist?(Config.paths.index)
 Dir[File.join(File.dirname(__FILE__), "..", "tmp", "index", "*")].each{|file| File.unlink(file)}
 Dir[Config.paths.index_queue+"*"].each{|file| File.unlink(file)}
 
