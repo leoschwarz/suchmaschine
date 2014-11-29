@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require_relative '../lib/databsae/database.rb'
+require_relative '../lib/database/database.rb'
 #require_relative '../lib/database/backend.rb' # TODO: nach lib/common verschieben ? 
 require_relative '../lib/common/common.rb'
 require_relative '../lib/indexer/indexer.rb'
