@@ -3,7 +3,7 @@ module Common
   # welche das einfache schreiben und lesen von Index-Dateien ermöglichen.
   #
   # Die Index Dateien besitzen ein eigenens spezielles binäres Format:
-  # [WORT-28] = 28 Bytes langes Stichwort (Nullybytes werden am Ende hinzugefügt, falls das Stichwort kürzer ist).
+  # [WORT-20] = 20 Bytes langes Stichwort (Nullybytes werden am Ende hinzugefügt, falls das Stichwort kürzer ist).
   # [FREQ-04] = 4  Bytes lange  Fliesskommazahl welche die Termfrequenz im Dokument angibt.
   # [DOKU-16] = 16 Bytes lange  Hexadezimalzahl/String zur Kennzeichnung des Dokumentes.
   # [ANZA-04] = 4  Bytes lange  Integerzahl welche die Anzahl Dokumente für das entsprechende Stichwort auflistet.
@@ -103,7 +103,7 @@ module Common
         when :row    then IndexFile::ROW_SIZE
       end
       
-      @buffer_offset += BUFFER_SIZE      
+      @buffer_offset += skip_bytes      
       if @buffer_last && @buffer_offset >= @buffer.bytesize
         # Das Ende der Datei wurde erreicht.
         @end = true
