@@ -11,12 +11,6 @@ if input != "index löschen"
   Kernel.exit
 end
 
-begin
-  db = Database::Backend.new
-rescue => e
-  raise "Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden."
-end
-
 puts "Löschvorgang begonnen..."
 puts "Löschen aller Index-Dateien..."
 
@@ -25,6 +19,12 @@ Dir[File.join(File.dirname(__FILE__), "..", "tmp", "index", "*")].each{|file| Fi
 Dir[Config.paths.index_queue+"*"].each{|file| File.unlink(file)}
 
 puts "Alte Dateien gelöscht, beginne die neue Warteschlange zu befüllen..."
+
+begin
+  db = Database::Backend.new
+rescue => e
+  raise "Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden."
+end
 
 puts "Befüllen der Index-Warteschlange begonnen..."
 keys = db.datastore_keys(:metadata)
