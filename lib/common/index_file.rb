@@ -14,7 +14,7 @@ module Common
   # - [FREQ-04][DOKU-16]          : Es gibt jeweils für jedes Auftreten pro Dokument eine solche Zeile,
   #                                 das Feld der Frequenz wird immer auf einen Wert ≠ 0 gesetzt um diesen Abschnit zu markieren.
   class IndexFile
-    HEADER_PACK = "g a28 L>"
+    HEADER_PACK = "g a20 L>"
     ROW_PACK    = "g h32"
     HEADER_SIZE = 28
     ROW_SIZE    = 20
