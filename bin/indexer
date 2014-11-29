@@ -25,37 +25,42 @@ module Indexer
         Kernel.exit
       end
       
-      # Temporäres Verzeichnis für den Index überprüfen...
-      dir = File.join(File.dirname(__FILE__), "..", "tmp", "index")
-      if Dir.exist?(dir)
-        raise "Bitte das tmp/index-Verzeichniss entleeren."
-      else
-        Dir.mkdir(dir)
-      end
-      
-      cache = Indexer::IndexingCache.new(dir)
-      Common::WorkerThreads.new(20).run(true) do
-        while (key = db.queue_fetch(:index)) != nil
-          raw = db.datastore_get(:metadata, key)
-          metadata = Common::Database::Metadata.deserialize(raw)
-          Task.new(cache, metadata).run unless metadata.nil?
+      begin
+        # Temporäres Verzeichnis für den Index überprüfen...
+        dir = File.join(File.dirname(__FILE__), "..", "tmp", "index")
+        if Dir.exist?(dir)
+          raise "Bitte das tmp/index-Verzeichniss entleeren."
+        else
+          Dir.mkdir(dir)
         end
+      
+        cache = Indexer::IndexingCache.new(dir)
+        Common::WorkerThreads.new(20).run(true) do
+          while (key = db.queue_fetch(:index)) != nil
+            raw = db.datastore_get(:metadata, key)
+            metadata = Common::Database::Metadata.deserialize(raw)
+            Task.new(cache, metadata).run unless metadata.nil?
+          end
+        end
+        cache.flush
+      
+        # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
+        @logger.log_info "Die Einträge werden nun gemerged..."
+        if File.exist?(Config.paths.index)
+          File.unlink Config.paths.index
+        end
+        destination = Common::IndexingFile.new(Config.paths.index).writer
+        sources = Dir["#{dir}/*"].each{|path| IndexFile.new(path).reader}
+        merger = Indexer::Merger.new(destination, sources)
+        merger.merge
+      
+        db.save
+      
+        @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
+      rescue => e
+        db.save
+        raise e
       end
-      cache.flush
-      
-      # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
-      @logger.log_info "Die Einträge werden nun gemerged..."
-      if File.exist?(Config.paths.index)
-        File.unlink Config.paths.index
-      end
-      destination = Common::IndexingFile.new(Config.paths.index).writer
-      sources = Dir["#{dir}/*"].each{|path| IndexFile.new(path).reader}
-      merger = Indexer::Merger.new(destination, sources)
-      merger.merge
-      
-      db.save
-      
-      @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
     end
   end
 end
