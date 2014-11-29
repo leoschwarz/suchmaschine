@@ -39,8 +39,8 @@ module Indexer
         datastore_mutex = Mutex.new
         Common::WorkerThreads.new(20).run(true) do
           loop do
-            queue_mutex.synchronize do
-              key = db.queue_fetch(:index)
+            key = queue_mutex.synchronize do
+              db.queue_fetch(:index)
             end
             
             break if key.nil?
