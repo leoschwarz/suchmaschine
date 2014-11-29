@@ -38,7 +38,7 @@ module Indexer
         while (key = db.queue_fetch(:index)) != nil
           raw = db.datastore_get(:metadata, key)
           metadata = Common::Database::Metadata.deserialize(raw)
-          Task.new(cache, metadata).run
+          Task.new(cache, metadata).run unless metadata.nil?
         end
       end
       cache.flush
