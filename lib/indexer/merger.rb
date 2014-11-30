@@ -23,6 +23,9 @@ module Indexer
         n_total = sources_for_term[term].map{|_, n| n}.inject(:+)
         @destination.write_header(term, n_total)
         
+        # Den Pointer der ausgewählte Quellen jeweils um eins weiter verschieben, sodass auf eine Inhaltszeile gezeigt wird.
+        sources.each{|source| source.shift}
+        
         # Nun werden die einzelnen Quellen gemerged
         while sources.size > 0
           source, index = sources.each_with_index.min_by{|source, _| source.current[1]}
