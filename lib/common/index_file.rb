@@ -30,6 +30,7 @@ module Common
       def initialize(path)
         @path   = path
         @exists = File.exists?(path)
+        
         if @exists
           @size = File.size(path)
         else
@@ -56,7 +57,7 @@ module Common
     
     # Methode des Moduls um eine neue Instanz von Common::IndexFile::IndexFile zu erzeugen...
     def self.new(path)
-      ::Common::IndexFile::IndexFile.new(path)
+      ::Common::IndexFile::IndexFile.new(File.expand_path path)
     end
   end
 end

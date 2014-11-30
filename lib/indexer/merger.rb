@@ -19,8 +19,9 @@ module Indexer
         term = sources_for_term.keys.min
         
         # Einen neuen Header in das Ziel schreiben
-        sources = sources_for_term[term].map{|source, _| source}
-        n_total = sources_for_term[term].map{|_, n| n}.inject(:+)
+        sources = sources_for_term[term].map{|source, count| source}
+        n_total = sources_for_term[term].map{|source, count| count}.inject(:+)
+        
         @destination.write_header(term, n_total)
         
         # Den Pointer der ausgewählte Quellen jeweils um eins weiter verschieben, sodass auf eine Inhaltszeile gezeigt wird.
@@ -37,6 +38,7 @@ module Indexer
           source.shift
           if source.current == nil
             # Quelle ist ganz fertig...
+            sources.delete_at(index)
             @sources.delete(source)
           elsif source.current[0] == :header
             # Quelle ist in diesem Schritt fertig

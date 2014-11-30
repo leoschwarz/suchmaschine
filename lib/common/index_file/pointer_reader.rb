@@ -6,7 +6,7 @@ module Common
       def initialize(file_path, file_size)
         @file_path = file_path
         @file_size = file_size
-            
+        
         @buffer    = []
         @pointer   = 0  # <- wo muss in der datei weitergelesen werden um den buffer zu ergänzen
       end
@@ -29,7 +29,7 @@ module Common
       def fetch_buffer
         if @pointer < @file_size
           raw = IO.binread(@file_path, BUFFER_SIZE, @pointer)
-        
+          
           # Einlesen
           pointer = 0
           loop do
