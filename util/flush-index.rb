@@ -16,6 +16,7 @@ puts "Löschen aller Index-Dateien..."
 
 File.unlink(Config.paths.index) if File.exist?(Config.paths.index)
 Dir[File.join(File.dirname(__FILE__), "..", "tmp", "index", "*")].each{|file| File.unlink(file)}
+Dir.delete(File.join(File.dirname(__FILE__), "..", "tmp", "index"))
 Dir[Config.paths.index_queue+"*"].each{|file| File.unlink(file)}
 
 puts "Alte Dateien gelöscht, beginne die neue Warteschlange zu befüllen..."

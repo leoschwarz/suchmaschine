@@ -41,6 +41,16 @@ module Common
           @size = 0
         end
       end
+      
+      def exists?
+        @exists
+      end
+      
+      def delete
+        File.unlink(@path) if File.exist?(@path)
+        File.unlink(@path+".meta") if File.exist?(@path+".meta")
+        reload
+      end
     
       def header_reader
         HeaderReader.new(@path, @size)
@@ -60,6 +70,7 @@ module Common
     
       def metadata
         @_metadata ||= Metadata.new(self)
+        @_metadata
       end
     end
     

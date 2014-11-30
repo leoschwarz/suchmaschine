@@ -61,14 +61,10 @@ module Indexer
       
         # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
         @logger.log_info "Die Einträge werden nun gemerged..."
-        if File.exist?(Config.paths.index)
-          File.unlink Config.paths.index
-        end
-        if File.exist?(Config.paths.index+".meta")
-          File.unlink(Config.paths.index+".meta")
-        end
-        FileUtils.touch Config.paths.index
+        
         destination = Common::IndexFile.new(Config.paths.index)
+        destination.delete
+        
         sources = Dir["#{dir}/*"].map{|path| Common::IndexFile.new(path).pointer_reader}
         merger = Indexer::Merger.new(destination.writer, sources)
         merger.merge
