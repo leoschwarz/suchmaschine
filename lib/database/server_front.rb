@@ -15,7 +15,7 @@ module Database
       # Mutex für die einzelnen Ressourcen der Datenbank erzeugen.
       # Zugriffe zu verschiedenen Ressourcen können so zur selben Zeit erfolgen.
       @mutex = {}
-      [:download_queue, :index_queue, :cache, :search_cache, :document, :metadata, :postings_block, :postings_metadata].each{|i| @mutex[i] = Mutex.new}
+      [:download_queue, :index_queue, :cache, :search_cache, :document, :metadata].each{|i| @mutex[i] = Mutex.new}
     end
     
     def execute(resource, action, parameters)
@@ -33,10 +33,6 @@ module Database
           handle_datastore(:document, action, parameters)  
         when :metadata
           handle_datastore(:metadata, action, parameters)
-        when :postings_block
-          handle_datastore(:postings_block, action, parameters)
-        when :postings_metadata
-          handle_datastore(:postings_metadata, action, parameters)
         end
       end
     end

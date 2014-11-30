@@ -30,8 +30,6 @@ local: &default
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
     index: "/mnt/sdb/suchmaschine/index"
     index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
-    postings_block: "/mnt/sdb/suchmaschine/postings/"
-    postings_metadata: "/mnt/sdb/suchmaschine/postings_metadata/"
     metadata: "/mnt/sdb/suchmaschine/metadata/"
 
 wired:
@@ -51,8 +49,6 @@ offline-laptop:
     download_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/download_q/"
     index: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index"
     index_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index_q/"
-    postings_block: "/Users/leonardo.schwarz/Maturarbeit/Code/db/postings/"
-    postings_metadata: "/Users/leonardo.schwarz/Maturarbeit/Code/db/postings_metadata/"
     metadata: "/Users/leonardo.schwarz/Maturarbeit/Code/db/metadata/"
 
 offline-desktop:
@@ -64,6 +60,4 @@ offline-desktop:
     download_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/download_q/"
     index: "/Users/leoschwarz/Desktop/suchmaschine/db/index"
     index_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/index_q/"
-    postings_block: "/Users/leoschwarz/Desktop/suchmaschine/db/postings/"
-    postings_metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/postings_metadata/"
     metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/metadata/"

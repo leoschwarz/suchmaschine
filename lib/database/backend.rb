@@ -8,7 +8,7 @@ module Database
       @queues[:index]    = Database::BetterQueue.new(Config.paths.index_queue)
       
       @datastores = {}
-      names = [:document, :metadata, :cache, :search_cache, :postings_block, :postings_metadata]
+      names = [:document, :metadata, :cache, :search_cache]
       names.each do |name|
         kb = Config.database.block_size[name]
         options = {}
