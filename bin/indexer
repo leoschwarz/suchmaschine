@@ -4,6 +4,8 @@ require_relative '../lib/common/common.rb'
 require_relative '../lib/database/database.rb'
 require_relative '../lib/indexer/indexer.rb'
 
+require 'fileutils'
+
 # TODO: Den Code übersichtlicher machen.
 Thread.abort_on_exception = true
 
@@ -59,6 +61,7 @@ module Indexer
         if File.exist?(Config.paths.index)
           File.unlink Config.paths.index
         end
+        FileUtils.touch Config.paths.index
         destination = Common::IndexFile.new(Config.paths.index).writer
         sources = Dir["#{dir}/*"].map{|path| Common::IndexFile.new(path).pointer_reader}
         merger = Indexer::Merger.new(destination, sources)
