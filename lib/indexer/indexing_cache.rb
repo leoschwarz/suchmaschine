@@ -38,7 +38,7 @@ module Indexer
           file.flush
       
           @flushes += 1
-        end
+        end.join
       else
         @flush_thread.join
       end
