@@ -25,7 +25,7 @@ module Indexer
         
         # Nun werden die einzelnen Quellen gemerged
         while sources.size > 0
-          source, index = sources.each_with_index.min_by{|source, _| source[0].current[1]}
+          source, index = sources.each_with_index.min_by{|source, _| source.current[1]}
           
           type, freq, doc = source.current
           @destination.write_row(freq, doc)
