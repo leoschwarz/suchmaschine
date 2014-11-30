@@ -3,7 +3,7 @@ module Common
     BUFFER_SIZE = 250_000
     
     def initialize(file_path, file_size)
-      @file_path = file_path
+      @file_path = File.expand_path file_path
       @file_size = file_size
       
       @buffer    = []
