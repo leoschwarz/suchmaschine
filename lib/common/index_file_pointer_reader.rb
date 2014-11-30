@@ -51,9 +51,11 @@ module Common
           end
           
           if type == :header
-            @buffer << raw.byteslice(pointer, bytes).unpack(IndexFile::HEADER_PACK)[1..2]
+            _, word, n = raw.byteslice(pointer, bytes).unpack(IndexFile::HEADER_PACK)
+            @buffer << [:header, word, n]
           elsif type == :row
-            @buffer << raw.byteslice(pointer, bytes).unpack(IndexFile::ROW_PACK)
+            freq, doc = raw.byteslice(pointer, bytes).unpack(IndexFile::ROW_PACK)
+            @buffer << [:row, freq, doc]
           end
           pointer += bytes
         end
