@@ -28,7 +28,7 @@ module Database
     end
     
     def has_metadata?(url)
-      @backend.datastore_haskey?(Digest::MD5.hexdigest(url))
+      @backend.datastore_haskey?(:metadata, Digest::MD5.hexdigest(url))
     end
     
     def handle_queue_insert(queue, items)
@@ -38,7 +38,7 @@ module Database
         end
       elsif queue == :index
         items.each do |id|
-          @backend.queue_insert(id)
+          @backend.queue_insert(:index, id)
         end
       end
 
