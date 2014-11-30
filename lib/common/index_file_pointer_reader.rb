@@ -27,7 +27,7 @@ module Common
     private
     def fetch_buffer
       if @pointer < @file_size
-        raw = IO.binread(@file_path, @pointer, BUFFER_SIZE)
+        raw = IO.binread(@file_path, BUFFER_SIZE, @pointer)
         
         # Einlesen
         pointer = 0
