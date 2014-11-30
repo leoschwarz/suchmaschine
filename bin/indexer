@@ -56,6 +56,9 @@ module Indexer
         end
         cache.flush
       
+        db.save
+        db = nil
+      
         # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
         @logger.log_info "Die Einträge werden nun gemerged..."
         if File.exist?(Config.paths.index)
@@ -67,11 +70,12 @@ module Indexer
         merger = Indexer::Merger.new(destination, sources)
         merger.merge
       
-        db.save
+        @logger.log_info "Merging abgeschlossen, nun wird ein Index der Abschnitte des Index erstellt..."
+        Common::IndexMetadata.new(destination).generate
       
         @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
       rescue Exception => e
-        db.save
+        db.save unless db.nil?
         raise e
       end
     end

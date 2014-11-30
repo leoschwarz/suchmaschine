@@ -3,9 +3,9 @@ module Common
     BUFFER_SIZE = 250_000
     
     def initialize(file_path, file_size)
-      @file_path = File.expand_path file_path
+      @file_path = file_path
       @file_size = file_size
-      
+            
       @buffer    = []
       @pointer   = 0  # <- wo muss in der datei weitergelesen werden um den buffer zu ergänzen
     end

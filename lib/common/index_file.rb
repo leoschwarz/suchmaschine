@@ -1,5 +1,5 @@
 module Common
-  # Diese Klasse stellt eine einfache Schnittstelle zu IndexFileWriter und IndexFilePointerReader zur Verfügung,
+  # Diese Klasse stellt eine einfache Schnittstelle zu anderen Klassen zur Verfügung,
   # welche das einfache schreiben und lesen von Index-Dateien ermöglichen.
   #
   # Die Index Dateien besitzen ein eigenens spezielles binäres Format:
@@ -19,6 +19,8 @@ module Common
     HEADER_SIZE = 28
     ROW_SIZE    = 20
     
+    attr_accessor :path
+    
     def initialize(path)
       @path   = path
       @exists = File.exists?(path)
@@ -27,6 +29,10 @@ module Common
       else
         @size = 0
       end
+    end
+    
+    def header_reader
+      IndexFileHeaderReader.new(@path, @size)
     end
     
     def pointer_reader
