@@ -3,73 +3,176 @@
 <head>
   <title><%= title %></title>
   <style>
-  /* TODO: Dies noch überarbeiten! */
-  :focus {outline:0px none transparent;}
-  ::-moz-focus-inner {border:0;}
-
   * {
     padding: 0px;
     margin: 0px;
     border: 0px;
+    font-family: sans-serif;
   }
-
+  
   body {
-    font-family: Arial;
-    padding: 20px;
-  }
-
-  input[type=text] {
-    width: 600px;
-    height: 24px;
-    font-size: 11pt;
-    padding: 2px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border: 1px solid #888;
-  }
-
-  input[type=button], input[type=submit] {
-    border: 1px solid #888;
-    height: 30px;
-    padding: 2px; 
-    font-size: 11pt;
-    background-color: #eee;
-  }
-
-  input[type=button]:hover, input[type=submit]:hover {
-    background-color: #e2e2e2;
+    background-color: #fcfcff;
   }
   
-  /* das ist noch immer hässlich umrandet im FF */
-  input[type=text]:focus {
-    outline: none;
-    outline-color: transparent;
-    outline-style: none;
-    box-shadow: 0 0 10px rgba(0,0,255,0.1)
-  }
-
-  ul {
-    border-top: 1px dotted #888;
-    margin-top: 10px;
-    padding-top: 20px;
-    list-style: none;
-  }
-
-  ul > li {
-    margin-bottom: 10px;
+  #bg-canvas {
+    position: fixed;
+    z-index: -100;
+    top: 0;
+    left: 0;
   }
   
-  #container {
-    max-width: 800px;
+  #logo {
+    display: block;
+    text-align: center;
+    font-size: 30pt;
+    font-weight: bold;
     margin-left: auto;
     margin-right: auto;
+    width: 340px;
+    margin-top: 50px;
+    background-color: white;
+    padding-top: 7px;
+    border: 1px solid black;
+    vertical-align: -4px;
   }
+  
+  #center_search {
+    width: 550px;
+    margin-top: 45px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  #center_search_field {
+    display: block;
+    width: 520px;
+    height: 90px;
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 16pt;
+    text-align: center;
+    font-family: monospace;
+  }
+  
+  #center_search_button {
+    display: block;
+    height: 30px;
+    font-size: 12pt;
+    padding: 6px;
+    margin-top: 15px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    border: 1px solid black;
+  }
+  
+  #center_search_button:hover {
+    background-color: #eee;
+  }
+  
   </style>
+  
+  <script>
+  function updatePage(t) {
+    var logo = document.getElementById("logo");
+    logo.style.marginTop = (50 - 30*t)+"px";
+    
+    // Suchfeld ist in #center_search
+    var centerSearch = document.getElementById("center_search");
+    centerSearch.style.marginTop = (45 - 30*t)+"px";
+    var centerSearchField = document.getElementById("center_search_field");
+    centerSearchField.style.height = (90 - 45*t)+"px";
+    
+    var canvas = document.getElementById("bg-canvas");
+    drawGrid(canvas, t);
+  }
+  
+  function drawGrid(canvas, t){
+    var ctx = canvas.getContext("2d");
+    var centerX = canvas.width/2;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#aaa";
+    
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    
+    // Vertikalen Linien
+    for (var i=0; i<7; i++) {
+      var startY = 0 - (t*canvas.height);
+      var startX = (centerX - 210) + i*70;
+      var stopY  = canvas.height - (t*canvas.height);
+      var stopX  = (centerX - 330) + i*110;
+      ctx.beginPath();    
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(stopX, stopY);
+      ctx.stroke();
+      
+      // falls t > 0, dann müssen noch Verlängerungen der Linien gezeichnet werden
+      if (t > 0) {
+        ctx.beginPath();
+        ctx.moveTo(stopX, stopY);
+        ctx.lineTo(stopX, canvas.height);
+        ctx.stroke();
+      }
+    }
+    
+    // Horizontale Linien
+    for (var i=0; i<4; i++) {
+      var startX = 0;
+      var y = 70 + (canvas.height-70)*(i/4) - (t*canvas.height);
+      var stopX  = canvas.width;
+      ctx.beginPath();
+      ctx.moveTo(startX, y);
+      ctx.lineTo(stopX, y);
+      ctx.stroke();
+    }
+  }
+  
+  window.resultsPage = false;
+  window.animationKey = 0.0;
+  
+  function runAnimation(){
+    animationKey += 0.01;
+    updatePage(animationKey);
+    if (animationKey < 1) {
+      setTimeout(runAnimation, 0.01);
+    }
+  }
+  
+  window.onload = function(){
+    // TODO: Kleine Lösung für Browser die dies nicht unterstützen hinzufügen...
+    var canvas = document.getElementById("bg-canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    window.onresize = function(){
+      var canvas = document.getElementById("bg-canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawGrid(canvas, 0);
+    }
+    
+    drawGrid(canvas, 0);
+    
+    // Handler für das Formular hinzufügen...
+    var searchButton = document.getElementById("center_search_button");
+    searchButton.onclick = function(){
+      if (!window.resultsPage){
+        runAnimation();
+      }
+      
+      return false;
+    }
+  };
+  </script>
 </head>
 <body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="logo">BREAKSEARCH</div>  
   <div id="container">
-    <% if defined? title %>
+<!--    <% if defined? title %>
     <h1><%= title %></h1>
-    <% end %>
+    <% end %>-->
   
     <%= content %>
   </div>
