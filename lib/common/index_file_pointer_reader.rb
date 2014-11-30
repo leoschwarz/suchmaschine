@@ -1,4 +1,4 @@
-module Indexer  
+module Common  
   class IndexFilePointerReader
     BUFFER_SIZE = 250_000
     
