@@ -38,7 +38,6 @@ module Common
           end
           
           freq = freq_raw.unpack("g")[0]
-          freq = raw.byteslice(pointer, 4).unpack("g")[0]
           if freq == 0.0
             type = :header
             bytes = IndexFile::HEADER_SIZE
