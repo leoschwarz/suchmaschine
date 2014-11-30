@@ -6,19 +6,21 @@ module Indexer
     end
     
     def merge
+      # Der Prozess ist abgeschlossen, sobald alle @sources entfernt wurden.
       while @sources.size > 0
-        # Den Header auswählen der ins Ziel übernommen werden soll...
-        headers = {}
+        # Da nun in den verschiedenen Quellen ein unterschiedliches Stichwort zuoberst sein kann,
+        # muss zuerst dasjenige gefunden werden, welches alphabetisch den geringsten Wert bestitzt.
+        sources_for_term = {}
         @sources.each do |source|
           type, term, n = source.current
-          headers[term] ||= []
-          headers[term] << [source, n]
+          sources_for_term[term] ||= []
+          sources_for_term[term] << [source, n]
         end
-        term = headers.keys.min
+        term = sources_for_term.keys.min
         
         # Einen neuen Header in das Ziel schreiben
-        sources = headers[term]
-        n_total = sources.map{|source, n| n}.inject(:+)
+        sources = sources_for_term[term].map{|source, _| source}
+        n_total = sources_for_term[term].map{|_, n| n}.inject(:+)
         @destination.write_header(term, n_total)
         
         # Nun werden die einzelnen Quellen gemerged
