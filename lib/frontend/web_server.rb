@@ -1,11 +1,18 @@
 require 'sinatra/base'
 require 'erubis'
+require_relative '../database/database.rb'
 
 module Frontend
   class WebServer < Sinatra::Base
-    set :views, File.join(File.dirname(__FILE__), "../ui/")
     set :bind, "0.0.0.0"
-
+    
+    def initialize(app = nil)
+      super(app)
+      
+      @index = Common::IndexFile.new(Config.paths.index)
+      @db    = Database::Backend.new
+    end
+    
     get '/' do
       render_page("index.erb", {title: "Durchsuche das Internet"})
     end
@@ -15,7 +22,7 @@ module Frontend
       query = params[:query]
       page  = params[:page].to_i
       
-      search = Frontend::SearchRunner.new(query)
+      search = Frontend::SearchRunner.new(@index, @db, query)
       search.run
       
       if page < 1
@@ -31,6 +38,8 @@ module Frontend
       render_page("results.erb", {query: query, duration: duration, results: results, results_count: search.results_count, pagination: pagination})
     end
 
+    private
+    
     def render_page(page, vars={})
       vars = {title: ""}.merge(vars)
       vars[:content] = Erubis::Eruby.new(File.read("ui/#{page}")).result(vars)

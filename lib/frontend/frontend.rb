@@ -1,5 +1,5 @@
 module Frontend
-  include Common::Database
+#  include Common::Database
 end
 
 # Alle Dateien im Verzeichnis laden

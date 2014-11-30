@@ -2,37 +2,33 @@ module Frontend
   class SearchRunner
     attr_accessor :results, :results_count
     
-    def initialize(query)
+    def initialize(index, db, query)
+      @index = index
+      @db    = db
       @query = query
       
-      # Alle Sonderzeichen entfernen
+      # Eingabe bereinigen
       @query.gsub!(/[^a-zA-ZäöüÄÖÜ]+/, " ")
-      
-      # Kleinschreiben
       @query.downcase!
     end
     
     def run
       # Überprüfen ob es bereits einen Cache-Eintrag gibt.
-      if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
-        @cache_item = cache_item
-        return
-      end
+      #if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
+      #  @cache_item = cache_item
+      #  return
+      #end
       
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
       @query.split(" ").uniq.each do |word|
-        postings = Frontend::Postings.new(word, temporary: false, load: true)
+        count, position = @index.metadata[word]
         
-        blocks = postings.sorted_blocks
-        
-        if blocks.size > 0
-          # TODO: Falls im ersten Block nicht alle relevanten Ergebnisse sind, weitere Blöcke laden...
-          block = blocks[0]
-          block.fetch
-          block.entries.each do |frequency, occurences, id|
-            corpus_count = postings.rows_count
-            results[id] += Math.log( frequency / corpus_count)
+        if count != nil && position != nil
+          @index.row_reader.read(position, count) do |tf, doc|
+            idf = 1 # <- TODO!!
+            score = tf * idf
+            results[doc] += score
           end
         end
       end
@@ -55,7 +51,12 @@ module Frontend
       run if @cache_item.nil?
       
       i = page_number-1
-      @cache_item.documents[10*i...10*(i+1)].map{|id, score| [Frontend::Metadata.fetch(id), score]}
+      @cache_item.documents[10*i...10*(i+1)].map do |id, score|
+        raw = @db.datastore_get(:metadata, id)
+        metadata = Common::Database::Metadata.deserialize(raw)
+        metadata.url = Common::URL.stored(metadata.url)
+        [metadata, score]
+      end
     end
   end
 end

@@ -1,6 +1,7 @@
 require_relative './index_file/header_reader.rb'
 require_relative './index_file/metadata.rb'
 require_relative './index_file/pointer_reader.rb'
+require_relative './index_file/row_reader.rb'
 require_relative './index_file/writer.rb'
 
 module Common
@@ -48,13 +49,17 @@ module Common
       def pointer_reader
         PointerReader.new(@path, @size)
       end
+      
+      def row_reader
+        RowReader.new(@path, @size)
+      end
     
       def writer(buffer_max=1024*1024)
         Writer.new(@path, @size, buffer_max)
       end
     
       def metadata
-        Metadata.new(self)
+        @_metadata ||= Metadata.new(self)
       end
     end
     

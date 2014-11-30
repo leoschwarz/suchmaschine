@@ -2,7 +2,7 @@ module Common
   module IndexFile
     class Metadata
       ROW_SIZE = 24
-      ROW_PACK = "a20 L> L>"
+      ROW_PACK = "a20 L> L> "
       
       def initialize(index_file)
         @index_file = index_file
@@ -12,7 +12,10 @@ module Common
       def read
         @data = {}
         raw = IO.binread(@path)
-        raw.unpack(ROW_PACK*(raw.bytesize / ROW_SIZE)).each_slice(2) do |term, count, position|
+        raw.unpack(ROW_PACK*(raw.bytesize / ROW_SIZE)).each_slice(3) do |term, count, position|
+          term.delete!("\u0000")
+          term.force_encoding("utf-8")
+          # TODO: Es werden irgendwie nicht alle Zeilen richtig gelesen... Vielleicht wurden sie aber auch nicht gespeichert?
           @data[term] = [count, position]
         end
       end

@@ -31,7 +31,7 @@ module Frontend
       item.key   = Digest::MD5.hexdigest(query)
       item.documents = documents
       item.timestamp = Time.now.to_i
-      item.save
+#      item.save
       item
     end
 
