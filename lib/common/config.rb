@@ -28,6 +28,9 @@ module Config
 
   # Konfiguration laden.
   data = YAML.load(File.read File.join(File.dirname(__FILE__), "..", "..", "config.yml"))[environment]
+  if data.nil?
+    raise "Unbekannte Umgebungsvariable: LIGHTBLAZE_ENV=#{environment}"
+  end
   data.each_pair do |key, value|
     ret = hash_proxy(value)
     self.define_singleton_method(key){ ret }
