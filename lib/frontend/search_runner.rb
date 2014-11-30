@@ -26,7 +26,7 @@ module Frontend
         
         if count != nil && position != nil
           @index.row_reader.read(position, count) do |tf, doc|
-            idf = 1 # <- TODO!!
+            idf = Math.log( @index.metadata.documents_count.to_f / count )
             score = tf * idf
             results[doc] += score
           end

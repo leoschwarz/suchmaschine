@@ -4,9 +4,12 @@ module Common
       ROW_SIZE = 32
       ROW_PACK = "a20 L> Q> "
       
+      attr_reader :documents_count
+      
       def initialize(index_file)
         @index_file = index_file
         @path       = index_file.path + ".meta"
+        @documents_count = 0
       end
     
       def read
@@ -16,6 +19,7 @@ module Common
           term.delete!("\u0000")
           term.force_encoding("utf-8")
           @data[term] = [count, position]
+          @documents_count += count
         end
       end
     
