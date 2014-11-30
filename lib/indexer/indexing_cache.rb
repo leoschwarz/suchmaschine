@@ -43,5 +43,14 @@ module Indexer
         @flush_thread.join
       end
     end
+    
+    def force_flush
+      if @flush_thread && @flush_thread.alive?
+        # Warten bis dieser abgeschlossen ist...
+        @flush_thread.join
+      end
+      
+      flush
+    end
   end
 end

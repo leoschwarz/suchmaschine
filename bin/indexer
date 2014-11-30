@@ -53,7 +53,7 @@ module Indexer
             end
           end
         end
-        cache.flush
+        cache.force_flush
       
         db.save
         db = nil
