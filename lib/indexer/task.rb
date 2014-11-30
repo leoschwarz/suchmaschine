@@ -1,4 +1,4 @@
-# TODO: Diese Datei noch sinnvol umbenennen...
+# TODO: Diese Datei noch sinnvoll umbenennen...
 
 module Indexer
   class Task
@@ -8,16 +8,13 @@ module Indexer
     end
     
     def run
-      # Zuerst die Maximal Anzahl eines beliebigen wortes finden...
-      max_occurences = 0
-      @metadata.word_counts.values.each do |count|
-        max_occurences = count if max_occurences < count
-      end
+      # Zuerst die totale Anzahl an Worten bestimmen.
+      total_words = @metadata.word_counts.values.inject(:+)
       
       # Nun die Resultate finden
       key = @metadata.hash
       @metadata.word_counts.each_pair do |word, count|
-        term_frequency = count.to_f / max_occurences
+        term_frequency = count.to_f / total_words
         @indexing_cache.add(word, term_frequency, key)
       end
     end
