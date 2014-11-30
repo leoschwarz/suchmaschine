@@ -44,10 +44,12 @@ module Indexer
       end
     end
     
-    def force_flush
+    # Im Gegensatz zu einem Aufruf von flush wird hier sicher gestellt dass ALLE Daten gespeichert werden...
+    def final_flush
       if @flush_thread && @flush_thread.alive?
         # Warten bis dieser abgeschlossen ist...
         @flush_thread.join
+        @flush_thread = nil
       end
       
       flush

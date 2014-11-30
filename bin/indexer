@@ -28,38 +28,37 @@ module Indexer
       
       begin
         # Temporäres Verzeichnis für den Index überprüfen...
+        # TODO: Sobald alles ideal funktioniert, automatisch den Inhalt des Ordners löschen...
         dir = File.join(File.dirname(__FILE__), "..", "tmp", "index")
         if Dir.exist?(dir)
           raise "Bitte das tmp/index-Verzeichniss entleeren."
         else
           Dir.mkdir(dir)
         end
-      
+        
+        # Einzelne Index-Dateien für alle Dokumente in der Indexierwarteschlange erstellen...
         cache = Indexer::IndexingCache.new(dir)
         queue_mutex = Mutex.new
-        Common::WorkerThreads.new(20).run(true) do
+        
+        Common::WorkerThreads.run(20, blocking:true) do
           loop do
-            key = queue_mutex.synchronize do
-              db.queue_fetch(:index)
-            end
-            
+            key = queue_mutex.synchronize{ db.queue_fetch(:index) }
             break if key.nil?
-            
-            raw = db.datastore_get(:metadata, key)
-            
-            if raw          
+          
+            if (raw = db.datastore_get(:metadata, key))
               metadata = Common::Database::Metadata.deserialize(raw)
               Task.new(cache, metadata).run unless metadata.nil?
             end
           end
         end
-        cache.force_flush
+        
+        cache.final_flush
       
         db.save
         db = nil
       
         # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
-        @logger.log_info "Die Einträge werden nun gemerged..."
+        @logger.log_info "Die Einträge werden nun zusammengeführt..."
         
         destination = Common::IndexFile.new(Config.paths.index)
         destination.delete
@@ -68,7 +67,7 @@ module Indexer
         merger = Indexer::Merger.new(destination.writer, sources)
         merger.merge
       
-        @logger.log_info "Merging abgeschlossen, nun wird ein Index der Abschnitte des Index erstellt..."
+        @logger.log_info "Zusammenführung abgeschlossen, nun wird ein Index der Abschnitte des Index erstellt..."
         destination.reload
         destination.metadata.generate
       
