@@ -15,7 +15,7 @@ module Indexer
       @data_mutex.synchronize do
         @data[word] ||= Array.new
         @data[word] << [freq, doc]
-        @data_size += Common::IndexFile::ROW_SIZE * 1.5 # <- Ruby-Ineffizienz Heuristik
+        @data_size += Common::IndexFile::IndexFile::ROW_SIZE * 1.5 # <- Ruby-Ineffizienz Heuristik
       end
       
       flush if @data_size >= MAX_SIZE
