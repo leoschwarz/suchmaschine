@@ -1,10 +1,9 @@
 module Common
   module IndexFile
-    # TODO: Möglichkeiten die Datei zu lesen...
     class Metadata
       ROW_SIZE = 24
-      ROW_PACK = "a20 L>"
-    
+      ROW_PACK = "a20 L> L>"
+      
       def initialize(index_file)
         @index_file = index_file
         @path       = index_file.path + ".meta"
@@ -13,8 +12,8 @@ module Common
       def read
         @data = {}
         raw = IO.binread(@path)
-        raw.unpack(ROW_PACK*(raw.bytesize / ROW_SIZE)).each_slice(2) do |term, position|
-          @data[term] = position
+        raw.unpack(ROW_PACK*(raw.bytesize / ROW_SIZE)).each_slice(2) do |term, count, position|
+          @data[term] = [count, position]
         end
       end
     
@@ -25,10 +24,10 @@ module Common
       alias :[] :get
     
       def generate
-        @buffer  = []
+        @buffer = []
         @write_offset = 0
         @index_file.header_reader.read do |term, count, position|
-          @buffer << [term, position]
+          @buffer << [term, count, position]
           flush if @buffer.size > 100_000
         end
         flush

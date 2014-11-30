@@ -28,11 +28,14 @@ module Common
       attr_accessor :path
     
       def initialize(path)
-        @path   = path
-        @exists = File.exists?(path)
-        
+        @path = path
+        reload
+      end
+      
+      def reload
+        @exists = File.exists?(@path)
         if @exists
-          @size = File.size(path)
+          @size = File.size(@path)
         else
           @size = 0
         end

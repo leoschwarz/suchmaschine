@@ -46,6 +46,8 @@ module Indexer
           end          
         end      
       end
+      
+      @destination.flush
     end
   end
 end

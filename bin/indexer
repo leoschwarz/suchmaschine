@@ -64,13 +64,17 @@ module Indexer
         if File.exist?(Config.paths.index)
           File.unlink Config.paths.index
         end
+        if File.exist?(Config.paths.index+".meta")
+          File.unlink(Config.paths.index+".meta")
+        end
         FileUtils.touch Config.paths.index
-        destination = Common::IndexFile.new(Config.paths.index).writer
+        destination = Common::IndexFile.new(Config.paths.index)
         sources = Dir["#{dir}/*"].map{|path| Common::IndexFile.new(path).pointer_reader}
-        merger = Indexer::Merger.new(destination, sources)
+        merger = Indexer::Merger.new(destination.writer, sources)
         merger.merge
       
         @logger.log_info "Merging abgeschlossen, nun wird ein Index der Abschnitte des Index erstellt..."
+        destination.reload
         destination.metadata.generate
       
         @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
