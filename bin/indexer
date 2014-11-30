@@ -3,7 +3,6 @@
 require_relative '../lib/common/common.rb'
 require_relative '../lib/database/database.rb'
 require_relative '../lib/indexer/indexer.rb'
-
 require 'fileutils'
 
 # TODO: Den Code übersichtlicher machen.
