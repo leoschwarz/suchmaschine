@@ -71,7 +71,7 @@ module Indexer
         merger.merge
       
         @logger.log_info "Merging abgeschlossen, nun wird ein Index der Abschnitte des Index erstellt..."
-        Common::IndexMetadata.new(destination).generate
+        destination.metadata.generate
       
         @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
       rescue Exception => e

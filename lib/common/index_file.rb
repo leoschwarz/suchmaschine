@@ -42,5 +42,9 @@ module Common
     def writer(buffer_max=1024*1024)
       IndexFileWriter.new(@path, @size, buffer_max)
     end
+    
+    def metadata
+      IndexFileMetadata.new(self)
+    end
   end
 end

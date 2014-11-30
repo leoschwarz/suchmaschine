@@ -1,6 +1,6 @@
 module Common
   # TODO: Möglichkeiten die Datei zu lesen...
-  class IndexMetadata
+  class IndexFileMetadata
     ROW_SIZE = 24
     ROW_PACK = "a20 L>"
     
