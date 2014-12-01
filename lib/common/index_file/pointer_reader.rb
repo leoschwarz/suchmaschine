@@ -32,8 +32,8 @@ module Common
           # Wir können alles lesen, dh. am Ende gibt es einen Header um weiterzulesen...
           raw = IO.binread(@file_path, size_with_following_header, @next_position)
           rows = raw.byteslice(0, size_without_header).unpack(IndexFile::ROW_PACK*@next_rowcount)
-          rows.each do |row|
-            @buffer << [:row, rows[0], row[1]]
+          rows.each_slice(2) do |freq, doc|
+            @buffer << [:row, freq, doc]
           end
           header = raw.byteslice(size_without_header, IndexFile::HEADER_SIZE).unpack(IndexFile::HEADER_PACK)
           @buffer << [:header, header[1], header[2]]
@@ -45,8 +45,8 @@ module Common
           raw = IO.binread(@file_path, size_without_header, @next_position)
           
           rows = raw.unpack(IndexFile::ROW_PACK*@next_rowcount)
-          rows.each do |row|
-            @buffer << [:row, rows[0], row[1]]
+          rows.each_slice(2) do |freq, doc|
+            @buffer << [:row, freq, doc]
           end
           
           @next_position += size_without_header + 1
