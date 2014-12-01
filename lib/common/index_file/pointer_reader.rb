@@ -30,7 +30,7 @@ module Common
         size_with_following_header = IndexFile::ROW_SIZE*@next_rowcount + IndexFile::HEADER_SIZE
         if @next_position + size_with_following_header <= @file_size
           # Wir können alles lesen, dh. am Ende gibt es einen Header um weiterzulesen...
-          raw = IO.binread(@file_path, IndexFile::size_with_following_header, @next_position)
+          raw = IO.binread(@file_path, size_with_following_header, @next_position)
           rows = raw.byteslice(0, size_without_header).unpack(IndexFile::ROW_PACK*@next_rowcount)
           rows.each do |row|
             @buffer << [:row, rows[0], row[1]]
