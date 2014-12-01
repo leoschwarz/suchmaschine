@@ -38,13 +38,6 @@ module Frontend
       render_layout = (params[:render_layout] != "false") # TODO implementieren, und nacher in die resultatseite laden...
       
       search  = get_search(query)
-      
-      if page < 1
-        page = 1
-      elsif page > search.pages_count
-        page = search.pages_count
-      end
-      
       results = search.page(page)      
       duration  = Time.now - start_time
       pagination = Frontend::WebPagination.new(search.pages_count, page, query)
@@ -59,6 +52,7 @@ module Frontend
     end
     
     def render_page(page, vars={})
+      vars[:title] ||= "BREAKSEARCH"
       vars[:content] = Erubis::Eruby.new(File.read("ui/#{page}")).result(vars)
       Erubis::Eruby.new(File.read("ui/layout.erb")).result(vars)
     end
