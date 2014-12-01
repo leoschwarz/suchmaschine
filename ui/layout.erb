@@ -36,6 +36,23 @@
     vertical-align: -4px;
   }
   
+  #results {
+    width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+    list-style-type: none;
+    margin-bottom: 15px;
+  }
+  
+  #results li {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    list-style-type: none;
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+  }
+  
   #center_search {
     width: 550px;
     margin-top: 45px;
@@ -49,6 +66,8 @@
     width: 520px;
     height: 90px;
     border: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
     padding: 5px;
     font-size: 16pt;
     text-align: center;
@@ -71,8 +90,29 @@
     background-color: #eee;
   }
   
+  #pagination {
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    border: 1px solid black;
+    width: 280px;
+    padding: 4px;
+  }
+  
+  #loadmore{
+    text-align: center;
+    cursor: default;
+  }
+  
+  #loadmore:hover{
+    background-color: #eee;
+  }
   </style>
   
+  <script type="text/javascript" src="/zepto.min.js"></script>
   <script>
   function updatePage(t) {
     var logo = document.getElementById("logo");
@@ -97,83 +137,52 @@
     ctx.clearRect(0,0,canvas.width,canvas.height);
     
     // Vertikalen Linien
+    ctx.beginPath();
+    var dx = 70*(1-t);
     for (var i=0; i<7; i++) {
       var startY = 0 - (t*canvas.height);
-      var startX = (centerX - 210) + i*70;
+      var startX = (centerX - 3*dx) + i*dx;
       var stopY  = canvas.height - (t*canvas.height);
-      var stopX  = (centerX - 330) + i*110;
-      ctx.beginPath();    
-      ctx.moveTo(startX, startY);
-      ctx.lineTo(stopX, stopY);
-      ctx.stroke();
+      var stopX  = (centerX - 330) + i*110;    
       
-      // falls t > 0, dann müssen noch Verlängerungen der Linien gezeichnet werden
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(stopX, stopY);      
+      // falls t > 0, dann werden noch Verlängerungen der Linien gezeichnet
       if (t > 0) {
-        ctx.beginPath();
         ctx.moveTo(stopX, stopY);
         ctx.lineTo(stopX, canvas.height);
-        ctx.stroke();
       }
     }
+    ctx.stroke();
     
     // Horizontale Linien
+    ctx.beginPath();
     for (var i=0; i<4; i++) {
       var startX = 0;
       var y = 70 + (canvas.height-70)*(i/4) - (t*canvas.height);
       var stopX  = canvas.width;
-      ctx.beginPath();
       ctx.moveTo(startX, y);
       ctx.lineTo(stopX, y);
-      ctx.stroke();
     }
+    ctx.stroke();
   }
   
   window.resultsPage = false;
   window.animationKey = 0.0;
   
   function runAnimation(){
-    animationKey += 0.01;
+    animationKey += 0.02;
     updatePage(animationKey);
     if (animationKey < 1) {
-      setTimeout(runAnimation, 0.01);
+      setTimeout(runAnimation, 0.02);
     }
   }
-  
-  window.onload = function(){
-    // TODO: Kleine Lösung für Browser die dies nicht unterstützen hinzufügen...
-    var canvas = document.getElementById("bg-canvas");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    window.onresize = function(){
-      var canvas = document.getElementById("bg-canvas");
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawGrid(canvas, 0);
-    }
-    
-    drawGrid(canvas, 0);
-    
-    // Handler für das Formular hinzufügen...
-    var searchButton = document.getElementById("center_search_button");
-    searchButton.onclick = function(){
-      if (!window.resultsPage){
-        runAnimation();
-      }
-      
-      return false;
-    }
-  };
   </script>
 </head>
 <body>
   <canvas id="bg-canvas"></canvas>
   <div id="logo">BREAKSEARCH</div>  
   <div id="container">
-<!--    <% if defined? title %>
-    <h1><%= title %></h1>
-    <% end %>-->
-  
     <%= content %>
   </div>
 </body>

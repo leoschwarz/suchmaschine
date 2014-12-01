@@ -1,4 +1,86 @@
+<script>  
+window.onload = function(){
+  // TODO: Kleine Lösung für Browser die dies nicht unterstützen hinzufügen...
+  var canvas = document.getElementById("bg-canvas");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  window.onresize = function(){
+    var canvas = document.getElementById("bg-canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawGrid(canvas, window.animationKey);
+  }
+  
+  drawGrid(canvas, 0);
+  
+  function loadmore(page){
+    $.ajax({
+      type: "GET",
+      url: "/search",
+      data: {
+        query: $("#center_search_field").val(),
+        page: 0
+      },
+      dataType: "html",
+      success: function(data, status, xhr){
+        html = $("#results").html();
+        
+        // button entfernen und dann die Resultate hinzufügen...
+        html  = $("#results",data).html();
+        html += "<li id='loadmore' onclick='loadmore(0);'>Weitere Resultate laden</li>";
+        $("#results").html(html);
+      },
+      error: function(xhr, errorType, error){
+        $("#results").html($("#results").html()+"<li style='text-align:center;'>Die Resultate konnten nicht geladen werden.</li>");
+      }
+    });
+  }
+  
+  // Handler für das Formular hinzufügen...
+  var searchButton = document.getElementById("center_search_button");
+  searchButton.onclick = function(){
+    if (!window.resultsPage){
+      window.resultsPage = true;
+      // TODO: Das wichtigste: Resultate laden...
+      runAnimation();
+    }
+    
+    $.ajax({
+      type: "GET",
+      url: "/search",
+      data: {
+        query: $("#center_search_field").val(),
+        page: 0
+      },
+      dataType: "html",
+      success: function(data, status, xhr){
+        html  = $("#results",data).html();
+        html += "<li id='loadmore' onclick='loadmore(0);'>Weitere Resultate laden</li>";
+        $("#results").html(html);
+      },
+      error: function(xhr, errorType, error){
+        $("#results").html("<li style='text-align:center;'>Die Resultate konnten nicht geladen werden.</li>");
+      }
+    });
+    
+    return false;
+  };
+  
+  /*window.onscroll = function(){
+    // URL: http://jsfiddle.net/doktormolle/w7X9N/
+    console.log($(this).scrollTop());
+    console.log(this.innerHeight);
+    console.log($(window).scrollHeight);
+    if ($("#results").scrollTop() + $("#results").innerHeight >= $(this)[0].scrollHeight) {
+      alert("ende");
+    }*/
+};
+</script>
+
 <form id="center_search" action="/search" method="GET">
-  <input id="center_search_field" type="text" name="query" placeholder="Was darf es sein?">
+  <input id="center_search_field" type="text" name="query" placeholder="Eingabe Suchanfrage">
   <input id="center_search_button" type="submit" value="SUCHEN">
 </form>
+
+<ul id="results"></ul>
