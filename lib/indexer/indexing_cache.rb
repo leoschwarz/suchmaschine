@@ -6,6 +6,7 @@ module Indexer
       @data = {}
       @data_size = 0
       @data_mutex = Mutex.new
+      @flush_mutex = Mutex.new
       @flush_directory = flush_directory
       @flush_thread    = nil
       @flushes = 0
@@ -22,10 +23,13 @@ module Indexer
     end
     
     def flush
-      if @flush_thread.nil? || !@flush_thread.alive?
-        @flush_thread = Thread.new do
+      # Sicherstellen, dass die Methode zuerst fertig aufgerufen wird, bevor ein neuer Thread an die Reihe kommt.
+      @flush_mutex.synchronize do
+        return if @data_size < MAX_SIZE
+        
+        @flush_thread = nil unless @flush_thread.alive?
+        @flush_thread ||= Thread.new do
           file = Common::IndexFile.new(File.join(@flush_directory, @flushes.to_s)).writer
-      
           @data_mutex.synchronize do
             @data.sort_by{|word, rows| word}.each do |word, rows|
               file.write_header(word, rows.size)
@@ -34,12 +38,9 @@ module Indexer
             @data.clear
             @data_size = 0
           end
-      
           file.flush
-      
           @flushes += 1
-        end.join
-      else
+        end
         @flush_thread.join
       end
     end
@@ -50,8 +51,7 @@ module Indexer
         # Warten bis dieser abgeschlossen ist...
         @flush_thread.join
         @flush_thread = nil
-      end
-      
+      end      
       flush
     end
   end
