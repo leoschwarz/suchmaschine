@@ -7,7 +7,7 @@ module Common
         
         # Der erste Header wird bereits jetzt gelesen
         header   = IO.binread(@file_path, IndexFile::HEADER_SIZE, 0).unpack(IndexFile::HEADER_PACK)
-        @buffer  = [:header, header[1], header[2]]
+        @buffer  = [[:header, header[1], header[2]]]
         @next_position = IndexFile::HEADER_SIZE
         @next_rowcount = header[2]
       end

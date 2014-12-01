@@ -8,7 +8,7 @@ module Indexer
       @data_mutex = Mutex.new
       @flush_mutex = Mutex.new
       @flush_directory = flush_directory
-      @flush_thread    = nil
+      @flush_thread    = Thread.new{}
       @flushes = 0
     end
     
