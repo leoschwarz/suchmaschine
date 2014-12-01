@@ -25,7 +25,11 @@ module Indexer
         @destination.write_header(term, n_total)
         
         # Den Pointer der ausgewählte Quellen jeweils um eins weiter verschieben, sodass auf eine Inhaltszeile gezeigt wird.
-        sources.each{|source| source.shift}
+        sources.each do |source|
+          while source.current[0] == :header
+            source.shift
+          end
+        end
         
         # Nun werden die einzelnen Quellen gemerged
         while sources.size > 0
