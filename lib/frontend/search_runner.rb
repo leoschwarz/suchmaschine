@@ -49,9 +49,11 @@ module Frontend
     
     def page(page_number=1)
       run if @cache_item.nil?
+      return [] if page_number < 1 || page_number > pages_count
       
       i = page_number-1
-      @cache_item.documents[10*i...10*(i+1)].map do |id, score|
+      documents = @cache_item.documents[10*i...10*(i+1)]
+      documents.map do |id, score|
         raw = @db.datastore_get(:metadata, id)
         metadata = Common::Database::Metadata.deserialize(raw)
         metadata.url = Common::URL.stored(metadata.url)

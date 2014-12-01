@@ -1,28 +1,36 @@
-<% # TODO: Alle XSS Angriffsstellen-Stellen schliessen... %>
-<form action="/search" method="GET">
-  <input type="text" name="query" value="<%= query %>">
-  <input type="submit" value="Suchen">
+<form id="center_search" action="/search" method="GET">
+  <input id="center_search_field" type="text" name="query" placeholder="Eingabe Suchanfrage" value="<%= query %>">
+  <input id="center_search_button" type="submit" value="SUCHEN">
 </form>
-<br>
-<i>Total <%= results_count %> Resultate. Abfrage innerhalb <%= duration.round(2) %>s erstellt.</i>
-<br>
 
-<ul>
+<ul id="results">
 <% results.each do |result, score| %>
   <li>
     <a href="<%= result.url.encoded %>"><%= result.title %></a><br>
-    <%= result.url.decoded %><br>
-    Score: <%= score %>
+    <%= result.url.decoded %>
   </li>
 <% end %>
 </ul>
 
+<script>
+window.onload = function(){
+  var canvas = document.getElementById("bg-canvas");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  
+  window.onresize = function(){
+    var canvas = document.getElementById("bg-canvas");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawGrid(canvas, 0);
+  }
+  
+  updatePage(1);
+};
+</script>
+
 <div id="pagination">
   <% pagination.entries.each do |pagination_entry| %>
-    <a href="<%= pagination_entry.url %>">
-      <%= "<b>" if pagination_entry.current? %>
-      <%= pagination_entry.number %>
-      <%= "</b>" if pagination_entry.current? %>
-    </a>
+    <a href="<%= pagination_entry.url %>"><%= "<b>" if pagination_entry.current? %><%= pagination_entry.number %><%= "</b>" if pagination_entry.current? %></a>&nbsp;
   <% end %>
 </div>
