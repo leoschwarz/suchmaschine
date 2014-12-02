@@ -55,7 +55,7 @@ module Common
       
       def read_header
         return nil if @read_offset >= @file_size
-        _, term, count = binread(IndexFile::HEADER_SIZE).unpack(IndexFile::HEADER_PACK)
+        term, count = binread(IndexFile::HEADER_SIZE).unpack(IndexFile::HEADER_PACK)
         [:header, term, count]
       end
       

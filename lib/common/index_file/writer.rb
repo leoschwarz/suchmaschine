@@ -9,7 +9,7 @@ module Common
       end
     
       def write_header(word, n)
-        @buffer << [0, word, n].pack(IndexFile::HEADER_PACK)
+        @buffer << [word, n].pack(IndexFile::HEADER_PACK)
         flush if @buffer.bytesize > @buffer_max
       end
     

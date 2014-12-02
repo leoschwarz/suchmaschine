@@ -16,14 +16,12 @@ module Common
     # [ANZA-04] = 4  Bytes lange  Integerzahl welche die Anzahl Dokumente für das entsprechende Stichwort auflistet.
     #
     # Die Elemente liegen immer in einer der beiden Annordnungen vor:
-    # - [FREQ-04][WORT-20][ANZA-04] : Dies markiert einen neuen Abschnitt für ein Stichwort,
-    #                                 das Feld der Frequenz wird auf 0 gesetzt um diesen Abschnitt zu markieren.
-    # - [FREQ-04][DOKU-16]          : Es gibt jeweils für jedes Auftreten pro Dokument eine solche Zeile,
-    #                                 das Feld der Frequenz wird immer auf einen Wert ≠ 0 gesetzt um diesen Abschnit zu markieren.
+    # - [WORT-20][ANZA-04] : Dies markiert einen neuen Abschnitt für ein Stichwort.
+    # - [FREQ-04][DOKU-16] : Es gibt jeweils für jedes Auftreten pro Dokument eine solche Zeile,
     class IndexFile
-      HEADER_PACK = "g a20 L>"
+      HEADER_PACK = "a20 L>"
       ROW_PACK    = "g h32"
-      HEADER_SIZE = 28
+      HEADER_SIZE = 24
       ROW_SIZE    = 20
     
       attr_accessor :path

@@ -13,7 +13,7 @@ module Common
       def read        
         pointer = 0
         while pointer < @file_size
-          _, term, count = IO.binread(@file_path, IndexFile::HEADER_SIZE, pointer).unpack(IndexFile::HEADER_PACK)
+          term, count = IO.binread(@file_path, IndexFile::HEADER_SIZE, pointer).unpack(IndexFile::HEADER_PACK)
           pointer += IndexFile::HEADER_SIZE
           yield(term, count, pointer) # <-- callback
           pointer += count * IndexFile::ROW_SIZE
