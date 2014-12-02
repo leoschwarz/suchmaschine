@@ -22,10 +22,10 @@ module Indexer
       flush if @data_size >= MAX_SIZE
     end
     
-    def flush
+    def flush(force=false)
       # Sicherstellen, dass die Methode zuerst fertig aufgerufen wird, bevor ein neuer Thread an die Reihe kommt.
       @flush_mutex.synchronize do
-        return if @data_size < MAX_SIZE
+        return if (@data_size < MAX_SIZE) && !force
         
         @flush_thread = nil unless @flush_thread.alive?
         @flush_thread ||= Thread.new do
@@ -52,7 +52,7 @@ module Indexer
         @flush_thread.join
         @flush_thread = nil
       end      
-      flush
+      flush(true)
     end
   end
 end
