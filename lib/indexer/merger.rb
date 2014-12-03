@@ -12,9 +12,9 @@ module Indexer
         # muss zuerst dasjenige gefunden werden, welches alphabetisch den geringsten Wert bestitzt.
         sources_for_term = {}
         @sources.each do |source|
-          type, term, n = source.current
+          type, term, count = source.current
           sources_for_term[term] ||= []
-          sources_for_term[term] << [source, n]
+          sources_for_term[term] << [source, count]
         end
         term = sources_for_term.keys.min
         

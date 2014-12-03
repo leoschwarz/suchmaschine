@@ -1,3 +1,8 @@
+############################################################################################
+# Der Crawler-Client verbindet sich mit dem Datenbankserver und ist der eigentliche Akteur #
+# im Crawling-Ablauf. Er lädt jeweils die Aufgaben, führt sie aus, und zeigt ausserdem die #
+# Anzahl erfolgreicher, fehlgeschlagener und verbotener Downloads an.                      #
+############################################################################################
 module Crawler
   class Client
     def launch

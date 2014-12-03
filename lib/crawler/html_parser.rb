@@ -1,19 +1,18 @@
+############################################################################################
+# Der HTMLParser arbeitet HTML-Dokumente für die weitere Verwendung auf.                   #
+# Dabei werden folgenden Informationen extrahiert:                                         #
+# - Titel des Dokumentes                                                                   #
+# - Erlaubnis das Dokument zu indexieren und Links zu verfolgen                            #
+# - Fliesstext des Dokumentkörpers, falls die Indexierung erlaubt ist                      #
+# - Links die verfolgt werden dürfen                                                       #
+############################################################################################
 require 'nokogiri'
-
 module Crawler
-  # Arbeitet HTML-Dokumente für die weitere Verwendung auf:
-  #
-  # Folgende Informationen werden extrahiert:
-  # - Titel des Dokumentes
-  # - Erlaubnis das Dokument zu indexieren und Links zu verfolgen
-  # - Fliesstext des Dokumentkörpers, falls Indexierung erlaubt
-  # - Links die verfolgt werden dürfen
-  
   class HTMLParser
     attr_reader :links, :text, :title
   
     # Initialisiert eine neue Parser-Instanz und verarbeitet das Dokument.
-    # @param base_url [URL] Die URL des Dokumentes (wird für die Ergänzung von relativen Links benötigt)
+    # @param base_url [URL] Die URL des Dokumentes (wird für relative Links benötigt).
     # @param html [String] Das HTML das gelesen werden soll.
     def initialize(base_url, html)
       # Instanzvariabeln setzen
@@ -45,7 +44,8 @@ module Crawler
     end
 
     private
-    # Entfernt alle mehrfachen Wiederholungen von Leerzeichen und Leerzeichen zu Beginn und Ende des Strings.
+    # Entfernt alle mehrfachen Wiederholungen von Leerzeichen,
+    # sowie leerzeichen zu Beginn und Ende des Strings.
     # @param text [String]
     # @return [String]
     def clean_text(text)
@@ -61,8 +61,7 @@ module Crawler
     end
     
     # Extrahiert den Titel aus dem Dokument.
-    # Falls der Titel nicht existiert wird nil zurückgegeben, ansonsten maximal 100 Zeichen des Titels.
-    # @return [String]
+    # @return [String,nil] Auf 100 Zeichen gekürzter Titel bzw. nil falls kein Titel
     def extract_title
       title_tag = @doc.xpath("//title")[0]
       return nil if title_tag.nil?

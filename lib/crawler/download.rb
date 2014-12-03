@@ -1,24 +1,35 @@
+############################################################################################
+# Die Download Klasse abstrahiert die Verwendung der Curb Bibliothek, welche ein Binding   #
+# für eine native Implementierung eines HTTP Clients, der libcurl Bibliothek, ist.         #
+#                                                                                          #
+# Folgende Funktionen werden von der Download Klasse übernommen:                           #
+# - Es wird versucht die Antwort in einen UTF-8 String zu konvertieren.                    #
+# - Es kann ein Content-Type vorausgesetzt werden, sollte dieser nicht zutreffen, wird der #
+#   Download vorzeitig abgebrochen.                                                        #
+# - Der Download wird abgebrochen, wenn eine maximale Antwortgrösse überschritten wird.    #
+############################################################################################
 require 'curb'
-
 module Crawler
   class Download
-    # Das hier ist leider nicht perfekt, da es verschiedene Schreibweisen für die verschiedenen
-    # Kodierungen gibt und somit einige deshalb nicht erkannt werden.
+    # Das hier ist leider nicht perfekt, da es verschiedene Schreibweisen für die
+    # verschiedenen Kodierungen gibt und somit einige deshalb nicht erkannt werden.
     SUPPORTED_ENCODINGS = (::Encoding.name_list.map{|name| name.downcase}+["utf8"]).freeze
     
+    # Getter für entsprechende Attribute
     attr_reader :redirect_url, :response_body, :status
-
-    # url: [URL]
-    # force_type: [nil/String] entweder nil (es ist egal um was für einen Content-Type es sich handelt)
-    #                          oder String (es muss sich um diesen Content-Type handeln.)
+    
+    # @param url [Common::URL] Download-URL
+    # @param force_type [String,nil] Falls gegeben: Die Antwort muss diesen Content-Type
+    #   haben, ansonsten wird der Download frühzeitig abgebrochen.
     def initialize(url, force_type=nil)
       # Download durchführen.
       if perform_download(url, force_type)
-        # UTF-8 Kodierung sicherstellen,
-        # Der String @response_body ist normalerweise ASCII-8BIT.
-        # 1. Falls im Content-Type Feld eine Kodierung festgelegt wurde, wird diese verwendet.
+        # Die Library gibt einen String mit ASCII-8BIT Kodierung zurück.
+        # Dieser muss nun nach UTF-8 konvertiert werden:
+        # 1. Eventuelle Content-Type Kodierung verwenden.
         original_encoding = @response_body.encoding
-        if not (match = /charset=([\w\d-]+)/.match(@content_type.downcase)).nil? and SUPPORTED_ENCODINGS.include?(encoding = match[1].downcase)
+        match = /charset=([\w\d-]+)/.match(@content_type.downcase)
+        if match != nil and SUPPORTED_ENCODINGS.include?(encoding = match[1].downcase)
           encoding = "UTF-8" if encoding.include? "utf8"
           @response_body.force_encoding(encoding)
           @response_body.encode!('utf-8', invalid: :replace, undef: :replace, replace: '')
@@ -28,11 +39,12 @@ module Crawler
           @response_body = @response_body.force_encoding("utf-8")
         # 3. Falls gar nichts funktioniert, werden einfach alle falschen Bytes entfernt.
         #    Das heisst alle Zeichen die es in ASCII nicht gibt aber falsch kodiert wurden
-        #    werden entfernt, auch wenn es diese Zeichen eigentlich in der UTF-8 Kodierung gäbe.
+        #    werden entfernt, auch wenn es diese Zeichen in der UTF-8 Kodierung gäbe.
         # Siehe: http://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
         #        http://www.ruby-doc.org/core-2.0/String.html
         else
-          @response_body.force_encoding(original_encoding).encode!('UTF-8', invalid: :replace, undef: :replace, replace: '')
+          options = {invalid: :replace, undef: :replace, replace: ''}
+          @response_body.force_encoding(original_encoding).encode!('UTF-8', options)
         end
       end
     end

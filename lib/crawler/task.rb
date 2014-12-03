@@ -1,3 +1,9 @@
+############################################################################################
+# Eine Task - eine Aufgabe - abstrahiert die eigentliche Arbeit des Crawlers.              #
+# Vom Client wird eine Aufgabe geladen, welche dann ausgeführt wird, was heisst dass die   #
+# Methode 'execute' aufgerufen wird. Die Resultate werden selbstständig in die Datenbank   #
+# geschrieben.                                                                             #
+############################################################################################
 module Crawler
   class Task
     # Erzeugt eine neue Aufgabe.
@@ -8,7 +14,7 @@ module Crawler
 
     # Führt die Aufgabe aus.
     # @return [Symbol] :success -> Alles lief einwandfrei.
-    #                  :failure -> Es gab einen Fehler beim Download. (zBsp. ein HTTP-Fehler)
+    #                  :failure -> Es gab einen (HTTP-)Fehler beim Download.
     #                  :not_allowed -> Die URL darf nicht heruntergeladen werden.
     def execute
       # Überprüfen ob es erlaubt ist die Seite herunterzuladen
@@ -37,7 +43,10 @@ module Crawler
         if parser.permissions[:follow]
           # Links einfügen, aber zuvor werden die Fragmentbezeichner aus den URLs entfernt,
           # um unnötige Duplikate zu verhindern.
-          Task.insert(parser.links.map{|anchor, url| url.remove_fragment_identifier; url.stored})
+          Task.insert(parser.links.map{ |anchor, url|
+            url.remove_fragment_identifier
+            url.stored
+          })
         end
         
         if parser.title_ok?
