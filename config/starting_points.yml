@@ -1,0 +1,35 @@
+# In dieser Datei, kann die Liste der Startpunkte des Crawlers festgelegt werden.
+# Mithilfe des Skripts in util/url-seed.rb kann man diese in die Datenbank laden.
+
+# Eine Auswahl an deutschsprachigen Webseiten:
+- de.wikipedia.org
+- tagesanzeiger.ch
+- srf.ch
+- 20min.ch
+- nzz.ch
+- spiegel.de
+- chip.de
+- heise.de
+- sueddeutsche.de
+- baz.ch
+- faz.net
+- zeit.de
+- gutefrage.net
+- mozilla.org
+- yahoo.de
+- focus.de
+- blick.ch
+- bluewin.ch
+- blogspot.ch
+- sbb.ch
+- local.ch
+
+# Eine Auswahl an englischsprachigen Webseiten:
+- en.wikipedia.org
+- stackoverflow.com
+- imdb.com
+- forbes.com
+- cnn.com
+- bbc.com
+- theguardian.com
+- nytimes.com

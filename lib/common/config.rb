@@ -27,7 +27,7 @@ module Config
   end
 
   # Konfiguration laden.
-  data = YAML.load(File.read File.join(File.dirname(__FILE__), "..", "..", "config.yml"))[environment]
+  data = YAML.load(File.read File.join(File.dirname(__FILE__), "..", "..", "config", "config.yml"))[environment]
   if data.nil?
     raise "Unbekannte Umgebungsvariable: LIGHTBLAZE_ENV=#{environment}"
   end

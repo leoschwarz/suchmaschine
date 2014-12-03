@@ -1,15 +1,15 @@
 #!/usr/bin/env ruby
-# Dieses Skript lädt einige Startpunkte für die Websuche
+#########################################################################################
+# Dieses Skript lädt die spezifizierten Startpunkte in die Datenbank.                   #
+# Hierfür wird jeweils eine Anfrage des Stammverzeichnis des Hosts durchgeführt,        #
+# und alle Links der jeweiligen Seite eingefügt.                                        #
+#########################################################################################
 require_relative '../lib/crawler/crawler'
 require 'oj'
+require 'yaml'
 
-# Deutschsprachige Seiten:
-$domains  = %w[de.wikipedia.org tagesanzeiger.ch srf.ch 20min.ch nzz.ch spiegel.de chip.de heise.de]
-$domains += %w[sueddeutsche.de baz.ch faz.net zeit.de gutefrage.net mozilla.org yahoo.de]
-$domains += %w[focus.de blick.ch bluewin.ch blogspot.ch sbb.ch local.ch comparis.ch]
-
-# Englischsprachige Seiten:
-$domains += %w[en.wikipedia.org stackoverflow.com imdb.com forbes.com cnn.com bbc.com theguardian.com nytimes.com]
+# Die Startpunkte aus der Konfigurationsdatei laden.
+$domains = YAML.load(File.read File.join(File.dirname(__FILE__), "..", "config", "starting_points.yml"))
 
 # Funktion um die URLs zu speichern.
 def insert_urls(urls)
