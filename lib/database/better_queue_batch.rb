@@ -1,3 +1,8 @@
+############################################################################################
+# Die BetterQueueBatch-Klasse abstrahiert einen Stapel einer BetterQueue. Diese Klasse     #
+# wird nur von der BetterQueue selbst verwendet.                                           #
+############################################################################################
+
 module Database
   class BetterQueueBatch
     def initialize(name, metadata)

@@ -1,6 +1,11 @@
+############################################################################################
+# Die ServerFront stellt das Objekt dar, welches der Datenbankserver über das DRuby        #
+# Protokoll teilt, und welches von einem Client als Zugangspunkt in die Datenbank dient.   #
+############################################################################################
 module Database
-  # Sowohl Object, als auch BasicObject, werden mitsamt gefährlicher Methoden wie instance_eval und class_eval definiert.
-  # Deshalb werden von dieser Klasse alle Methoden entfernt, die nicht unbedingt notwendig sind, um das ServerFront Objekt
+  # Sowohl Object, als auch BasicObject, werden mitsamt gefährlicher Methoden, wie
+  # 'instance_eval' und 'class_eval' definiert. Deshalb werden von dieser Klasse alle
+  # Methoden entfernt, die nicht unbedingt notwendig sind, um das ServerFront Objekt
   # sicher zu machen.
   class BlankObject
     (instance_methods - [:__send__, :__id__, :object_id, :private_methods, :protected_methods]).each do |method|

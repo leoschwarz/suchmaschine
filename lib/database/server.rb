@@ -1,8 +1,12 @@
+############################################################################################
+# Der Datenbankserver stellt das ServerFront-Objekt über das DRuby Protokoll zur Verfügung #
+# und ist Bindeglied zwischen ServerFront und Backend.                                     #
+# Informationen über DRuby:                                                                #
+# https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb                      #
+############################################################################################
 require 'drb/drb'
 require 'drb/acl'
 require 'digest/md5'
-
-# URL: https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb
 
 module Database
   class Server
@@ -14,7 +18,9 @@ module Database
     
     def start
       front_object = ServerFront.new(self)
-      directive = (["deny", "all"] + Config.database.client_whitelist.map{|ip| ["allow", ip]}).flatten
+      
+      directive  = ["deny", "all"]
+      directive += Config.database.client_whitelist.map{|ip| ["allow", ip]}.flatten      
       DRb.install_acl(ACL.new(directive))
       DRb.start_service(Config.database_connection, front_object)
       @logger.log_info "Datenbank Server gestartet."

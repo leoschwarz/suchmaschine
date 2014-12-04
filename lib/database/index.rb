@@ -1,3 +1,4 @@
+# TODO: löschen
 module Database
   class Index
     # Fügt docinfo_id zu einem existierendem Index File hinzu oder erstellt ein neues.

@@ -1,3 +1,11 @@
+############################################################################################
+# Das Datenbank-Backend ist der Teil der Datenbank, welcher direkt Kontakt zu den Daten-   #
+# strukturen hat. Es wird zum einen die LevelDBNative Library verwendet, als auch die      #
+# BetterQueue Implementierung.                                                             #
+# Es kann immer nur ein Prozess zur selben Zeit die Datenbank geöffnet haben, ansonsten    #
+# wird ein Fehler produziert. Das Datenbankbackend wird aber auch von anderen Modulen als  #
+# nur von der Datenbank selbst verwendet.                                                  #
+############################################################################################
 require 'leveldb-native'
 
 module Database

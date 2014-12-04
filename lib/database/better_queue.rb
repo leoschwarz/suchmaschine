@@ -1,11 +1,16 @@
-# Ziele:
-# - Auch mit Gigabytes grossen Warteschlangen umgehen können.
-# - Möglichst zufällige Reihenfolge der Einträge.
-# - Zuverlässig (keine Einträge verlieren)
-# - Trotzdem schnell sein.
-
-# TODO: Eventuell das Verhalten auch in Randsituationen testen.
-
+############################################################################################
+# Die BetterQueue ist eine Datenstruktur welche es ermöglicht eine grosse zufällige Warte- #
+# schlange beständig auf der Festplatte zu speichern. Sie löste die alte BigQueue ab, die  #
+# verschiedene Probleme hatte. Folgendes waren die Ziele bei der Implementierung:          #
+# - Auch mit Gigabytes grossen Warteschlangen umgehen können.                              #
+# - Möglichst zufällige Reihenfolge der Einträge.                                          #
+# - Zuverlässig (keine Einträge verlieren)                                                 #
+# - Trotzdem schnell sein.                                                                 #
+# Hinweis: BetterQueue arbeitet mit dem Newline-Zeichen \n als Trennzeichen, was heisst,   #
+# dass keine Einträge, welche dieses Zeichen enthalten verwendet werden können.            #
+############################################################################################
+require_relative './better_queue_metadata.rb'
+require_relative './better_queue_batch.rb'
 module Database
   class BetterQueue
     MAX_BUFFER = 20_000
@@ -57,20 +62,19 @@ module Database
     def fetch_items
       batch = @metadata.get_random_readable_batch
       if batch.nil?
-        # Da kein Stapel auf der Disk vorhanden ist, wird nun einfach versucht den insert_buffer
-        # zu lesen, falls auch dies nicht geling wird jedoch false zurückgegeben.
+        # Da kein Stapel auf der Disk vorhanden ist, wird nun einfach versucht den
+        # insert_buffer zu lesen, falls auch dies nicht gelingt, wird false zurückgegeben.
         if @insert_buffer.size > 0
           @fetch_buffer = @insert_buffer.shuffle
           @insert_buffer = []
-          
-          true
+          return true
         else
-          false
+          return false
         end
       else
         @fetch_buffer = batch.read_all
         batch.delete
-        true
+        return true
       end
     end
   end

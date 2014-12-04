@@ -1,3 +1,8 @@
+############################################################################################
+# Die BetterQueueMetadata-Klasse stellt ein Interface zu den Metadaten der BetterQueue-    #
+# Warteschlangen zur Verfügung. Diese enthalten eine Liste der Stapel und deren Grösse.    #
+# Auch gibt es einen Zähler um neuen Stapeln eindeutige Namen zuweisen zu können.          #
+############################################################################################
 module Database
   class BetterQueueMetadata
     include Common::Serializable
