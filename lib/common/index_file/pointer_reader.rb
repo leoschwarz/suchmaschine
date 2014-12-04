@@ -9,7 +9,6 @@
 module Common  
   module IndexFile
     class PointerReader
-      # TODO: Auslagern...
       MAX_ROWS = 5000
       
       def initialize(file_path, file_size)

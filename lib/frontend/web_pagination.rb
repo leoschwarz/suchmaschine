@@ -15,8 +15,8 @@ module Frontend
     end
     
     def url
-      # TODO: Das hier ist noch nicht ganz korrekt... 
-      "search?query=#{@query}&page=#{@page_number}"
+      safe_query = @query.gsub(/[^a-zA-Z0-9äöüÄÖÜ ]/, "")
+      "/search?query=#{safe_query}&page=#{@page_number.to_i}"
     end
     
     def number

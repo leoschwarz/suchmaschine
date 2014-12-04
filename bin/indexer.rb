@@ -9,8 +9,6 @@ require_relative '../lib/database/database.rb'
 require_relative '../lib/indexer/indexer.rb'
 require 'fileutils'
 
-# TODO hier noch etwas aufräumen...
-
 module Indexer
   class Main
     def initialize
@@ -32,9 +30,9 @@ module Indexer
       
       begin
         # Temporäres Verzeichnis für den Index überprüfen...
-        # TODO: Sobald alles ideal funktioniert, automatisch den Inhalt des Ordners löschen...
         if Dir.exist?(Config.paths.index_tmp)
-          raise "Bitte das tmp/index-Verzeichniss entleeren."
+          @logger.log_warning "Bitte das temporäre Index-Verzeichniss löschen."
+          @logger.log_warning "Dieses befindet sich bei: #{Config.paths.index_tmp}"
         else
           Dir.mkdir(Config.paths.index_tmp)
         end
@@ -44,14 +42,8 @@ module Indexer
         queue_mutex = Mutex.new
         
         Common::WorkerThreads.run(20, blocking:true) do
-          loop do
-            key = queue_mutex.synchronize{ db.queue_fetch(:index) }
-            break if key.nil?
-          
-            if (raw = db.datastore_get(:metadata, key))
-              metadata = Common::Database::Metadata.deserialize(raw)
-              Task.new(cache, metadata).run unless metadata.nil?
-            end
+          while (key = queue_mutex.synchronize{ db.queue_fetch(:index) })
+            Task.new(cache, key).run
           end
         end
         
@@ -71,7 +63,7 @@ module Indexer
         merger = Indexer::Merger.new(destination.writer, sources)
         merger.merge
       
-        @logger.log_info "Zusammenführung abgeschlossen, nun wird ein Index der Abschnitte des Index erstellt..."
+        @logger.log_info "Zusammenführung abgeschlossen, Metaindex Generierung gestarted."
         destination.reload
         destination.metadata.generate
       

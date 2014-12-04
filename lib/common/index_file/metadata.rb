@@ -4,7 +4,6 @@
 # Zeile aus der Index-Datei in eine Metaindex-Zeile geschrieben, und von einer 8 Bytes     #
 # grossen Angabe der Position in der Index-Datei gefolgt.                                  #
 ############################################################################################
-# TODO: Falls noch Zeit bleibt, Leser mit Binary-Search implementieren.
 module Common
   module IndexFile
     class Metadata

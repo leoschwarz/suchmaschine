@@ -15,7 +15,7 @@ module Frontend
     field :timestamp
 
     def valid?
-      max_age_seconds = 1800 # TODO Konfiguration
+      max_age_seconds = 1800
       Time.now.to_i - max_age_seconds < timestamp
     end
 
