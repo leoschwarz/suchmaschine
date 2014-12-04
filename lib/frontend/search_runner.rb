@@ -1,3 +1,8 @@
+############################################################################################
+# Der SearchRunner führt die eigentliche Suchanfrage aus. Dazu wird die Suchanfrage in     #
+# einzelne Stichworte zerlegt. Danach werden Index-Einträge geladen und die relevantesten  #
+# Dokumente bestimmt und später vom Webserver angezeigt.                                   #
+############################################################################################
 module Frontend
   class SearchRunner
     attr_accessor :results, :results_count
@@ -14,10 +19,10 @@ module Frontend
     
     def run
       # Überprüfen ob es bereits einen Cache-Eintrag gibt.
-      #if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
-      #  @cache_item = cache_item
-      #  return
-      #end
+      if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
+        @cache_item = cache_item
+        return
+      end
       
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
@@ -34,7 +39,7 @@ module Frontend
       end
       
       # Cache schreiben
-      @cache_item = SearchCacheItem.create(@query, results.sort_by{|_, score| score}.reverse)
+      @cache_item = SearchCacheItem.create(@query, results.sort_by{|_,score| score}.reverse)
     end
     
     def results_count

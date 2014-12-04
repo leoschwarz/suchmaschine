@@ -1,3 +1,7 @@
+############################################################################################
+# Für Browser welche die dynamische Navigation mit Javascript nicht unterstützen, gibt es  #
+# eine einfache Seitennumerierungslogik welche hier implementiert wurde.                   #
+############################################################################################
 module Frontend
   class WebPaginationEntry
     def initialize(page_number, query, current)
@@ -20,11 +24,9 @@ module Frontend
     end
   end
   
-  # TODO: Zur Zeit ist das Ergebnis auf den letzten Seiten von langen Listen noch nicht optimal...
-  #       BSP: 18 19 [20]           (wo ist der Rest?)
-  
   class WebPagination
-    MIN_BACK    = 3 # mindestens 3 Seiten zurück anzeigen... also bsp: 2 3 4 [5] 6 7 8 9 ...
+    # mindestens 3 Seiten zurück anzeigen... also bsp: 2 3 4 [5] 6 7 8 9 ...
+    MIN_BACK    = 3 
     MAX_ENTRIES = 10
     
     def initialize(total_pages, current_page, query)
@@ -40,7 +42,9 @@ module Frontend
       stop_at = start_at + MAX_ENTRIES - 1
       stop_at = @total_pages if stop_at > @total_pages
       
-      (start_at..stop_at).each.map{|index| WebPaginationEntry.new(index, @query, index == @current_page)}
+      (start_at..stop_at).each.map do |index|
+        WebPaginationEntry.new(index, @query, index == @current_page)
+      end
     end
   end
 end

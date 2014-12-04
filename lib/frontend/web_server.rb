@@ -1,3 +1,9 @@
+############################################################################################
+# Der Webserver stellt die Schnittstelle zwischen dem Webbrowser des Nutzers und dem       #
+# SearchRunner da. Die Resultate werden in Templates im Verzeichnis ui geladen und dem     #
+# Nutzer angezeigt. Der Server verwendet die Sinatra Library um einfach einen Server zu    #
+# implementieren.                                                                          #
+############################################################################################
 require 'sinatra/base'
 require 'erubis'
 require_relative '../database/database.rb'
@@ -35,13 +41,19 @@ module Frontend
       start_time = Time.now
       query = params[:query]
       page  = params[:page].to_i
-      render_layout = (params[:render_layout] != "false") # TODO implementieren, und nacher in die resultatseite laden...
       
       search  = get_search(query)
       results = search.page(page)      
       duration  = Time.now - start_time
       pagination = Frontend::WebPagination.new(search.pages_count, page, query)
-      render_page("results.erb", {query: query, duration: duration, results: results, results_count: search.results_count, pagination: pagination})
+      
+      view_vars = {}
+      view_vars[:query] = query
+      view_vars[:duration] = duration
+      view_vars[:results] = results
+      view_vars[:results_count] = search.results_count
+      view_vars[:pagination] = pagination
+      render_page("results.erb", view_vars)
     end
     
     private

@@ -1,3 +1,8 @@
+############################################################################################
+# Das SearchCacheItem speichert die Resultate einer Suche, sodass diese nicht jedes Mal    #
+# ermittelt werden müssen. Dies wird vor allem dazu gemacht, um die Suche nicht jedes Mal  #
+# erneut ausführen zu müssen, wenn der Nutzer eine weitere Seite der Resultate möchte.     #
+############################################################################################
 require 'digest/md5'
 
 module Frontend
@@ -31,7 +36,7 @@ module Frontend
       item.key   = Digest::MD5.hexdigest(query)
       item.documents = documents
       item.timestamp = Time.now.to_i
-#      item.save
+      item.save
       item
     end
 
