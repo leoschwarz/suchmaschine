@@ -8,7 +8,8 @@ module Database
   # Methoden entfernt, die nicht unbedingt notwendig sind, um das ServerFront Objekt
   # sicher zu machen.
   class BlankObject
-    (instance_methods - [:__send__, :__id__, :object_id, :private_methods, :protected_methods]).each do |method|
+    safe_methods = [:__send__, :__id__, :object_id, :private_methods, :protected_methods]
+    (instance_methods - safe_methods).each do |method|
       undef_method method
     end
   end
@@ -20,7 +21,9 @@ module Database
       # Mutex für die einzelnen Ressourcen der Datenbank erzeugen.
       # Zugriffe zu verschiedenen Ressourcen können so zur selben Zeit erfolgen.
       @mutex = {}
-      [:download_queue, :index_queue, :cache, :search_cache, :document, :metadata].each{|i| @mutex[i] = Mutex.new}
+      ressources = [:download_queue, :index_queue, :cache,
+                    :search_cache, :document, :metadata]
+      ressources.each{|i| @mutex[i] = Mutex.new}
     end
     
     def execute(resource, action, parameters)
