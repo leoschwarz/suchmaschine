@@ -1,3 +1,9 @@
+############################################################################################
+# Die IndexFile::Writer Klasse ermöglicht das einfache Schreiben von Index-Dateien.        #
+# Die Schreibzugriffe werden gebuffert, es ist aber dennoch effizienter die write_rows     #
+# Methode für das Schreiben vieler Zeilen zu verwenden, da diese einen einzelnen "pack"    #
+# Methoden-Aufruf vollstreckt, anstatt viele einzelne für jede separate Zeile.             #
+############################################################################################
 module Common
   module IndexFile
     class Writer

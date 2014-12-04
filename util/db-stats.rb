@@ -1,26 +1,34 @@
 #!/usr/bin/env ruby
-load( File.join(File.dirname(__FILE__), "..", "bin", "database") )
+############################################################################################
+# Dieses Programm gibt einige Statistiken über die Datenbank aus.                          #
+# Um das Programm ausführen zu können, darf die Datenbank nicht von einem anderen Prozess  #
+# verwendet werden. Die Ausführung kann unter Umständen einige Zeit in Anspruch nehmen.    #
+############################################################################################
+require_relative '../bin/database.rb'
 
-kb = Config.database.block_size.metadata
-options = {}
-options[:create_if_missing] = true
-options[:compression]       = LevelDBNative::CompressionType::SnappyCompression
-options[:block_size]        = kb * 1024
-options[:write_buffer_size] = 16 * 1024*1024
-data_store = LevelDBNative::DB.new(Config.paths.metadata, options)
+# Datenbank laden.
+db = Database::Backend.new
 
+# Häufigste Domains ermitteln, um Zeit zu sparen wird hier lediglich die Verteilung von
+# 100'000 zufällig ausgewählten Einträgen betrachtet.
 domain_counts = Hash.new(0)
-data_store.keys.each do |key|
-  metadata = Common::Database::Metadata.deserialize(data_store[key])
-  domain   = (metadata.url).split("/")[0]
+metadata_keys = db.datastore_keys(:metadata)
+metadata_keys.sample(100_000).each do |key|
+  metadata = Common::Database::Metadata.deserialize(db.datastore_get(:metadata, key))
+  domain   = metadata.url.split("/")[0]
   domain_counts[domain] += 1
 end
 
-total = 0
-domain_counts.sort_by{|k,v| v}.last(200).reverse.each_with_index do |pair, index|
-  domain, value = pair
-  puts "[#{index.to_s.ljust(3)}]: #{domain} => #{value}"
-  total += value
+# Ausgabe der Domain-Verteilung:
+puts "Häufigste Hosts im Korpus und ihr entsprechender Anteil:"
+total = domain_counts.values.inject(:+)
+domain_counts.sort_by{|_,count| count}.last(100).reverse.each do |domain, count|
+  percent = count.to_f / total * 100
+  puts "%.3f%% #{domain}" % percent
 end
-puts "="*20
-puts "TOTAL: #{total}"
+
+# Ausgabe der totalen Anzahl:
+puts "==========================================="
+puts "n(Dokumente) = #{metadata_keys.size}"
+puts "n(Cache)     = #{db.datastore_keys(:cache).size}"
+puts "==========================================="

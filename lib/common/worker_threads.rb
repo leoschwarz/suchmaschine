@@ -1,5 +1,9 @@
+############################################################################################
+# TODO
+
 module Common
   class WorkerThreads
+    # TODO: Alle stellen finden wo diese alte Instanzbasierte Variante verwendet wurde und diese entfernen, um danach hier aufräumen zu können.
     def initialize(thread_number)
       @thread_number = thread_number
     end

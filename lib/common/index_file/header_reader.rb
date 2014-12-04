@@ -1,19 +1,25 @@
+############################################################################################
+# Die HeaderReader Klasse ermöglicht das effiziente Lesen der Header-Zeilen eines Index-   #
+# Dokumentes. Die restlichen Zeilen werden nicht gelesen, sondern direkt übersprungen, um  #
+# den Lesevorgang zu beschleunigen. Diese Implementierung verwendet keinen Puffer, weshalb #
+# dies nur in Kombination mit Lauwerken mit sehr kurzer Zugriffszeit verwendet werden      #
+# sollte, da das Lesen sonst ineffizient sein könnte.                                      #
+############################################################################################
 module Common
   module IndexFile
-    # Ein Leser für Index-Dateien, der ausschliesslich Header-Zeilen liest.
-    # Die restlichen Zeilen werden nicht gelesen, sondern direkt übersprungen, um die Performance zu verbessern.
-    # Es wird kein Buffer verwendet, weshalb dies ausschliesslich auf Laufwerken mit sehr kurzer Zugriffszeit verwendet werden sollte (SSD, RAM-Disk, etc)
-    # Die einzelnen Zeilen werden als callback zurückgegeben.
     class HeaderReader
       def initialize(file_path, file_size)
         @file_path = file_path
         @file_size = file_size
       end
     
+      # Diese Methode liest die Datei und erwartet einen Block als Parameter, der für jede
+      # Header-Zeile aufgerufen wird.
       def read        
         pointer = 0
         while pointer < @file_size
-          term, count = IO.binread(@file_path, IndexFile::HEADER_SIZE, pointer).unpack(IndexFile::HEADER_PACK)
+          raw = IO.binread(@file_path, IndexFile::HEADER_SIZE, pointer)
+          term, count = raw.unpack(IndexFile::HEADER_PACK)
           pointer += IndexFile::HEADER_SIZE
           yield(term, count, pointer) # <-- callback
           pointer += count * IndexFile::ROW_SIZE

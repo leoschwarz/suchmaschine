@@ -29,6 +29,7 @@ local: &default
     document: "/home/lightblaze/suchmaschine/db/document/"
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
     index: "/mnt/sdb/suchmaschine/index"
+    index_tmp: "/home/lightblaze/suchmaschine/tmp/index/"
     index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
     metadata: "/mnt/sdb/suchmaschine/metadata/"
 
@@ -48,6 +49,7 @@ offline-laptop:
     document: "/Users/leonardo.schwarz/Maturarbeit/Code/db/document/"
     download_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/download_q/"
     index: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index"
+    index_tmp: "/Users/leonardo.schwarz/Maturarbeit/Code/tmp/index/"
     index_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index_q/"
     metadata: "/Users/leonardo.schwarz/Maturarbeit/Code/db/metadata/"
 
@@ -59,5 +61,6 @@ offline-desktop:
     document: "/Users/leoschwarz/Desktop/suchmaschine/db/document/"
     download_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/download_q/"
     index: "/Users/leoschwarz/Desktop/suchmaschine/db/index"
+    index_tmp: "/Users/leoschwarz/Desktop/suchmaschine/tmp/index/"
     index_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/index_q/"
     metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/metadata/"

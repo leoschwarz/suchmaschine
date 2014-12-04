@@ -1,3 +1,12 @@
+############################################################################################
+# Diese Datei lädt sowohl das Common::Database Submodul, als auch den Datenbank-Client.    #
+# Die Verwendung erfolgt in der Regel durch ein Mixin des Common::Database Submoduls, den  #
+# dann kann man im ganzen Modul auf den Datebank-Client Common::Database::Database zu-     #
+# greifen.                                                                                 #
+#                                                                                          #
+# Die Verbindung zum Datenbankserver wird mithilfe der Distributed Ruby Platform herge-    #
+# stellt. Dabei wird auf die Instanz der Klasse ServerFront im Modul Database zugegriffen. #
+############################################################################################
 require_relative './database.rb'
 require_relative './document.rb'
 require_relative './metadata.rb'

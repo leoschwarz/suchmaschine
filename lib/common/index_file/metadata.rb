@@ -1,3 +1,10 @@
+############################################################################################
+# Klasse für das Lesen und Schreiben von Metaindex-Dateien. Das Format der Metaindex-      #
+# Dateien ist ganz einfach aufgebaut. Es werden jeweils zuerst die 24 Bytes der Header-    #
+# Zeile aus der Index-Datei in eine Metaindex-Zeile geschrieben, und von einer 8 Bytes     #
+# grossen Angabe der Position in der Index-Datei gefolgt.                                  #
+############################################################################################
+# TODO: Falls noch Zeit bleibt, Leser mit Binary-Search implementieren.
 module Common
   module IndexFile
     class Metadata
@@ -14,8 +21,8 @@ module Common
     
       def read
         @data = {}
-        raw = IO.binread(@path)
-        raw.unpack(ROW_PACK*(raw.bytesize / ROW_SIZE)).each_slice(3) do |term, count, position|
+        rows = IO.binread(@path).unpack(ROW_PACK*(raw.bytesize / ROW_SIZE))
+        rows.each_slice(3) do |term, count, position|
           term.delete!("\u0000")
           term.force_encoding("utf-8")
           @data[term] = [count, position]

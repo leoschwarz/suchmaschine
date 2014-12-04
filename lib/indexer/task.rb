@@ -1,5 +1,9 @@
-# TODO: Diese Datei noch sinnvoll umbenennen...
-
+############################################################################################
+# Eine Aufgabe des Indexierers beschreibt die Aufgabe ein Dokument zu lesen und die für    #
+# Stichworte Einträge im IndexingCache zu hinterlassen. Die Aufgabe beinhaltet nicht das   #
+# zusammenführen der einzelnen Zwischenergebnissdateien.                                   #
+############################################################################################
+# TODO Dokument-Lesen hierhin verlagern...
 module Indexer
   class Task
     def initialize(indexing_cache, metadata)

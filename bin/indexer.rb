@@ -1,17 +1,21 @@
 #!/usr/bin/env ruby
-#require_relative '../lib/database/backend.rb' # TODO: nach lib/common verschieben ? 
+############################################################################################
+# Diese Datei startet, falls sie direkt ausgeführt wird, den Indexierer.                   #
+# Ansonsten werden lediglich das Common- und das Indexer-Modul geladen, ohne dass weiter   #
+# etwas geschieht.                                                                         #
+############################################################################################
 require_relative '../lib/common/common.rb'
 require_relative '../lib/database/database.rb'
 require_relative '../lib/indexer/indexer.rb'
 require 'fileutils'
 
-# TODO: Den Code übersichtlicher machen.
-Thread.abort_on_exception = true
+# TODO hier noch etwas aufräumen...
 
 module Indexer
   class Main
     def initialize
-      @logger = Common::Logger.new({labels: {tasks: "Aufgaben", tasks_per_second: "Aufgaben/s"}})
+      labels = {tasks: "Aufgaben", tasks_per_second: "Aufgaben/s"}
+      @logger = Common::Logger.new({labels: labels})
       @logger.add_output($stdout, Common::Logger::INFO)
     end
     
@@ -21,23 +25,22 @@ module Indexer
       begin
         db = Database::Backend.new
       rescue => e
+        @logger.log_warning("Die Datenbank wird bereits von einem Prozess verwendet.")
         @logger.log_exception(e)
-        @logger.log_warning("Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden.")
         Kernel.exit
       end
       
       begin
         # Temporäres Verzeichnis für den Index überprüfen...
         # TODO: Sobald alles ideal funktioniert, automatisch den Inhalt des Ordners löschen...
-        dir = File.join(File.dirname(__FILE__), "..", "tmp", "index")
-        if Dir.exist?(dir)
+        if Dir.exist?(Config.paths.index_tmp)
           raise "Bitte das tmp/index-Verzeichniss entleeren."
         else
-          Dir.mkdir(dir)
+          Dir.mkdir(Config.paths.index_tmp)
         end
         
-        # Einzelne Index-Dateien für alle Dokumente in der Indexierwarteschlange erstellen...
-        cache = Indexer::IndexingCache.new(dir)
+        # Einzelne Index-Dateien für alle Dokumente in der Indexierwarteschlange erstellen.
+        cache = Indexer::IndexingCache.new(Config.paths.index_tmp)
         queue_mutex = Mutex.new
         
         Common::WorkerThreads.run(20, blocking:true) do
@@ -57,7 +60,8 @@ module Indexer
         db.save
         db = nil
       
-        # Nun müssen die einzelnen Cache Dateien in tmp/index in eine einzelne finale Cache-Datei sortiert werden.
+        # Nun müssen die einzelnen Zwischenergebnisse aus dem temporären Index-Verzeichnis
+        # in den Zielindex zusammengeführt werden.
         @logger.log_info "Die Einträge werden nun zusammengeführt..."
         
         destination = Common::IndexFile.new(Config.paths.index)

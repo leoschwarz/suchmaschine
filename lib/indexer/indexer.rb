@@ -1,5 +1,7 @@
-module Indexer
-end
-
-# Alle Dateien im Verzeichnis laden
-Dir[File.join(File.dirname(__FILE__), './*.rb')].each {|file| require file }
+############################################################################################
+# Diese Datei lädt das Indexer Modul                                                       #
+############################################################################################
+module Indexer; end
+require_relative './indexing_cache.rb'
+require_relative './merger.rb'
+require_relative './task.rb'

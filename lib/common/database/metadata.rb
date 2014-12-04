@@ -1,3 +1,10 @@
+############################################################################################
+# Die Metadaten eines Dokumentes enthalten wie der Name schon sagt Metadaten über          #
+# Dokumente. Die Metadaten enthalten eine Liste der Anzahl Auftreten jedes Wortes, aber    #
+# im Gegensatz zu den Dokumenten nicht den gesammten Fliesstext des Dokumentkörpers.       #
+# Die Metadaten werden von der Datenbank auf der SSD gespeichert, um so schnelle Zugriffs- #
+# zeiten zu erreichen.                                                                     #
+############################################################################################
 require 'digest/md5'
 
 module Common
@@ -5,13 +12,21 @@ module Common
     class Metadata
       include Common::Serializable
       
-      field :url                                     # [URL]     URL des Dokumentes (URL.stored wird gespeichert)
-      field :title, ""                               # [String]  Titel des Dokumentes.
-      field :added_at                                # [Integer] Timestamp der Erstellung
-      field :permissions, {index: nil, follow: nil}  # [Boolean] index, follow: Meta-Tag Information
-      field :word_counts, {}                         # [Hash]    Wort => Anzahl, Wie oft kommen die Worte im Dokument vor?
-      field :redirect                                # [String]  URL, im Format Common::URL.stored, falls Umleitung
-      field :downloaded, true                        # [Boolean] Gibt es ein heruntergeladenes Dokument?
+      # [URL/String] Es wird URL.stored gespeichert, aber wenn die Metadaten mit fetch
+      # geladen wurden, wird stattdessen auf ein [URL] Objekt verwiesen.
+      field :url
+      # [String] Der Dokumenttitel
+      field :title, ""
+      # [Integer] Timestamp der Erstellung
+      field :added_at
+      # [Symbol=>Boolean] Erlaubnis das Dokument zu indexieren und zu verfolgen.
+      field :permissions, {index: nil, follow: nil}
+      # [String=>Integer] Anzahl Auftreten eines jeden Wortes.
+      field :word_counts, {}
+      # [String] URL im Format Common::URL.stored, falls es eine Umleitung gibt.
+      field :redirect
+      # [Boolean] Gibt es ein heruntergeladenes Dokument?
+      field :downloaded, true
       
       def word_counts_total
         self.word_counts.values.inject(:+).to_i

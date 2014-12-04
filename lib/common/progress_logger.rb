@@ -1,3 +1,12 @@
+############################################################################################
+# Der ProgressLogger wird zusammen mit dem Logger dazu verwendet dazu verwendet durch tab  #
+# getrennte Fortschrittsinformationen auf der Konsole auszugeben.                          #
+# Hinweis: Die Variabeln werden in einem Hash gespeichert, in neueren Ruby Versionen       #
+#          (2.1.x - 2.2.x) behalten Hashes die Reihenfolge der Elemente bei, in welcher    #
+#          sie hinzugefügt wurden. Dadurch ist es einfach möglich die Reihenfolge der      #
+#          Elemente im Hash beizubehalten. Sollte dieses Verhalten in einer neueren        #
+#          Version von Ruby geändert werden, ist diese Klasse nicht mehr kompatibel.       #
+############################################################################################
 module Common
   class ProgressLogger
     def initialize(variables={}, logger=nil)

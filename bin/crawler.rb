@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 ############################################################################################
 # Diese Datei startet, falls sie direkt ausgeführt wird, den Crawler-Client.               #
 # Ansonsten werden lediglich das Common- und das Crawler-Modul geladen, ohne dass weiter   #

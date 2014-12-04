@@ -1,6 +1,15 @@
+############################################################################################
+# Die PointerReader Klasse ermöglicht das lesen von Index-Dateien, indem ein Zeiger immer  #
+# an eine bestimmte Position zeigt. Es kann jeweils die aktuelle Zeile gelesen werden, bei #
+# der es sich entweder um eine Header- oder eine Inhalt-Zeile handeln kann, oder es kann,  #
+# sofern die Datei noch nicht zu Ende ist, den Pointer auf die folgende Zeile verschieben. #
+# Hiermit wird es möglich nicht die gesammte Datei in den Arbeitsspeicher laden zu müssen, #
+# muss aber nicht auf die Möglichkeit die gesammte Datei zu lesen verzichten.              #
+############################################################################################
 module Common  
   module IndexFile
     class PointerReader
+      # TODO: Auslagern...
       MAX_ROWS = 5000
       
       def initialize(file_path, file_size)

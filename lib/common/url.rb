@@ -1,17 +1,23 @@
+############################################################################################
+# Die URL Klasse abstrahiert (und vereinfacht) die Handhabung von verschiedenen Repräsen-  #
+# tationsformen von URLs. Generell werden hier drei verschiedene Formen unterschieden:     #
+# - encoded: Schema + kodierte URL (ohne Sonderzeichen)                                    #
+# - decoded: Schema + dekodierte URL (mit Sonderzeichen)                                   #
+# - stored: Kein Schema + Kodierte URLs (ohne Sonderzeichen)                               #
+# Ausserdem werden Helfer zur Verfügung gestellt um relative URls zu ganzen URLs zu        #
+# ergänzen und die Fragmentbezeichner (der #-Teil der URL) von der URL zu entfernen.       #
+############################################################################################
 require 'uri'
-
 module Common
-  # Diese Klasse abstrahiert (und vereinfacht) die Handhabung von URLs.
+  # 
   # Generell werden hier drei verschiedene Formen von URLs unterschieden:
-  # - encoded: Kodierte URLs in denen keine Sonderzeichen vorkommen, sie beginnen mit dem Schema.
-  # - decoded: Dekodierte URLs in denen Sonderzeichen vorkommen, sie beginnen mit dem Schema.
-  # - stored: Kodierte URLs in denen keine Sonderzeichen vorkommen, sie beginnen ohne das Schema.
+  
   class URL
     # Handelt es sich um eine absolute URL?
     attr_reader :full_url
 
     # Die Klassenmethode 'new' privat machen.
-    # Es soll immer einer der Konstruktoren encoded, decoded oder stored explizit verwendet werden.
+    # Stattdessen sollen die Konstruktoren encoded, decoded oder stored verwendet werden.
     private_class_method :new
     
     # Erzeugt eine neue URL Instanz.
@@ -36,7 +42,7 @@ module Common
       @_decoded_url ||= URI.decode @encoded_url
     end
 
-    # URL die in der Datenbank gespeichert wird. Ohne URI-Schema, mit kodierten Sonderzeichen
+    # URL die in der Datenbank gespeichert wird. Ohne Schema, mit kodierten Sonderzeichen
     # Beispiel: de.wikipedia.org/wiki/K%C3%A4se
     # @return [String]
     def stored_url
@@ -102,8 +108,9 @@ module Common
     
     # Interpretiert die als Parameter gegebene URL als Link der auf einer Webseite gefunden
     # wurde und evaluiert die Ziel-URL. Falls es sich um eine relative handelt, wird sie
-    # an das Ende hinzugefügt, falls es sich um eine absolute handelt, wird die absolute zurückgegeben
-    # und falls es sich um etwas handelt das keine URL ist oder es andere Fehler gibt, wird nil zurückgegeben.
+    # an das Ende hinzugefügt, falls es sich um eine absolute handelt, wird die absolute
+    # zurückgegeben und falls es sich um etwas handelt das keine URL ist oder es andere
+    # Fehler gibt, wird nil zurückgegeben.
     # @param [URL, String]
     # @return [URL, nil]    
     def join_with(url)
@@ -127,7 +134,8 @@ module Common
     # Es werden nur encoded und decoded unterstützt.
     # Falls dies nicht gelingt wird stattdessen nil zurückgegeben.
     # @param string [String] Der zu konvertierende String.
-    # @param second_try [Boolean] Soll ein zweiter Versuch erlaubt sein? (In dem Fall wird versucht die URL zu kodieren)
+    # @param second_try [Boolean] Soll ein zweiter Versuch erlaubt sein?
+    #   (In dem Fall wird versucht die URL zu kodieren)
     # @return [URL, nil]
     def self.from_unknown(string, second_try=true)
       # 1. Versuch: die URL enthält keine besonderen Sonderzeichen...

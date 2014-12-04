@@ -1,6 +1,16 @@
+############################################################################################
+# Das Serializable-Modul ist ein Mixin welches mithilfe des "include"-Befehls in eine      #
+# Klasse geladen werden kann und dann die Logik anbietet ein Objekt serialisierbar zu      #
+# machen. Es werden eine Klassenmethode namens field und fields definiert, welche es       #
+# ermöglichen Felder und Standardwerte auf Klassenebene zu definieren.                     #
+# Eine Klassenmethode namens "deserialize" ermöglicht es ein ehemals mit der Instanz-      #
+# methode "serialize" serialisiertes Objekt wieder in ein neues Objekt zu laden.           #
+#                                                                                          #
+# Für die Serialisierung wird die JSON Parser-Bibliothek "oj" verwendet. Der Aufbau des    #
+# Mixins baut auf demjenigen folgendes Aritkels auf:                                       #
+# http://wiseheartdesign.com/articles/2006/09/22/class-level-instance-variables/           #
+############################################################################################
 require 'oj'
-
-# URL: http://wiseheartdesign.com/articles/2006/09/22/class-level-instance-variables/
 
 module Common
   module Serializable

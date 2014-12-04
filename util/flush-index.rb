@@ -1,34 +1,49 @@
 #!/usr/bin/env ruby
-# Dieses Skript löscht den Index der Suchmaschine und befüllt die INDEX_QUEUE erneut.
-load './bin/database'
-load './bin/indexer'
+############################################################################################
+# Dieses Skript löscht den Index der Suchmaschine und befüllt die Index Warteschlange      #
+# erneut, indem alle heruntergeladenen Dokumente in die Warteschlange eingetragen werden.  #
+#                                                                                          #
+# Dieses Programm führt die Datenbankoperationen über direkt auf der Datenbank durch, was  #
+# bedeutet, dass die Datenbank nicht bereits von einem anderen Prozess verwendet werden    #
+# darf.                                                                                    #
+############################################################################################
+require_relative '../bin/database.rb'
+require_relative '../bin/indexer.rb'
 
-print "Warnung, dieses Skript wird alle Postings (und zugehörige Metadaten) unwiederbringlich löschen.\n"
-print "Um fortzufahren, bitte 'index löschen' eintippen: "
-input = gets.strip
-if input != "index löschen"
+print "Warnung: Dieses Skript wird den gesammten bereits bestehenden Index löschen.\n"
+print "Wirklich fortfahren? (Ich will den Index löschen/[Nein]): "
+verification = gets.strip
+if verification != "Ich will den Index löschen"
   puts "Es wurde nichts gelöscht."
   Kernel.exit
 end
 
-puts "Löschvorgang begonnen..."
-puts "Löschen aller Index-Dateien..."
+puts "Der Löschvorgang wird begonnen."
+puts "Löschung aller Index-Dateien begonnen."
 
-File.unlink(Config.paths.index) if File.exist?(Config.paths.index)
-Dir[File.join(File.dirname(__FILE__), "..", "tmp", "index", "*")].each{|file| File.unlink(file)}
-Dir.delete(File.join(File.dirname(__FILE__), "..", "tmp", "index")) if Dir.exist? File.join(File.dirname(__FILE__), "..", "tmp", "index")
-Dir[Config.paths.index_queue+"*"].each{|file| File.unlink(file)}
+allpaths = [
+  Config.paths.index,
+  Config.paths.index_tmp+"*",
+  Config.paths.index_queue+"*"
+]
+allpaths.each do |paths|
+  Dir[paths].each do |path|
+    File.unlink(path) if File.exist?(path)
+  end
+end
+Dir.delete(Config.paths.index_tmp) if Dir.exist?(Config.paths.index_tmp)
 
-puts "Alte Dateien gelöscht, beginne die neue Warteschlange zu befüllen..."
+puts "Löschung aller Index-Dateien abgeschlossen."
+puts "Befüllung der Index Warteschlange begonnen."
 
 begin
   db = Database::Backend.new
 rescue => e
-  puts "Um den Indexierer ausführen zu können, darf die Datenbank nicht von einem anderen Prozess verwendet werden."
+  puts "Die Datenbank darf nicht von einem anderen Prozess verwendet werden."
+  puts "Befüllung der Datenbank fehlgeschlagen."
   raise e
 end
 
-puts "Befüllen der Index-Warteschlange begonnen..."
 keys = db.datastore_keys(:metadata)
 total = keys.size
 counter = 0
@@ -37,7 +52,7 @@ keys.each do |key|
   counter += 1
   print "\r[#{counter}/#{total}] eingefügt." if counter % 100 == 0
 end
-
 db.save
 
-puts "\rBefüllen beendet.                      "
+puts "\rBefüllung der Index Warteschlange abgeschlossen."
+puts "Der Index wurde erfolgreich gelöscht."

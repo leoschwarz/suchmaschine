@@ -1,3 +1,12 @@
+############################################################################################
+# Diese Datei implemntiert die Logik, welche für die Zusammenführung verschiedener Index-  #
+# Dateien miteinander notwendig ist.                                                       #
+# Es werden Common::IndexFile::PointerReader verwendet, welche es ermöglichen in der Index #
+# Datei zu navigieren, ohne die gesammte Datei in den Arbeitsspeicher laden zu müssen. So  #
+# wird die Indexierung hier überhaupt erst möglich. Unter Umständen, kann es bei einem     #
+# grossen Korpus notwendig sein, in der Konfiguration die Buffergrösse runterzuschrauben,  #
+# da ansonsten zu wenig Arbeitsspeicher zur Verfügung stehen könnte.                       #
+############################################################################################
 module Indexer
   class Merger
     def initialize(destination_writer, source_readers)
@@ -8,8 +17,11 @@ module Indexer
     def merge
       # Der Prozess ist abgeschlossen, sobald alle @sources entfernt wurden.
       while @sources.size > 0
-        # Da nun in den verschiedenen Quellen ein unterschiedliches Stichwort zuoberst sein kann,
-        # muss zuerst dasjenige gefunden werden, welches alphabetisch den geringsten Wert bestitzt.
+        # Da in den verschiedenen Quellen verschiedene Stichworte für den momentanen Block
+        # gegeben sein können, ist es zuerst nötig, Quellen auszuwählen, welche an der
+        # momentanen Stelle dasselbe Stichwort verwenden.
+        # Hierzu werden jeweils diejenigen ausgewählt, welche das Stichwort haben, welches
+        # alphabetisch den geringsten Wert besitzt.
         sources_for_term = {}
         @sources.each do |source|
           type, term, count = source.current
@@ -24,7 +36,7 @@ module Indexer
         
         @destination.write_header(term, n_total)
         
-        # Den Pointer der ausgewählte Quellen jeweils um eins weiter verschieben, sodass auf eine Inhaltszeile gezeigt wird.
+        # Den Zeiger der ausgewählten Quellen, jeweils auf Inhalt-Zeilen verschieben.
         sources.each do |source|
           while source.current[0] == :header
             source.shift

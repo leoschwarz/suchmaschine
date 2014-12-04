@@ -1,6 +1,11 @@
+############################################################################################
+# Der Indexierungs-Cache stellt ein einfaches Interface zur Verfügung Auftritsstellen von  #
+# Stichworten festzuhalten und diese automatisch nach der Überschreitung eines bestimmten  #
+# Schwellenwertes in eine temporärere Index-Datei in einem Verzeichnis zu speichern.       #
+############################################################################################
 module Indexer
   class IndexingCache
-    MAX_SIZE = 300_000_000
+    MAX_SIZE = 250_000_000
     
     def initialize(flush_directory)
       @data = {}
@@ -8,7 +13,7 @@ module Indexer
       @data_mutex = Mutex.new
       @flush_mutex = Mutex.new
       @flush_directory = flush_directory
-      @flush_thread    = Thread.new{}
+      @flush_thread = Thread.new{}
       @flushes = 0
     end
     
@@ -16,14 +21,15 @@ module Indexer
       @data_mutex.synchronize do
         @data[word] ||= Array.new
         @data[word] << [freq, doc]
-        @data_size += Common::IndexFile::IndexFile::ROW_SIZE * 1.5 # <- Ruby-Ineffizienz Heuristik
+        @data_size += Common::IndexFile::IndexFile::ROW_SIZE
       end
       
       flush if @data_size >= MAX_SIZE
     end
     
     def flush(force=false)
-      # Sicherstellen, dass die Methode zuerst fertig aufgerufen wird, bevor ein neuer Thread an die Reihe kommt.
+      # Sicherstellen, dass die Methode zuerst fertig aufgerufen wurde,
+      # bevor ein neuer Thread an die Reihe kommt.
       @flush_mutex.synchronize do
         return if (@data_size < MAX_SIZE) && !force
         
@@ -45,7 +51,8 @@ module Indexer
       end
     end
     
-    # Im Gegensatz zu einem Aufruf von flush wird hier sicher gestellt dass ALLE Daten gespeichert werden...
+    # Diese Methode stellt sicher, dass auch die letzten Daten gespeichert wurden.
+    # Flush im gegenzug, speichert nur wenn es viele Daten zu speichern gibt.
     def final_flush
       if @flush_thread && @flush_thread.alive?
         # Warten bis dieser abgeschlossen ist...
