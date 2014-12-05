@@ -19,9 +19,9 @@ module Frontend
       Time.now.to_i - max_age_seconds < timestamp
     end
 
-    def self.load(query)
+    def self.load(db_backend, query)
       key = Digest::MD5.hexdigest(query)
-      raw = Frontend::Database.search_cache_get(key)
+      raw = db_backend.datastore_get(:search_cache, key)
   
       if raw.nil?
         nil
@@ -30,18 +30,18 @@ module Frontend
       end
     end
 
-    def self.create(query, documents)
+    def self.create(db_backend, query, documents)
       item = SearchCacheItem.new
       item.query = query
       item.key   = Digest::MD5.hexdigest(query)
       item.documents = documents
       item.timestamp = Time.now.to_i
-      item.save
+      item.save(db_backend)
       item
     end
 
-    def save
-      Frontend::Database.search_cache_set(key, serialize)
+    def save(db_backend)
+      db_backend.datastore_set(:search_cache, key, self.serialize)
     end
   end
 end

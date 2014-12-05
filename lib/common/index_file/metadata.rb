@@ -20,7 +20,8 @@ module Common
     
       def read
         @data = {}
-        rows = IO.binread(@path).unpack(ROW_PACK*(raw.bytesize / ROW_SIZE))
+        raw = IO.binread(@path)
+        rows = raw.unpack(ROW_PACK*(raw.bytesize / ROW_SIZE))
         rows.each_slice(3) do |term, count, position|
           term.delete!("\u0000")
           term.force_encoding("utf-8")

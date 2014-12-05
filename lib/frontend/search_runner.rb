@@ -19,7 +19,7 @@ module Frontend
     
     def run
       # Überprüfen ob es bereits einen Cache-Eintrag gibt.
-      if (cache_item = SearchCacheItem.load(@query)) && cache_item.valid?
+      if (cache_item = SearchCacheItem.load(@db, @query)) && cache_item.valid?
         @cache_item = cache_item
         return
       end
@@ -39,7 +39,7 @@ module Frontend
       end
       
       # Cache schreiben
-      @cache_item = SearchCacheItem.create(@query, results.sort_by{|_,score| score}.reverse)
+      @cache_item = SearchCacheItem.create(@db, @query, results.sort_by{|_,score| score}.reverse)
     end
     
     def results_count
