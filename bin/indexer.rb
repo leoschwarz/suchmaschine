@@ -41,7 +41,7 @@ module Indexer
         cache = Indexer::IndexingCache.new(Config.paths.index_tmp)
         queue_mutex = Mutex.new
         
-        Common::WorkerThreads.run(20, blocking:true) do
+        Common::WorkerThreads.run(Config.indexer.threads, blocking:true) do
           while (key = queue_mutex.synchronize{ db.queue_fetch(:index) })
             Task.new(cache, key).run
           end

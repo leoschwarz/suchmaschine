@@ -1,5 +1,7 @@
-# In dieser Datei, kann die Liste der Startpunkte des Crawlers festgelegt werden.
-# Mithilfe des Skripts in util/url-seed.rb kann man diese in die Datenbank laden.
+############################################################################################
+# In dieser Datei, kann die Liste der Startpunkte des Crawlers festgelegt werden.          #
+# Mithilfe des Skripts in util/url-seed.rb kann man diese in die Datenbank laden.          #
+############################################################################################
 
 # Eine Auswahl an deutschsprachigen Webseiten:
 - de.wikipedia.org

@@ -1,38 +1,71 @@
+############################################################################################
+# Haupt-Konfiguration der Suchmaschine                                                     #
+############################################################################################
+
 local: &default
+  # Verbindung zur Datenbank, "druby://0.0.0.0:2051" bedeutet lokal.
   database_connection: "druby://0.0.0.0:2051"
+  # Parameter der Datenbank
   database:
+    # Grösse eines BetterQueue-Stapels in Anzahl Zeilen.
     batch_size: 100_000
-    block_size: # Angaben in KB
+    # Blockgrössen der verschiedenen LevelDB Datenbanken in KB.
+    block_size:
       document: 128
       metadata: 4
       cache: 4
       search_cache: 4
       postings_block: 32
       postings_metadata: 8
+    # Whitelist der erlaubten IPs, welche eine Verbindung zur Datenbank herstellen dürfen.
     client_whitelist:
       - 127.0.0.1
       - 192.168.10.100
+  # Parameter des Crawlers
   crawler:
-    agent: "lightblaze"
+    # User-Agent der bei HTTP-Anfragen mitgesendet werden soll.
+    agent: "breaksearch.crawler/1.0"
+    # Anzahl Threads, die für das Crawling verwendet werden sollen.
     threads: 100
+    # Timeout von HTTP-Anfragen in Sekunden.
+    # Sollte eine Anfrage länger dauern, wird sie als Fehler abgebgrochen.
     timeout: 10
+    # Maximale Grösse einer HTTP-Antwort in Bytes.
+    # Überschüssiger Inhalt wird abgetrennt und nicht empfangen.
     maxsize: 500_000
+  # Konfiguration des robots.txt-Lesers
   robotstxt:
     cache:
+      # Cache aktiviert?
       enabled: YES
+      # Maximales Alter von Cache-Einträgen in Sekunden.
       lifetime: 86400
+  # Konfiguration des Indexierers.
   indexer:
-    threads: 10
+    # Anzahl Threads, die für die Indexierung verwendet werden sollen.
+    threads: 20
+  # Konfiguration der Dateipfade für die Speicherung der Daten.
+  # Ordner müssen mit einem Slash beendet werden.
   paths:
+    # Pfad zum Ordner in dem die Cache-Einträge gespeichert werden.
     cache: "/mnt/sdb/suchmaschine/cache/"
-    search_cache: "/mnt/sdb/suchmaschine/search_cache/"
+    # Pfad zum Ordner in dem die Dokumente gespeichert werden.
     document: "/home/lightblaze/suchmaschine/db/document/"
+    # Pfad zum Ordner in dem die Download-Warteschlange gespeichert wird.
     download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
+    # Pfad zur Index-Datei.
     index: "/mnt/sdb/suchmaschine/index"
+    # Pfad zum Ordner in dem die temporären Index-Dateien gespeichert werden.
     index_tmp: "/home/lightblaze/suchmaschine/tmp/index/"
+    # Pfad zum Ordner in dem die Index-Warteschlange gespeichert wird.
     index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
+    # Pfad zum Ordner in dem die Metadaten gespeichert werden.
     metadata: "/mnt/sdb/suchmaschine/metadata/"
+    # Pfad zum Ordner in dem die SearchCache-Einträge gespeichert werden.
+    search_cache: "/mnt/sdb/suchmaschine/search_cache/"
 
+# Es folgen noch einige weitere beispiele von Profilen, welche bei der
+# Entwicklung der Suchmaschine verwendet wurden.
 wired:
   <<: *default
   database_connection: "druby://192.168.10.50:2051"
