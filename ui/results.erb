@@ -1,5 +1,12 @@
+<!--
+############################################################################################
+# Template für die Darstellung der Suchresultate. Entweder wird diese Seite direkt         #
+# statisch angezeigt, oder die gerenderte Webseite wird mittels Javascript geladen.        #
+############################################################################################
+-->
 <form id="center_search" action="/search" method="GET">
-  <input id="center_search_field" type="text" name="query" placeholder="Eingabe Suchanfrage" value="<%= query %>">
+  <input id="center_search_field" type="text" name="query"
+         placeholder="Eingabe Suchanfrage" value="<%= query %>">
   <input id="center_search_button" type="submit" value="SUCHEN">
 </form>
 
@@ -31,6 +38,10 @@ window.onload = function(){
 
 <div id="pagination">
   <% pagination.entries.each do |pagination_entry| %>
-    <a href="<%= pagination_entry.url %>"><%= "<b>" if pagination_entry.current? %><%= pagination_entry.number %><%= "</b>" if pagination_entry.current? %></a>&nbsp;
+    <% if pagination_entry.current? %>
+      <a href="<%= pagination_entry.url %>"><b><%= pagination_entry.number %></b></a>
+    <% else %>
+      <a href="<%= pagination_entry.url %>"><%= pagination_entry.number %></a>
+    <% end %>  
   <% end %>
 </div>

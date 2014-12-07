@@ -1,3 +1,9 @@
+<!--
+############################################################################################
+# Template für die Startseite der Suchmaschine, implementiert einen weiteren Teil der      #
+# UI-Logik mit Javascript.                                                                 #
+############################################################################################
+-->
 <script>  
 window.onload = function(){
   // TODO: Kleine Lösung für Browser die dies nicht unterstützen hinzufügen...
@@ -28,14 +34,21 @@ window.onload = function(){
         html  = $("#results").html();
         newResults = $("#results", data).html();
         html += newResults;
-        // Falls newResults ≠ Leerer String (mit Whitespace), einen Link zum Laden weiterer Seiten anzeigen...
+        // Falls newResults ≠ Leerer String (mit Whitespace),
+        // einen Link zum Laden weiterer Seiten anzeigen...
         if (! (!newResults || /^\s*$/.test(newResults))) {
-          html += "<li id='loadmore' onclick='loadmore("+(page+1)+");'>Weitere Resultate laden</li>";
+          html += "<li id='loadmore' onclick='loadmore(";
+          html += (page+1);
+          html += ");'>Weitere Resultate laden</li>";
         }
         $("#results").html(html);
       },
       error: function(xhr, errorType, error){
-        $("#results").html($("#results").html()+"<li style='text-align:center;'>Die Resultate konnten nicht geladen werden.</li>");
+        html  = $("#results").html();
+        html += "<li style='text-align:center;'>";
+        html += "Die Resultate konnten nicht geladen werden.";
+        html += "</li>";
+        $("#results").html(html);
       }
     });
   }
@@ -56,8 +69,15 @@ window.onload = function(){
 </script>
 
 <form id="center_search" action="/search" method="GET">
-  <input id="center_search_field" type="text" name="query" placeholder="Eingabe Suchanfrage">
-  <input id="center_search_button" type="submit" value="SUCHEN">
+  <input
+    id="center_search_field"
+    type="text"
+    name="query"
+    placeholder="Eingabe Suchanfrage">
+  <input
+    id="center_search_button"
+    type="submit"
+    value="SUCHEN">
 </form>
 
 <ul id="results"></ul>
