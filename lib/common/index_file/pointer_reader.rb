@@ -68,7 +68,9 @@ module Common
       end
       
       def read_rows(n)
-        binread(IndexFile::ROW_SIZE*n).unpack(IndexFile::ROW_PACK*n).each_slice(2).map{|freq, doc| [:row, freq, doc]}
+        raw = binread(IndexFile::ROW_SIZE*n)
+        raw_items = raw.unpack(IndexFile::ROW_PACK*n).each_slice(2)
+        raw_items.map{|freq, doc| [:row, freq, doc]}
       end
     end
   end
