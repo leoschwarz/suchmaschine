@@ -11,6 +11,14 @@ describe Common::IndexFile::Writer do
     content
   end
 
+  def size(p)
+    if File.exist? p
+      File.size p
+    else
+      0
+    end
+  end
+
   it "file doesn't exist already" do
     expect(File).to_not exist(path)
   end
@@ -19,6 +27,18 @@ describe Common::IndexFile::Writer do
     writer.write_header("abc",2)
     writer.flush
     expect(File).to exist(path)
+  end
+
+  it "flushes automatically if threshold hit" do
+    writer = Common::IndexFile::Writer.new(path, 0, 40)
+    writer.write_header("abc",0) # -> 24B
+    expect(size(path)).to eq(0)
+    writer.write_header("xyz",0) # -> 48B
+    expect(size(path)).to eq(48)
+    writer.write_header("zzz",0) # -> 72B
+    expect(size(path)).to eq(48)
+    writer.flush()
+    expect(size(path)).to eq(72)
   end
 
   it "writes header" do
