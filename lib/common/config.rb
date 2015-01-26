@@ -8,14 +8,14 @@ require 'yaml'
 # Die veraltete RbConfig Klasse wird noch immer mit Config referenziert.
 # Es ist relativ ungefährlich diese Klasse zu entdefinieren, muss aber gemacht werden, da
 # ansonsten die Verwendung des Namens "Config" eine Warnung ausgibt.
-Object.send(:remove_const, :Config)
+Object.send(:remove_const, :Config) if defined? Config
 module Config
   # Erzeugt ein Objekt welches durch Methoden Zugriffe auf die Elemente für Hash-Schlüssel
   # bietet. Dabei funktioniert dies im Gegensatz zu Ruby's OStruct auch rekursiv.
   # Wenn hash kein Hash ist, wird einfach hash zurückgegeben.
   def self.hash_proxy(hash)
     return hash unless hash.class == Hash
-  
+
     obj = Object.new
     hash.each_pair do |key, value|
       ret = hash_proxy(value)
