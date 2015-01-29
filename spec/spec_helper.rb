@@ -1,5 +1,10 @@
 # Load helpers.
 require_relative './helpers/tempfile_helper.rb'
+require_relative './helpers/assets_helper.rb'
+RSpec.configure do |c|
+  c.extend TempfileHelper
+  c.extend AssetsHelper
+end
 
 # Load code coverage monitoring.
 require 'simplecov'

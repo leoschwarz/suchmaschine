@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Common::IndexFile::Writer do
-  include TempfileHelper
   let_tempfile(:path)
   let(:writer){ Common::IndexFile::Writer.new(path, 0, 200) }
 
