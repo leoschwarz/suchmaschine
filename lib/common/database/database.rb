@@ -30,7 +30,7 @@ module Common
       def self.index_queue_fetch()
         self.run(:index_queue, :fetch)
       end
-      
+
       def self.cache_set(key, value)
         self.run(:cache, :set, key, value)
       end
@@ -38,7 +38,7 @@ module Common
       def self.cache_get(key)
         self.run(:cache, :get, key)
       end
-      
+
       def self.search_cache_set(key, value)
         self.run(:search_cache, :set, key, value)
       end
@@ -62,7 +62,7 @@ module Common
       def self.metadata_get(hash)
         self.run(:metadata, :get, hash)
       end
-      
+
       def self.run(resource, action, *parameters)
         server = DRbObject.new(nil, Config.database_connection)
         server.execute(resource, action, parameters)

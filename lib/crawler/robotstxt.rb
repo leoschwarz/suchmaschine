@@ -32,13 +32,13 @@ module Crawler
       self.instance.allowed?(url)
     end
   end
-  
+
   class RobotstxtParser
     include Common::Serializable
-    
+
     field :rules, nil
     field :valid_until
-    
+
     # Erzeugt eine Instanz für eine Domain und versucht die Daten aus dem Cache zu laden.
     # Falls dies nicht erfolgreich ist, wird die robots.txt Datei geladen und gelesen.
     # @param domain [String]
@@ -51,7 +51,7 @@ module Crawler
         # Gültigkeit des Eintrags überprüfen und eventuell Resultat zurückgeben.
         return parser if parser.valid_until > Time.now.to_i
       end
-      
+
       # Datei aus dem Internet laden...
       parser = self.new
       parser.fetch(Common::URL.encoded("http://#{domain}/robots.txt"))
@@ -60,11 +60,11 @@ module Crawler
       end
       parser
     end
-    
+
     # Überprüft ob der Zugriff auf einen Pfad erlaubt ist.
     # @param path [String] Der zu überprüfende Pfad.
     # @return [Boolean]
-    def allowed?(path)      
+    def allowed?(path)
       allowed = true
       self.rules.each do |rule|
         if /^(#{rule[1]})/.match(path)
@@ -78,7 +78,7 @@ module Crawler
       end
       allowed
     end
-    
+
     # Lädt die robots.txt-Datei herunter und verarbeitet sie.
     # @param url [URL] URL zur Datei.
     # @return [nil]
@@ -96,7 +96,7 @@ module Crawler
         self.valid_until = Time.now.to_i + Config.robotstxt.cache.lifetime
       end
     end
-    
+
     private
     # Verarbeitet die robots.txt-Datei und gibt ein Array an Regeln zurück.
     # @param raw [String] Der Inhalt der robots.txt-Datei.
@@ -106,17 +106,17 @@ module Crawler
       # und falls keiner gefunden wurde, wird einfach der Eintrag für alle verwendet,
       # sofern dieser vorhanden ist.
       default_entries = []
-      
+
       current_agents  = []
       current_entries = []
       opening         = true
       skip            = false
-      
+
       raw.lines.each do |line|
         if (match = /([-a-zA-Z]+):[ ]?(.*)$/.match(line))
           key = match[1].strip.downcase
           value = match[2].strip.downcase
-          
+
           if key == "user-agent"
             if opening
               current_agents << value
@@ -127,7 +127,7 @@ module Crawler
               elsif current_agents.include?("*")
                 default_entries = current_entries
               end
-              
+
               opening = true
               current_agents = [value]
               current_entries = []
@@ -144,17 +144,17 @@ module Crawler
                 skip = true
               end
             end
-            
+
             if !skip && !value.empty?
               current_entries << [key.to_sym, convert_to_regex_string(value)]
             end
           end
         end
       end
-      
+
       default_entries
     end
-    
+
     # Kleiner Helfer
     def convert_to_regex_string(value)
       s = Regexp.quote(value)

@@ -21,7 +21,7 @@ module Crawler
       unless Robotstxt.allowed?(@url)
         return :not_allowed
       end
-      
+
       # Den Download durchführen.
       download = Crawler::Download.new(@url, "text/html")
       if not download.success?
@@ -30,7 +30,7 @@ module Crawler
       elsif download.redirect_url.nil?
         # Der Download war erfolgreich und es wird nicht weitergeleitet.
         parser = HTMLParser.new(@url, download.response_body)
-        
+
         # Ergebniss speichern
         metadata = Crawler::Metadata.new
         metadata.url = @url
@@ -39,7 +39,7 @@ module Crawler
         metadata.added_at    = Time.now.to_i
         metadata.permissions = parser.permissions
         metadata.word_counts = WordCounter.new(parser.text).counts
-        
+
         if parser.permissions[:follow]
           # Links einfügen, aber zuvor werden die Fragmentbezeichner aus den URLs entfernt,
           # um unnötige Duplikate zu verhindern.
@@ -48,7 +48,7 @@ module Crawler
             url.stored
           })
         end
-        
+
         if parser.title_ok?
           document = Crawler::Document.new
           document.url   = @url
@@ -58,7 +58,7 @@ module Crawler
           document.save
           metadata.downloaded = true
           metadata.save
-          
+
           Crawler::Database.index_queue_insert([metadata.hash])
         else
           # Wir speichern Dokumente bei denen der Titel nicht in Ordnung ist gar nicht erst,
@@ -66,7 +66,7 @@ module Crawler
           metadata.downloaded = false
           metadata.save
         end
-        
+
         :success
       else
         # Der Download war erfolgreich, es handelt sich aber nur um eine Weiterleitung.
@@ -79,7 +79,7 @@ module Crawler
         metadata.redirect   = destination_url.stored unless destination_url.nil?
         metadata.added_at   = Time.now.to_i
         metadata.save
-        
+
         :success
       end
     end

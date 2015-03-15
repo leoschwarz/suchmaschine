@@ -22,7 +22,7 @@ module Frontend
     def self.load(db_backend, query)
       key = Digest::MD5.hexdigest(query)
       raw = db_backend.datastore_get(:search_cache, key)
-  
+
       if raw.nil?
         nil
       else

@@ -19,7 +19,7 @@ module Common
       base.include InstanceMethods
       base.instance_variable_set("@_fields", {})
     end
-  
+
     module InstanceMethods
       def initialize(data = {})
         @_data = self.class.instance_variable_get("@_fields").merge(data)
@@ -29,7 +29,7 @@ module Common
         Oj.dump(@_data, {mode: :object})
       end
     end
-  
+
     module ClassMethods
       def deserialize(json)
         return nil if json.nil?

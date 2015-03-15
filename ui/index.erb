@@ -4,22 +4,22 @@
 # UI-Logik mit Javascript.                                                                 #
 ############################################################################################
 -->
-<script>  
+<script>
 window.onload = function(){
   // TODO: Kleine Lösung für Browser die dies nicht unterstützen hinzufügen...
   var canvas = document.getElementById("bg-canvas");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  
+
   window.onresize = function(){
     var canvas = document.getElementById("bg-canvas");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     drawGrid(canvas, window.animationKey);
   }
-  
+
   drawGrid(canvas, 0);
-  
+
   window.loadmore = function(page){
     $.ajax({
       type: "GET",
@@ -52,7 +52,7 @@ window.onload = function(){
       }
     });
   }
-  
+
   // Handler für das Formular hinzufügen...
   var searchButton = document.getElementById("center_search_button");
   searchButton.onclick = function(){
@@ -60,7 +60,7 @@ window.onload = function(){
       window.resultsPage = true;
       runAnimation();
     }
-    
+
     $("#results").html("");
     window.loadmore(1);
     return false;

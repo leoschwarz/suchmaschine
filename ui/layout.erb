@@ -15,18 +15,18 @@
     border: 0px;
     font-family: sans-serif;
   }
-  
+
   body {
     background-color: #fcfcff;
   }
-  
+
   #bg-canvas {
     position: fixed;
     z-index: -100;
     top: 0;
     left: 0;
   }
-  
+
   #logo {
     display: block;
     text-align: center;
@@ -41,7 +41,7 @@
     border: 1px solid black;
     vertical-align: -4px;
   }
-  
+
   #results {
     width: 550px;
     margin-left: auto;
@@ -49,7 +49,7 @@
     list-style-type: none;
     margin-bottom: 15px;
   }
-  
+
   #results li {
     margin-top: 10px;
     margin-bottom: 5px;
@@ -58,7 +58,7 @@
     border: 1px solid black;
     padding: 5px;
   }
-  
+
   #center_search {
     width: 550px;
     margin-top: 45px;
@@ -79,7 +79,7 @@
     text-align: center;
     font-family: monospace;
   }
-  
+
   #center_search_button {
     display: block;
     height: 30px;
@@ -91,11 +91,11 @@
     background-color: white;
     border: 1px solid black;
   }
-  
+
   #center_search_button:hover {
     background-color: #eee;
   }
-  
+
   #pagination {
     text-align: center;
     margin-top: 15px;
@@ -107,41 +107,41 @@
     width: 280px;
     padding: 4px;
   }
-  
+
   #loadmore{
     text-align: center;
     cursor: default;
   }
-  
+
   #loadmore:hover{
     background-color: #eee;
   }
   </style>
-  
+
   <script type="text/javascript" src="/zepto.min.js"></script>
   <script>
   function updatePage(t) {
     var logo = document.getElementById("logo");
     logo.style.marginTop = (50 - 30*t)+"px";
-    
+
     // Suchfeld ist in #center_search
     var centerSearch = document.getElementById("center_search");
     centerSearch.style.marginTop = (45 - 30*t)+"px";
     var centerSearchField = document.getElementById("center_search_field");
     centerSearchField.style.height = (90 - 45*t)+"px";
-    
+
     var canvas = document.getElementById("bg-canvas");
     drawGrid(canvas, t);
   }
-  
+
   function drawGrid(canvas, t){
     var ctx = canvas.getContext("2d");
     var centerX = canvas.width/2;
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#aaa";
-    
+
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    
+
     // Vertikalen Linien
     ctx.beginPath();
     var dx = 70*(1-t);
@@ -149,10 +149,10 @@
       var startY = 0 - (t*canvas.height);
       var startX = (centerX - 3*dx) + i*dx;
       var stopY  = canvas.height - (t*canvas.height);
-      var stopX  = (centerX - 330) + i*110;    
-      
+      var stopX  = (centerX - 330) + i*110;
+
       ctx.moveTo(startX, startY);
-      ctx.lineTo(stopX, stopY);      
+      ctx.lineTo(stopX, stopY);
       // falls t > 0, dann werden noch Verlängerungen der Linien gezeichnet
       if (t > 0) {
         ctx.moveTo(stopX, stopY);
@@ -160,7 +160,7 @@
       }
     }
     ctx.stroke();
-    
+
     // Horizontale Linien
     ctx.beginPath();
     for (var i=0; i<4; i++) {
@@ -172,10 +172,10 @@
     }
     ctx.stroke();
   }
-  
+
   window.resultsPage = false;
   window.animationKey = 0.0;
-  
+
   function runAnimation(){
     animationKey += 0.02;
     updatePage(animationKey);
@@ -187,7 +187,7 @@
 </head>
 <body>
   <canvas id="bg-canvas"></canvas>
-  <div id="logo">BREAKSEARCH</div>  
+  <div id="logo">BREAKSEARCH</div>
   <div id="container">
     <%= content %>
   </div>

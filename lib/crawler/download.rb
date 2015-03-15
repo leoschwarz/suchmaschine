@@ -14,10 +14,10 @@ module Crawler
     # Das hier ist leider nicht perfekt, da es verschiedene Schreibweisen für die
     # verschiedenen Kodierungen gibt und somit einige deshalb nicht erkannt werden.
     SUPPORTED_ENCODINGS = (::Encoding.name_list.map{|name| name.downcase}+["utf8"]).freeze
-    
+
     # Getter für entsprechende Attribute
     attr_reader :redirect_url, :response_body, :status
-    
+
     # @param url [Common::URL] Download-URL
     # @param force_type [String,nil] Falls gegeben: Die Antwort muss diesen Content-Type
     #   haben, ansonsten wird der Download frühzeitig abgebrochen.
@@ -52,7 +52,7 @@ module Crawler
     def success?
       @success
     end
-    
+
     private
     def perform_download(url, force_type = nil)
       # Standardwerte setzen.
@@ -62,7 +62,7 @@ module Crawler
       @status = "500"
       @success = false
       @content_type = ""
-      
+
       # Download durchführen.
       begin
         type_checked = false
@@ -81,7 +81,7 @@ module Crawler
                 return false
               end
             end
-          
+
             size = chunk.bytesize
             if @response_body_size+size <= Config.crawler.maxsize
               @response_body += chunk
@@ -93,11 +93,11 @@ module Crawler
           }
         end
         dl.perform
-        
+
         @status       = dl.status
         @success      = @status[0] == "2"
         @redirect_url = url.join_with(dl.redirect_url) unless dl.redirect_url == -1
-        
+
         return true
       rescue
         return false

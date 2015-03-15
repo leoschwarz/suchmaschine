@@ -19,7 +19,7 @@ module Common
       self.value <=> other.value
     end
   end
-  
+
   class Logger
     ERROR   = LoggerLevel.new("FEHL", 3).freeze
     WARNING = LoggerLevel.new("WARN", 2).freeze
@@ -35,7 +35,7 @@ module Common
     def add_output(stream, min_level)
       @outputs << {stream: stream, min_level: min_level}
     end
-    
+
     def progress_logger(variables)
       ProgressLogger.new(variables, self)
     end
@@ -49,7 +49,7 @@ module Common
         end
       end
     end
-    
+
     # Gibt mehrere Zeilen aus.
     def log_lines(lines, level)
       label       = "[#{level.name}][#{Time.now.strftime "%d-%m-%y %H:%M:%S.%L"}] "
@@ -62,7 +62,7 @@ module Common
         end
       end
     end
-    
+
     def log_message(msg, level)
       if msg.class == Array
         log_lines(msg, level)
@@ -84,7 +84,7 @@ module Common
     def log_info(info)
       self.log_message(info, INFO)
     end
-    
+
     def log_exception(exception)
       self.log_lines(exception.backtrace.insert(0, exception.to_s), ERROR)
     end

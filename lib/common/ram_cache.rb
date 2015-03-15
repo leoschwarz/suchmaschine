@@ -6,7 +6,7 @@
 # Mehr Informationen unter:                                                                #
 # https://de.wikipedia.org/wiki/First_In_%E2%80%93_First_Out                               #
 ############################################################################################
-module Common  
+module Common
   class RAMCacheFIFO
     def initialize(max_items)
       @max_items   = max_items

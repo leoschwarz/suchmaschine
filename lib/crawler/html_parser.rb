@@ -10,7 +10,7 @@ require 'nokogiri'
 module Crawler
   class HTMLParser
     attr_reader :links, :text, :title
-  
+
     # Initialisiert eine neue Parser-Instanz und verarbeitet das Dokument.
     # @param base_url [URL] Die URL des Dokumentes (wird für relative Links benötigt).
     # @param html [String] Das HTML das gelesen werden soll.
@@ -20,8 +20,8 @@ module Crawler
       @doc      = Nokogiri::HTML(html)
       @links    = []
       @text     = ""
-      
-      # HTML-Verarbeitung      
+
+      # HTML-Verarbeitung
       @title = extract_title
       @permissions = extract_permissions if title_ok?
       @links = extract_links if permissions[:follow]
@@ -30,13 +30,13 @@ module Crawler
         @text = extract_text
       end
     end
-    
+
     # Gibt die Berechtigungen der Suchmaschine zurück.
     # @return [Hash]
     def permissions
       @permissions || {index: true, follow: true}
     end
-    
+
     # Überprüft ob der Dokumenttitel in Ordnung ist.
     # @return [Boolean]
     def title_ok?
@@ -51,7 +51,7 @@ module Crawler
     def clean_text(text)
       text.gsub(/\s+/, " ").strip
     end
-    
+
     # Entfernt Scripts, Styles und Kommentare aus dem Dokument.
     # @return [nil]
     def remove_invisible_items
@@ -59,7 +59,7 @@ module Crawler
       @doc.search("style").each{|el| el.unlink}
       @doc.xpath("//comment()").remove
     end
-    
+
     # Extrahiert den Titel aus dem Dokument.
     # @return [String,nil] Auf 100 Zeichen gekürzter Titel bzw. nil falls kein Titel
     def extract_title
@@ -68,7 +68,7 @@ module Crawler
       return nil if (title = clean_text(title_tag.text)).size < 1
       title[0..100]
     end
-    
+
     # Extrahiert die Bot-Berechtigungen aus dem Dokument.
     # Standardwerte werden angenommen, wenn keine Informationen im Dokument gefunden werden.
     # @return [Hash]
@@ -81,7 +81,7 @@ module Crawler
       end
       result
     end
-    
+
     # Extrahiert die Links aus dem Dokument.
     # Nur gültige Links werden zurückgegeben.
     # @return [Array]
@@ -95,7 +95,7 @@ module Crawler
       end
       links
     end
-    
+
     # Extrahiert den Fliesstext aus dem Dokumentkörper.
     # @return [String]
     def extract_text

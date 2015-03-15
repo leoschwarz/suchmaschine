@@ -16,10 +16,10 @@ module Indexer
       @logger = Common::Logger.new({labels: labels})
       @logger.add_output($stdout, Common::Logger::INFO)
     end
-    
+
     def run
       @logger.log_info "Indexierer wurde gestartet."
-      
+
       begin
         db = Database::Backend.new
       rescue => e
@@ -27,7 +27,7 @@ module Indexer
         @logger.log_exception(e)
         Kernel.exit
       end
-      
+
       begin
         # Temporäres Verzeichnis für den Index überprüfen...
         if Dir.exist?(Config.paths.index_tmp)
@@ -36,37 +36,37 @@ module Indexer
         else
           Dir.mkdir(Config.paths.index_tmp)
         end
-        
+
         # Einzelne Index-Dateien für alle Dokumente in der Indexierwarteschlange erstellen.
         cache = Indexer::IndexingCache.new(Config.paths.index_tmp)
         queue_mutex = Mutex.new
-        
+
         Common::WorkerThreads.run(Config.indexer.threads, blocking:true) do
           while (key = queue_mutex.synchronize{ db.queue_fetch(:index) })
             Task.new(cache, key).run
           end
         end
-        
+
         cache.final_flush
-      
+
         db.save
         db = nil
-      
+
         # Nun müssen die einzelnen Zwischenergebnisse aus dem temporären Index-Verzeichnis
         # in den Zielindex zusammengeführt werden.
         @logger.log_info "Die Einträge werden nun zusammengeführt..."
-        
+
         destination = Common::IndexFile.new(Config.paths.index)
         destination.delete
-        
+
         sources = Dir["#{dir}/*"].map{|path| Common::IndexFile.new(path).pointer_reader}
         merger = Indexer::Merger.new(destination.writer, sources)
         merger.merge
-      
+
         @logger.log_info "Zusammenführung abgeschlossen, Metaindex Generierung gestarted."
         destination.reload
         destination.metadata.generate
-      
+
         @logger.log_info "Generierung des Indexes ist nun abgeschlossen."
       rescue Exception => e
         db.save unless db.nil?

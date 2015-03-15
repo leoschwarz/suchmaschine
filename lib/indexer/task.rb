@@ -9,16 +9,16 @@ module Indexer
       @indexing_cache = indexing_cache
       @metadata_key   = metadata_key
     end
-    
+
     def run
       # Metadaten laden.
       raw = db.datastore_get(:metadata, @metadata_key)
       metadata = Common::Database::Metadata.deserialize(raw)
       return if metadata.nil?
-      
+
       # Zuerst die totale Anzahl an Worten bestimmen.
       total_words = metadata.word_counts.values.inject(:+)
-      
+
       # Nun die Resultate finden
       key = metadata.hash
       metadata.word_counts.each_pair do |word, count|

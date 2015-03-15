@@ -36,7 +36,7 @@ end
 def fetch_urls(url, retries=3)
   download = Crawler::Download.new(url)
   if download.success?
-    puts "[✓] #{url.decoded}"   
+    puts "[✓] #{url.decoded}"
     parser = Crawler::HTMLParser.new(url, download.response_body)
     parser.links.map{|anchor,link| link.remove_fragment_identifier; link.stored}
   else

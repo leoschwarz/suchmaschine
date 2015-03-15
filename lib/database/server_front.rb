@@ -13,11 +13,11 @@ module Database
       undef_method method
     end
   end
-  
+
   class ServerFront < BlankObject
     def initialize(server)
       @server = server
-      
+
       # Mutex für die einzelnen Ressourcen der Datenbank erzeugen.
       # Zugriffe zu verschiedenen Ressourcen können so zur selben Zeit erfolgen.
       @mutex = {}
@@ -25,7 +25,7 @@ module Database
                     :search_cache, :document, :metadata]
       ressources.each{|i| @mutex[i] = Mutex.new}
     end
-    
+
     def execute(resource, action, parameters)
       @mutex[resource].synchronize do
         case resource
@@ -38,13 +38,13 @@ module Database
         when :search_cache
           handle_datastore(:search_cache, action, parameters)
         when :document
-          handle_datastore(:document, action, parameters)  
+          handle_datastore(:document, action, parameters)
         when :metadata
           handle_datastore(:metadata, action, parameters)
         end
       end
     end
-    
+
     private
     def handle_queue(queue_name, action, parameters)
       if action == :insert
@@ -55,7 +55,7 @@ module Database
         raise "Unbekannte Aktion: '#{action}'"
       end
     end
-    
+
     def handle_datastore(datastore_name, action, parameters)
       if action == :set
         @server.handle_datastore_set(datastore_name, parameters[0], parameters[1])

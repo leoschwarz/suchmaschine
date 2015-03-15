@@ -19,6 +19,6 @@ describe Common::IndexFile::IndexFile do
   end
 
   it "loads size of the file on reload" do
-    
+
   end
 end

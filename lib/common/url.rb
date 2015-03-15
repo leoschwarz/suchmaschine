@@ -9,9 +9,9 @@
 ############################################################################################
 require 'uri'
 module Common
-  # 
+  #
   # Generell werden hier drei verschiedene Formen von URLs unterschieden:
-  
+
   class URL
     # Handelt es sich um eine absolute URL?
     attr_reader :full_url
@@ -19,7 +19,7 @@ module Common
     # Die Klassenmethode 'new' privat machen.
     # Stattdessen sollen die Konstruktoren encoded, decoded oder stored verwendet werden.
     private_class_method :new
-    
+
     # Erzeugt eine neue URL Instanz.
     # @param encoded_url [String] Die kodierte URL mit dem Schema.
     # @param full_url [Boolean] Handelt es sich um eine absolute URL?
@@ -53,7 +53,7 @@ module Common
     alias :encoded :encoded_url
     alias :decoded :decoded_url
     alias :stored :stored_url
-    
+
     # Entfernt den Fragmentbezeichner von der URL.
     # @return [nil]
     def remove_fragment_identifier
@@ -69,7 +69,7 @@ module Common
       return nil if @url_parts[0].nil?
       @url_parts[0].downcase
     end
-    
+
     # Gibt den Pfad der URL zurück.
     # @return [String, nil] Pfad beginnend mit "/"
     def path
@@ -105,22 +105,22 @@ module Common
     def to_uri
       URI(encoded_url)
     end
-    
+
     # Interpretiert die als Parameter gegebene URL als Link der auf einer Webseite gefunden
     # wurde und evaluiert die Ziel-URL. Falls es sich um eine relative handelt, wird sie
     # an das Ende hinzugefügt, falls es sich um eine absolute handelt, wird die absolute
     # zurückgegeben und falls es sich um etwas handelt das keine URL ist oder es andere
     # Fehler gibt, wird nil zurückgegeben.
     # @param [URL, String]
-    # @return [URL, nil]    
+    # @return [URL, nil]
     def join_with(url)
       # Eventuelle Typkonvertierung des Parameters
       url = URL.from_unknown(url) if url.class == String
-      
+
       # Wir sind fertig, falls die URL nil ist oder es sich um eine absolute URL handelt.
       return nil if url.nil?
       return url if url.full_url
-      
+
       # Die URIs zusammenfügen
       begin
         url = URI::join(self.to_uri, url.to_uri).to_s
@@ -158,7 +158,7 @@ module Common
       return self.from_unknown(URI.encode(string).to_s, false) if second_try
       nil
     end
-    
+
     private
     # Teilt die kodierte URL in die Domain und den Pfad auf.
     # @return [Array]

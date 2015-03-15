@@ -11,7 +11,7 @@ module Common
   module Database
     class Metadata
       include Common::Serializable
-      
+
       # [URL/String] Es wird URL.stored gespeichert, aber wenn die Metadaten mit fetch
       # geladen wurden, wird stattdessen auf ein [URL] Objekt verwiesen.
       field :url
@@ -27,7 +27,7 @@ module Common
       field :redirect
       # [Boolean] Gibt es ein heruntergeladenes Dokument?
       field :downloaded, true
-      
+
       def word_counts_total
         self.word_counts.values.inject(:+).to_i
       end
@@ -58,7 +58,7 @@ module Common
         if raw.nil?
           return nil
         end
-        
+
         metadata = self.deserialize(raw)
         metadata.url = Common::URL.stored(metadata.url)
         metadata

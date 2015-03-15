@@ -24,14 +24,14 @@ window.onload = function(){
   var canvas = document.getElementById("bg-canvas");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  
+
   window.onresize = function(){
     var canvas = document.getElementById("bg-canvas");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     drawGrid(canvas, 0);
   }
-  
+
   updatePage(1);
 };
 </script>
@@ -42,6 +42,6 @@ window.onload = function(){
       <a href="<%= pagination_entry.url %>"><b><%= pagination_entry.number %></b></a>
     <% else %>
       <a href="<%= pagination_entry.url %>"><%= pagination_entry.number %></a>
-    <% end %>  
+    <% end %>
   <% end %>
 </div>

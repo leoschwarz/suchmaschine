@@ -6,13 +6,13 @@ module Common
   module WorkerThreads
     def self.run(thread_count, options={}, &block)
       options = {blocking: true}.merge(options)
-      
+
       threads = thread_count.times.map do
         Thread.new do
           block.call
         end
       end
-      
+
       if options[:blocking]
         threads.map(&:join)
       end
