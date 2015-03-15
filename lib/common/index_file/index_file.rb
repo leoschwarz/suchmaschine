@@ -17,8 +17,8 @@
 module Common
   module IndexFile
     class IndexFile
-      HEADER_PACK = "a20 L>"
-      ROW_PACK    = "g h32"
+      HEADER_PACK = "a20 L>".freeze
+      ROW_PACK    = "g h32".freeze
       HEADER_SIZE = 24
       ROW_SIZE    = 20
 

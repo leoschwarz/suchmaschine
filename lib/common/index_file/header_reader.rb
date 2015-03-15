@@ -12,10 +12,10 @@ module Common
         @file_path = file_path
         @file_size = file_size
       end
-    
+
       # Diese Methode liest die Datei und erwartet einen Block als Parameter, der für jede
       # Header-Zeile aufgerufen wird.
-      def read        
+      def read
         pointer = 0
         while pointer < @file_size
           raw = IO.binread(@file_path, IndexFile::HEADER_SIZE, pointer)

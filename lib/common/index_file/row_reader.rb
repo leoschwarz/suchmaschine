@@ -9,9 +9,9 @@ module Common
         @path = path
         @size = size
       end
-      
+
       # Liest Inhalt-Zeilen ausgehend einer bestimten Position und ruft den mitgegebenen
-      # Block für jede Inhalt-Zeile mit den Parametern TF und Dokument-ID auf. 
+      # Block für jede Inhalt-Zeile mit den Parametern TF und Dokument-ID auf.
       # @param start [Integer] Relative Position der Einträge in der Index-Datei.
       # @param count [Integer] Anzahl der Zeilen die gelesen werden soll.
       def read(start, count)

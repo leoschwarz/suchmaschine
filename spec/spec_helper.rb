@@ -1,4 +1,4 @@
-# Load helpers.
+# Helfer laden.
 require_relative './helpers/tempfile_helper.rb'
 require_relative './helpers/assets_helper.rb'
 RSpec.configure do |c|
@@ -6,11 +6,11 @@ RSpec.configure do |c|
   c.extend AssetsHelper
 end
 
-# Load code coverage monitoring.
+# Starte Testabdeckungs-Messung.
 require 'simplecov'
 SimpleCov.start{ add_filter "/spec/" }
 
-# Load code to be tested.
+# Zu testenden Code laden.
 require_relative '../lib/common/common.rb'
 require_relative '../lib/crawler/crawler.rb'
 require_relative '../lib/database/database.rb'

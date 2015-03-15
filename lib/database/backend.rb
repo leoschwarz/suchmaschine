@@ -14,7 +14,7 @@ module Database
       @queues = {}
       @queues[:download] = Database::BetterQueue.new(Config.paths.download_queue)
       @queues[:index]    = Database::BetterQueue.new(Config.paths.index_queue)
-      
+
       @datastores = {}
       names = [:document, :metadata, :cache, :search_cache]
       names.each do |name|
@@ -27,17 +27,17 @@ module Database
         @datastores[name] = LevelDBNative::DB.new(Config.paths[name], options)
       end
     end
-    
+
     def save
       @queues.each_pair do |name, queue|
         queue.save
       end
     end
-    
+
     def datastore_set(datastore, key, value)
       @datastores[datastore].put(key, value)
     end
-    
+
     def datastore_batchset(datastore, pairs)
       @datastores[datastore].batch do |batch|
         pairs.each do |key, value|
@@ -45,27 +45,27 @@ module Database
         end
       end
     end
-    
+
     def datastore_get(datastore, key)
       @datastores[datastore].get(key)
     end
-    
+
     def datastore_delete(datastore, key)
       @datastores[datastore].delete(key)
     end
-    
+
     def datastore_haskey?(datastore, key)
       @datastores[datastore].exists?(key)
     end
-    
+
     def datastore_keys(datastore)
       @datastores[datastore].keys
     end
-    
+
     def queue_fetch(queue)
       @queues[queue].fetch
     end
-    
+
     def queue_insert(queue, row)
       @queues[queue].insert(row)
     end

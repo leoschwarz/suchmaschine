@@ -14,37 +14,37 @@ require_relative './better_queue_batch.rb'
 module Database
   class BetterQueue
     MAX_BUFFER = 20_000
-    
+
     def initialize(directory)
       @directory     = directory
       @insert_buffer = []
       @fetch_buffer  = []
       @metadata      = BetterQueueMetadata.load(File.join(directory, "metadata"))
     end
-  
+
     def insert(line)
       @insert_buffer << line
       if @insert_buffer.size > MAX_BUFFER
         write_items
       end
     end
-  
+
     def fetch
       if @fetch_buffer.size == 0
         unless fetch_items
           return nil
         end
       end
-      
+
       @fetch_buffer.pop
     end
-    
+
     def save
       @insert_buffer.concat(@fetch_buffer)
       write_items
       @metadata.save
     end
-    
+
     private
     def write_items
       # Auf verschiedene Stapel verteilen, falls einer nicht genug Platz bietet.
@@ -58,7 +58,7 @@ module Database
         batch.insert(@insert_buffer.pop(appendable))
       end
     end
-    
+
     def fetch_items
       batch = @metadata.get_random_readable_batch
       if batch.nil?
