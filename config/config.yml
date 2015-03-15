@@ -20,7 +20,7 @@ local: &default
     # Whitelist der erlaubten IPs, welche eine Verbindung zur Datenbank herstellen dürfen.
     client_whitelist:
       - 127.0.0.1
-      - 192.168.10.100
+      # Weitere IPs hier auflisten.
   # Parameter des Crawlers
   crawler:
     # User-Agent der bei HTTP-Anfragen mitgesendet werden soll.
@@ -46,54 +46,42 @@ local: &default
     threads: 20
   # Konfiguration der Dateipfade für die Speicherung der Daten.
   # Ordner müssen mit einem Slash beendet werden.
+  # Die Pfade sollten alle absolute Pfade sein, eventuell funktioniert das
+  # verwenden der ~ für das Homeverzeichnis oder relative Verzeichnise,
+  # allerdings wurde der Code diesbezüglich nicht optimiert und es müsste mit
+  # teilweise höheren Performanceinbussen gerechnet werden.
   paths:
     # Pfad zum Ordner in dem die Cache-Einträge gespeichert werden.
-    cache: "/mnt/sdb/suchmaschine/cache/"
+    cache: "/ssd/suchmaschine/cache/"
     # Pfad zum Ordner in dem die Dokumente gespeichert werden.
-    document: "/home/lightblaze/suchmaschine/db/document/"
+    document: "/hdd/suchmaschine/db/document/"
     # Pfad zum Ordner in dem die Download-Warteschlange gespeichert wird.
-    download_queue: "/home/lightblaze/suchmaschine/db/download_q/"
+    download_queue: "/hdd/suchmaschine/db/download_q/"
     # Pfad zur Index-Datei.
-    index: "/mnt/sdb/suchmaschine/index"
+    index: "/ssd/suchmaschine/index"
     # Pfad zum Ordner in dem die temporären Index-Dateien gespeichert werden.
-    index_tmp: "/home/lightblaze/suchmaschine/tmp/index/"
+    index_tmp: "/hdd/suchmaschine/tmp/index/"
     # Pfad zum Ordner in dem die Index-Warteschlange gespeichert wird.
-    index_queue: "/home/lightblaze/suchmaschine/db/index_q/"
+    index_queue: "/hdd/suchmaschine/db/index_q/"
     # Pfad zum Ordner in dem die Metadaten gespeichert werden.
-    metadata: "/mnt/sdb/suchmaschine/metadata/"
+    metadata: "/ssd/suchmaschine/metadata/"
     # Pfad zum Ordner in dem die SearchCache-Einträge gespeichert werden.
-    search_cache: "/mnt/sdb/suchmaschine/search_cache/"
+    search_cache: "/ssd/suchmaschine/search_cache/"
 
-# Es folgen noch einige weitere beispiele von Profilen, welche bei der
-# Entwicklung der Suchmaschine verwendet wurden.
-wired:
-  <<: *default
-  database_connection: "druby://192.168.10.50:2051"
+# Unter Umständen werden mehrere Profile benötigt, hierzu kann man diese hier
+# definieren. Die Standardwerte werden übernommen, allerdings heisst das überschreiben
+# der Werte für einen Schlüssel (in der obersten Hierarchie), dass keine Standardwerte
+# für diesen Eintrag übernommen werden.
 
-wireless:
-  <<: *default
-  database_connection: "druby://192.168.1.106:2051"
-
-offline-laptop:
-  <<: *default
-  paths:
-    cache: "/Users/leonardo.schwarz/Maturarbeit/Code/db/cache/"
-    search_cache: "/Users/leonardo.schwarz/Maturarbeit/Code/db/search_cache/"
-    document: "/Users/leonardo.schwarz/Maturarbeit/Code/db/document/"
-    download_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/download_q/"
-    index: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index"
-    index_tmp: "/Users/leonardo.schwarz/Maturarbeit/Code/tmp/index/"
-    index_queue: "/Users/leonardo.schwarz/Maturarbeit/Code/db/index_q/"
-    metadata: "/Users/leonardo.schwarz/Maturarbeit/Code/db/metadata/"
-
-offline-desktop:
-  <<: *default
-  paths:
-    cache: "/Users/leoschwarz/Desktop/suchmaschine/db/cache/"
-    search_cache: "/Users/leoschwarz/Desktop/suchmaschine/db/search_cache/"
-    document: "/Users/leoschwarz/Desktop/suchmaschine/db/document/"
-    download_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/download_q/"
-    index: "/Users/leoschwarz/Desktop/suchmaschine/db/index"
-    index_tmp: "/Users/leoschwarz/Desktop/suchmaschine/tmp/index/"
-    index_queue: "/Users/leoschwarz/Desktop/suchmaschine/db/index_q/"
-    metadata: "/Users/leoschwarz/Desktop/suchmaschine/db/metadata/"
+# my-cool-laptop:
+#   <<: *default
+#   database_connection: "druby://192.168.10.50:2051"
+#   paths:
+#     cache: "/pfad/zur/db/cache/"
+#     search_cache: "/pfad/zur/db/search_cache/"
+#     document: "/pfad/zur/db/document/"
+#     download_queue: "/pfad/zur/db/download_q/"
+#     index: "/pfad/zur/db/index"
+#     index_tmp: "/pfad/zur/tmp/index/"
+#     index_queue: "/pfad/zur/db/index_q/"
+#     metadata: "/pfad/zur/db/metadata/"
