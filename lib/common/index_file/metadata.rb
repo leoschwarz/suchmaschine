@@ -40,9 +40,9 @@ module Common
           current_row  = read_row(index_middle)
 
           # Gesuchtes Wort mit dem momentanen Stichwort vergleichen.
-          if word < current_row
+          if word < current_row[0]
             index_b = index_middle
-          elsif word > current_row
+          elsif word > current_row[0]
             index_a = index_middle
           else
             return current_row

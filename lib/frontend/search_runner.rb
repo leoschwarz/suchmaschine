@@ -27,7 +27,7 @@ module Frontend
       # Der Hash results beinhaltet den jeweiligen Score für jedes Dokument (ID => Score)
       results = Hash.new(0)
       @query.split(" ").uniq.each do |word|
-        count, position = @index.metadata[word]
+        _, count, position = @index.metadata.find(word)
 
         if count != nil && position != nil
           @index.row_reader.read(position, count) do |tf, doc|
