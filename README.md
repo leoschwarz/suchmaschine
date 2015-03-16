@@ -39,9 +39,8 @@ ausführst.
 
 Leider ist es zur Zeit nicht möglich, dass die gecrawlten Seiten automatisch indexiert werden,
 stattdessen ist es notwendig alle Crawler und die Datenbank zu beenden und dann das
-Programm `bin/indexer.rb` aufzurufen. Sobald diese fertig ist mit der Indexierung, kann
-wieder die Datenbank gestartet werden. Danach kann man das Frontend starten und
-mithilfe eines Webbrowsers Suchanfragen durchführen.
+Programm `bin/indexer.rb` aufzurufen. Sobald dieses fertig ist mit der Indexierung,
+kann man das Frontend starten und mithilfe eines Webbrowsers Suchanfragen durchführen.
 
 Die Verwendung ist vergleichsweise aufwändig, dieses System wurde aber auch nicht
 primär dazu konstruiert einfach verwendbar zu sein.
