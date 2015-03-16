@@ -10,7 +10,7 @@ module Indexer
       @metadata_key   = metadata_key
     end
 
-    def run
+    def run(db)
       # Metadaten laden.
       raw = db.datastore_get(:metadata, @metadata_key)
       metadata = Common::Database::Metadata.deserialize(raw)

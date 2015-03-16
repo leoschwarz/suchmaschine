@@ -43,7 +43,7 @@ module Indexer
 
         Common::WorkerThreads.run(Config.indexer.threads, blocking:true) do
           while (key = queue_mutex.synchronize{ db.queue_fetch(:index) })
-            Task.new(cache, key).run
+            Task.new(cache, key).run(db)
           end
         end
 
@@ -59,11 +59,11 @@ module Indexer
         destination = Common::IndexFile.new(Config.paths.index)
         destination.delete
 
-        sources = Dir["#{dir}/*"].map{|path| Common::IndexFile.new(path).pointer_reader}
+        sources = Dir["#{Config.paths.index_tmp}/*"].map{|path| Common::IndexFile.new(path).pointer_reader}
         merger = Indexer::Merger.new(destination.writer, sources)
         merger.merge
 
-        @logger.log_info "Zusammenführung abgeschlossen, Metaindex Generierung gestarted."
+        @logger.log_info "Zusammenführung abgeschlossen, Metaindex Generierung gestartet."
         destination.reload
         destination.metadata.generate
 

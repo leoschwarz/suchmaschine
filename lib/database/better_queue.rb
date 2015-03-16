@@ -16,6 +16,12 @@ module Database
     MAX_BUFFER = 20_000
 
     def initialize(directory)
+      # Falls das Verzeichnis nicht existiert, soll es doch gleich angelegt werden.
+      if !Dir.exist?(directory)
+        Dir.mkdir(directory)
+      end
+
+      # Initialisierung der Instanzvariabeln.
       @directory     = directory
       @insert_buffer = []
       @fetch_buffer  = []

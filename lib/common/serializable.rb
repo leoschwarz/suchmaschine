@@ -21,7 +21,8 @@ module Common
     end
 
     module InstanceMethods
-      def initialize(data = {})
+      def initialize(data = nil)
+        data = {} if data.nil?
         @_data = self.class.instance_variable_get("@_fields").merge(data)
       end
 

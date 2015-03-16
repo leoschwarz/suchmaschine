@@ -7,6 +7,7 @@
 # Dieses Programm führt die Datenbankoperationen über das Client-Interface des Crawlers    #
 # aus, weshalb der Datenbankserver gestartet sein muss, bevor das Skript gestartet wird.   #
 ############################################################################################
+require_relative '../lib/common/common'
 require_relative '../lib/crawler/crawler'
 require 'oj'
 require 'yaml'
