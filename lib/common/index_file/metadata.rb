@@ -12,11 +12,16 @@ module Common
 
       def initialize(index_file)
         @index_file = index_file
-        @path       = index_file.path + ".meta"
+        @meta_file_path = index_file.path + ".meta"
+        @count_file_path = index_file.path + ".count"
       end
 
       def documents_count
-        # TODO... (Oder eventuell entfernen...)
+        if File.exists?(@count_file_path)
+          File.read(@count_file_path).to_i
+        else
+          0
+        end
       end
 
       # Sucht nach einer Zeile in der Datei mithilfe einer Binärsuche, ohne den ganzen
@@ -27,11 +32,11 @@ module Common
       # @return [Array, nil]
       def find(word)
         # Bestimme die Anzahl Zeilen in der Datei.
-        rows_count = File.size(@path) / ROW_SIZE
+        rows_count = File.size(@meta_file_path) / ROW_SIZE
 
         # Lege zwei Begrenzungen fest.
         index_a = 0
-        index_b = rows_count -1
+        index_b = rows_count - 1
 
         # Solange die beiden Indezes nicht denselben Wert haben, sind wir nicht fertig.
         while index_a != index_b
@@ -44,8 +49,11 @@ module Common
             index_b = index_middle
           elsif word > current_row[0]
             index_a = index_middle
-          else
+          elsif word == current_row[0]
             return current_row
+          else
+            # Der Eintrag existiert gar nicht.
+            return nil
           end
         end
 
@@ -56,11 +64,18 @@ module Common
       def generate
         @buffer = []
         @write_offset = 0
+        @total = 0
         @index_file.header_reader.read do |term, count, position|
           @buffer << [term, count, position]
+          @total += 1
           flush_write_buffer if @buffer.size > 100_000
         end
         flush_write_buffer
+
+        # Totale Anzahl vermerken...
+        File.open(@count_file_path, "w") do |file|
+          file.write(@total.to_s)
+        end
       end
 
       private
@@ -68,7 +83,7 @@ module Common
       # @param index [Integer] Die wievielte Zeile ist es? (Kein Byte-offset!)
       # @return [Array] WORT (max 20 bytes), ZEILEN, POSITION (in der Indexdatei)
       def read_row(index)
-        rawstr = IO.binread(@path, ROW_SIZE, ROW_SIZE*index)
+        rawstr = IO.binread(@meta_file_path, ROW_SIZE, ROW_SIZE*index)
         row    = rawstr.unpack(ROW_PACK)
 
         # TODO : Diese Aufräumoperation extrahieren und irgendwo zentral lassen.
@@ -78,9 +93,9 @@ module Common
         row
       end
 
-      # Schreibt den Puffer in die verwaltetet Datei und löscht den Puffer.
+      # Schreibt den Puffer in die verwaltete Datei und löscht den Puffer.
       def flush_write_buffer
-        IO.binwrite(@path, @buffer.flatten.pack(ROW_PACK*@buffer.size), @write_offset)
+        IO.binwrite(@meta_file_path, @buffer.flatten.pack(ROW_PACK*@buffer.size), @write_offset)
         @write_offset += ROW_SIZE*@buffer.size
         @buffer.clear
       end
