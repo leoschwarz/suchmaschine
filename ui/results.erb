@@ -13,8 +13,8 @@
 <ul id="results">
 <% results.each do |result, score| %>
   <li>
-    <a href="<%= result.url.encoded %>"><%= result.title %></a><br>
-    <%= result.url.decoded %>
+    <div class="result_link"><a href="<%= result.url.encoded %>"><%= result.title %></a></div>
+    <div class="result_url"><%= result.url.decoded %></div>
   </li>
 <% end %>
 </ul>
