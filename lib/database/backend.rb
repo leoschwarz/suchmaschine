@@ -7,8 +7,7 @@
 # nur von der Datenbank selbst verwendet.                                                  #
 ############################################################################################
 
-# TODO: Fix support on Rubinius
-#require 'leveldb-native'
+require 'leveldb-native'
 
 module Database
   class Backend

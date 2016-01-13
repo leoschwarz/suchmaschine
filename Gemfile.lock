@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/leoschwarz/ruby-leveldb-native.git
+  revision: eb9327993f3a06c2a09fda24298e08ebb83906f9
+  specs:
+    leveldb-native (0.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -50,6 +56,7 @@ PLATFORMS
 DEPENDENCIES
   curb (~> 0.8.6)
   erubis (~> 2.7.0)
+  leveldb-native!
   oga (~> 2.0.0)
   oj (~> 2.9.9)
   puma (~> 2.10.2)
