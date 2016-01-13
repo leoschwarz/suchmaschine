@@ -1,15 +1,16 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ansi (1.5.0)
+    ast (2.2.0)
     curb (0.8.6)
     diff-lcs (1.2.5)
     docile (1.1.5)
     erubis (2.7.0)
-    leveldb-native (0.6)
-    mini_portile (0.6.0)
     multi_json (1.10.1)
-    nokogiri (1.6.2.1)
-      mini_portile (= 0.6.0)
+    oga (2.0.0)
+      ast
+      ruby-ll (~> 2.1)
     oj (2.9.9)
     puma (2.10.2)
       rack (>= 1.1, < 2.0)
@@ -28,6 +29,9 @@ GEM
     rspec-mocks (3.1.3)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.2)
+    ruby-ll (2.1.2)
+      ansi
+      ast
     simplecov (0.9.1)
       docile (~> 1.1.0)
       multi_json (~> 1.0)
@@ -45,10 +49,12 @@ PLATFORMS
 DEPENDENCIES
   curb (~> 0.8.6)
   erubis (~> 2.7.0)
-  leveldb-native (~> 0.6)
-  nokogiri (~> 1.6.2.1)
+  oga (~> 2.0.0)
   oj (~> 2.9.9)
   puma (~> 2.10.2)
   rspec (~> 3.1.0)
   simplecov (~> 0.9.1)
   sinatra (~> 1.4.5)
+
+BUNDLED WITH
+   1.11.2

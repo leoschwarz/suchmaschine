@@ -6,7 +6,11 @@
 # - Fliesstext des Dokumentkörpers, falls die Indexierung erlaubt ist                      #
 # - Links die verfolgt werden dürfen                                                       #
 ############################################################################################
-require 'nokogiri'
+
+#require 'nokogiri'
+
+require 'oga'
+
 module Crawler
   class HTMLParser
     attr_reader :links, :text, :title
@@ -17,7 +21,7 @@ module Crawler
     def initialize(base_url, html)
       # Instanzvariabeln setzen
       @base_url = base_url
-      @doc      = Nokogiri::HTML(html)
+      @doc      = Oga.parse_html(html)
       @links    = []
       @text     = ""
 

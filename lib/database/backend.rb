@@ -6,7 +6,9 @@
 # wird ein Fehler produziert. Das Datenbankbackend wird aber auch von anderen Modulen als  #
 # nur von der Datenbank selbst verwendet.                                                  #
 ############################################################################################
-require 'leveldb-native'
+
+# TODO: Fix support on Rubinius
+#require 'leveldb-native'
 
 module Database
   class Backend
