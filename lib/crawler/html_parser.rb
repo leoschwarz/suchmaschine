@@ -1,109 +1,119 @@
-############################################################################################
-# Der HTMLParser arbeitet HTML-Dokumente für die weitere Verwendung auf.                   #
-# Dabei werden folgenden Informationen extrahiert:                                         #
-# - Titel des Dokumentes                                                                   #
-# - Erlaubnis das Dokument zu indexieren und Links zu verfolgen                            #
-# - Fliesstext des Dokumentkörpers, falls die Indexierung erlaubt ist                      #
-# - Links die verfolgt werden dürfen                                                       #
-############################################################################################
-
-#require 'nokogiri'
+# Copyright (c) 2014-2016 Leonardo Schwarz <mail@leoschwarz.com>
+#
+# This file is part of BreakSearch.
+#
+# BreakSearch is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License version 3
+# as published by the Free Software Foundation.
+#
+# BreakSearch is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with BreakSearch. If not, see <http://www.gnu.org/licenses/>.
 
 require 'oga'
 
 module Crawler
+  # The HTMLParser extracts all data relevant to us from the raw HTML document.
   class HTMLParser
-    attr_reader :links, :text, :title
+    # @return [String] Title of the document.
+    attr_reader :title
 
-    # Initialisiert eine neue Parser-Instanz und verarbeitet das Dokument.
-    # @param base_url [URL] Die URL des Dokumentes (wird für relative Links benötigt).
-    # @param html [String] Das HTML das gelesen werden soll.
+    # @return [String] Text of the document. This includes the title and the concatenation of
+    #                  all elements inside the document's body.
+    attr_reader :text
+
+    # @return [Array[String, URL]] Links (in anchor, url pairs) that may be followed (if any)
+    attr_reader :links
+
+    # @return [Hash] Returns a hash with :index and :follow key indicating the document level
+    #                robots permissions. Defaults to liberal permissions if nothing is specified.
+    attr_reader :permissions
+
+    # Initializes a new parser instance and parses the document.
+    # @param base_url [URL] The URL of the document that will be used to resolve relative links.
+    # @param html [String] The raw HTML to be parsed.
     def initialize(base_url, html)
-      # Instanzvariabeln setzen
+      # Initialize fields.
       @base_url = base_url
-      @doc      = Oga.parse_html(html)
-      @links    = []
-      @text     = ""
+      @doc = Oga.parse_html(html)
 
-      # HTML-Verarbeitung
+      # Parse HTML.
       @title = extract_title
-      @permissions = extract_permissions if title_ok?
+      @permissions = extract_permissions
       @links = extract_links if permissions[:follow]
       if permissions[:index]
         remove_invisible_items
         @text = extract_text
+      else
+        @text = ''
       end
     end
 
-    # Gibt die Berechtigungen der Suchmaschine zurück.
-    # @return [Hash]
-    def permissions
-      @permissions || {index: true, follow: true}
-    end
-
-    # Überprüft ob der Dokumenttitel in Ordnung ist.
+    # Checks whether the document's title is alright.
     # @return [Boolean]
     def title_ok?
       @title != nil
     end
 
     private
-    # Entfernt alle mehrfachen Wiederholungen von Leerzeichen,
-    # sowie leerzeichen zu Beginn und Ende des Strings.
-    # @param text [String]
-    # @return [String]
+    # Removes all multiple occurrences of whitespaces as-well as any leading and trailing ones.
+    # @param text [String] The string to be cleaned up.
+    # @return [String] The cleaned up string.
     def clean_text(text)
-      text.gsub(/\s+/, " ").strip
+      text.gsub(/\s+/, ' ').strip
     end
 
-    # Entfernt Scripts, Styles und Kommentare aus dem Dokument.
+    # Removes all scripts, styles and comments from the document.
     # @return [nil]
     def remove_invisible_items
-      @doc.search("script").each{|el| el.unlink}
-      @doc.search("style").each{|el| el.unlink}
-      @doc.xpath("//comment()").remove
+      @doc.xpath('//script').each { |el| el.remove }
+      @doc.xpath('//style').each { |el| el.remove }
+      @doc.xpath('//comment()').remove
     end
 
-    # Extrahiert den Titel aus dem Dokument.
-    # @return [String,nil] Auf 100 Zeichen gekürzter Titel bzw. nil falls kein Titel
+    # Extracts the title of the document.
+    # @return [String, nil] Title of the document trimmed to maximally 100 characters. nil if there is no title.
     def extract_title
-      title_tag = @doc.xpath("//title")[0]
+      title_tag = @doc.xpath('//title')[0]
       return nil if title_tag.nil?
       return nil if (title = clean_text(title_tag.text)).size < 1
       title[0..100]
     end
 
-    # Extrahiert die Bot-Berechtigungen aus dem Dokument.
-    # Standardwerte werden angenommen, wenn keine Informationen im Dokument gefunden werden.
+    # Extracts robot permissions from the document.
+    # Default values will be returned if nothing is found in the document.
     # @return [Hash]
     def extract_permissions
       result = {index: true, follow: true}
       if (metatag_robots = @doc.at_xpath("//meta[@name='robots']/@content")) != nil
         data = metatag_robots.text.downcase
-        result[:index]  = !data.include?("noindex")
-        result[:follow] = !data.include?("nofollow")
+        result[:index] = !data.include?('noindex')
+        result[:follow] = !data.include?('nofollow')
       end
       result
     end
 
-    # Extrahiert die Links aus dem Dokument.
-    # Nur gültige Links werden zurückgegeben.
+    # Extracts all valid links from the document that may be followed.
     # @return [Array]
     def extract_links
       links = []
       @doc.xpath('//a[@href]').each do |link|
-        if link['rel'].nil? or not link['rel'].include?("nofollow")
-          url = @base_url.join_with(link['href'])
+        if link.get('rel').nil? or not link.get('rel').include?('nofollow')
+          url = @base_url.join_with(link.get('href'))
           links << [clean_text(link.text), url] unless url.nil?
         end
       end
       links
     end
 
-    # Extrahiert den Fliesstext aus dem Dokumentkörper.
+    # Extracts the text body of the document.
     # @return [String]
     def extract_text
-      clean_text(@doc.text)
+      clean_text @doc.children.map(&:text).join('')
     end
   end
 end
