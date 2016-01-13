@@ -1,24 +1,25 @@
-# Allgemein
-Diese einfache Implementierung einer Websuchmaschine entstand im Rahmen meiner
-Maturitätsarbeit an der Kantonsschule Zürich Nord. Ich veröffentliche den Code
-hier in der Hoffnung, dass vielleicht jemand etwas hieraus lernen kann, und dass
-es dazu beiträgt praktisch zu zeigen, wie eine Websuchmaschine aufgebaut sein kann.
+# About
+BreakSearch originates in a school project of mine.
+It's basically a full fledged search engine including a crawler, indexer and search frontend
+and database backend written in Ruby. Its purpose is kind of a proof of concept how a search
+engine works written in well documented Ruby code.
 
-Es gibt vieles das man viel besser hätte lösen können; diese Suchmaschine liefert
-zwar in der Regel recht schlechte Resultate, doch man muss bedenken, dass die
-gesamte Implementierung (exklusiv einiger Libraries) mit lediglich 2000 Zeilen
-Code auskommt.
+# Status
+I'm currently working on porting it to Rubinius and make some more improvements on the project.
+Goals for the future definitely include the possibility to update the index while search
+requests are being handled and making the system self balanced. The clients should just be able
+to connect to the network and execute the kind of task that is most needed right now.
+Only the database backend is supposed to stay specialized (for now in the far future I could
+see how something distributed might be fun to implement there too).
 
-# Abhängigkeiten
-Um die Suchmaschine betreiben können muss auf deinem Computer eine aktuelle Version
-von Ruby installiert sein. Danach musst du die Bibliothek "leveldb" in deinem
-Betriebssystem installieren (ggf. Packagemanger verwenden).
-Die nun weiter benötigten Bibliotheken für das Projekt können mittels Rubygems bequem
-installiert werden, hierzu sollte man zuerst das Gem "Bundler" installieren, was
-ermöglicht mit dem Befehl "bundle install" alle weiter benötigten Bibliotheken zu
-installieren.
+# Dependencies
+You need to have an up to date ruby version installed. Currently also leveldb needs to be installed
+because it's required by one library required by this project. You can use Ruby Bundler to install
+the dependencies with `bundle install`.
 
-# Verwendung
+# Running
+Old instructions (in German), will be updated once there is more progress with the rewrite:
+```
 Falls du diese Software zum laufen bringen möchtest musst du einiges beachten.
 Der Ablauf wird hier nur grob beschrieben, ansonsten kannst du bei Fragen aber
 auch mich fragen, oder einfach den Quellcode inspizieren.
@@ -44,8 +45,11 @@ kann man das Frontend starten und mithilfe eines Webbrowsers Suchanfragen durchf
 
 Die Verwendung ist vergleichsweise aufwändig, dieses System wurde aber auch nicht
 primär dazu konstruiert einfach verwendbar zu sein.
+```
 
 # Copyright
-© 2014-2015 Leonardo Schwarz (http://leoschwarz.com)
-Der Quellcode darf gemäss der Bestimmungen in der Datei LICENSE verwendet werden.
-Für die verwendeten Bibliotheken sind die jeweiligen Lizenzbedingungen zu berücksichtigen.
+© 2014-2016 Leonardo Schwarz (https://leoschwarz.com)
+The source code is licensed under the GNU Affero General Public License.
+You can find a copy of the license in the file LICENSE.
+
+The required libraries all have their own licenses that you should check out individually.
