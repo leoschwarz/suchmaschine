@@ -1,7 +1,19 @@
-############################################################################################
-# Die ServerFront stellt das Objekt dar, welches der Datenbankserver über das DRuby        #
-# Protokoll teilt, und welches von einem Client als Zugangspunkt in die Datenbank dient.   #
-############################################################################################
+# Copyright (c) 2014-2016 Leonardo Schwarz <mail@leoschwarz.com>
+#
+# This file is part of BreakSearch.
+#
+# BreakSearch is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License version 3
+# as published by the Free Software Foundation.
+#
+# BreakSearch is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with BreakSearch. If not, see <http://www.gnu.org/licenses/>.
+
 module Database
   # Sowohl Object, als auch BasicObject, werden mitsamt gefährlicher Methoden, wie
   # 'instance_eval' und 'class_eval' definiert. Deshalb werden von dieser Klasse alle
@@ -14,7 +26,10 @@ module Database
     end
   end
 
+  # The ServerFront is the object that will be shared over DCell and manages client access.
   class ServerFront < BlankObject
+    include Celluloid
+
     def initialize(server)
       @server = server
 

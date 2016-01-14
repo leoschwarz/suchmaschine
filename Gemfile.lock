@@ -9,11 +9,40 @@ GEM
   specs:
     ansi (1.5.0)
     ast (2.2.0)
+    celluloid (0.16.0)
+      timers (~> 4.0.0)
+    celluloid-io (0.16.2)
+      celluloid (>= 0.16.0)
+      nio4r (>= 1.1.0)
+    celluloid-redis (0.0.2)
+      celluloid-io (>= 0.13.0.pre)
+      redis
+    celluloid-zmq (0.16.1)
+      celluloid (~> 0.16)
+      ffi
+      ffi-rzmq
     curb (0.8.6)
+    dcell (0.16.1)
+      celluloid (~> 0.16.0)
+      celluloid-redis
+      celluloid-zmq (~> 0.16.0)
+      http (~> 0.5.0)
+      redis-namespace
+      reel (~> 0.4.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
     erubis (2.7.0)
+    ffi (1.9.10)
+    ffi-rzmq (2.0.4)
+      ffi-rzmq-core (>= 1.0.1)
+    ffi-rzmq-core (1.0.4)
+      ffi (~> 1.9)
+    hitimes (1.2.3)
+    http (0.5.1)
+      http_parser.rb
+    http_parser.rb (0.6.0)
     json (1.8.3)
+    nio4r (1.2.0)
     oga (2.0.0)
       ast
       ruby-ll (~> 2.1)
@@ -23,6 +52,15 @@ GEM
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
+    redis (3.2.2)
+    redis-namespace (1.5.2)
+      redis (~> 3.0, >= 3.0.4)
+    reel (0.4.0)
+      celluloid (>= 0.15.1)
+      celluloid-io (>= 0.15.0)
+      http (>= 0.5.0)
+      http_parser.rb (>= 0.6.0.beta.2)
+      websocket_parser (>= 0.1.4)
     rspec (3.4.0)
       rspec-core (~> 3.4.0)
       rspec-expectations (~> 3.4.0)
@@ -49,12 +87,16 @@ GEM
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
     tilt (1.4.1)
+    timers (4.0.4)
+      hitimes
+    websocket_parser (1.0.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   curb (~> 0.8.6)
+  dcell (~> 0.16.1)
   erubis (~> 2.7.0)
   leveldb-native!
   oga (~> 2.0.0)
