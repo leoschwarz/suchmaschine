@@ -15,21 +15,11 @@
 # along with BreakSearch. If not, see <http://www.gnu.org/licenses/>.
 
 require 'dcell'
-
-
-############################################################################################
-# Der Datenbankserver stellt das ServerFront-Objekt über das DRuby Protokoll zur Verfügung #
-# und ist Bindeglied zwischen ServerFront und Backend.                                     #
-# Informationen über DRuby:                                                                #
-# https://en.wikibooks.org/wiki/Ruby_Programming/Standard_Library/DRb                      #
-############################################################################################
-
-
-#require 'drb/drb'
-#require 'drb/acl'
 require 'digest/md5'
 
 module Database
+  # The Server provides the ServerFront object over the DCell protocol and also acts as the interface
+  # between ServerFront and Backend.
   class Server
     def initialize
       @logger = Common::Logger.new
@@ -38,14 +28,14 @@ module Database
     end
 
     def start
-      front_object = ServerFront.new(self)
+      # Create new instance object to serve over the network.
+      #front_object = ServerFront.new(self)
 
-      directive  = ["deny", "all"]
-      directive += Config.database.client_whitelist.map{|ip| ["allow", ip]}.flatten
-      DRb.install_acl(ACL.new(directive))
-      DRb.start_service(Config.database_connection, front_object)
-      @logger.log_info "Datenbank Server gestartet."
-      DRb.thread.join
+      # Setup DCell server.
+      DCell.start(id: 'database_front', url: Config.database_connection)
+      ServerFront.supervise_as(:database_front)
+      #front_object.supervise_as(:database_front)
+      sleep
     end
 
     def stop

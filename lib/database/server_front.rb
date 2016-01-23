@@ -14,20 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with BreakSearch. If not, see <http://www.gnu.org/licenses/>.
 
-module Database
-  # Sowohl Object, als auch BasicObject, werden mitsamt gefährlicher Methoden, wie
-  # 'instance_eval' und 'class_eval' definiert. Deshalb werden von dieser Klasse alle
-  # Methoden entfernt, die nicht unbedingt notwendig sind, um das ServerFront Objekt
-  # sicher zu machen.
-  class BlankObject
-    safe_methods = [:__send__, :__id__, :object_id, :private_methods, :protected_methods]
-    (instance_methods - safe_methods).each do |method|
-      undef_method method
-    end
-  end
+require 'dcell'
 
+module Database
   # The ServerFront is the object that will be shared over DCell and manages client access.
-  class ServerFront < BlankObject
+  class ServerFront
     include Celluloid
 
     def initialize(server)
